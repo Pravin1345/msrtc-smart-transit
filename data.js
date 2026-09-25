@@ -22,7 +22,63 @@ const SAVED_CO_PASSENGERS = [
   { name: "Sunita Dongare", age: 54, gender: "Female", relation: "Mother" }
 ];
 
-// 3. Realistic Demo Travel & Historical Booking Records
+// 3. Comprehensive Locations Across Overall Kolhapur District & Maharashtra
+const KOLHAPUR_DISTRICT_LOCATIONS = [
+  "Kolhapur CBS (Central Bus Stand)",
+  "Kolhapur Rankala Stand",
+  "Kolhapur Sambhajinagar Stand",
+  "Ichalkaranji Central Stand",
+  "Jaisingpur Bus Stand",
+  "Gadhinglaj Central Stand",
+  "Kagal Bus Stand",
+  "Kagal 5-Star MIDC",
+  "Panhala Fort Stand",
+  "Radhanagari Bus Stand",
+  "Gargoti (Bhudargad) Stand",
+  "Malkapur (Shahuwadi) Stand",
+  "Ajara Central Stand",
+  "Chandgad Bus Stand",
+  "Hatkanangle Stand",
+  "Kurundwad Bus Stand",
+  "Shirol Bus Stand",
+  "Hupari (Silver City) Stand",
+  "Peth Vadgaon Stand",
+  "Gandhinagar Stand",
+  "Gaganbawda Stand",
+  "Kodoli (Panhala) Stand",
+  "Bambavade (Shahuwadi) Stand",
+  "Nesari (Gadhinglaj) Stand",
+  "Kowad (Chandgad) Stand",
+  "Uttur (Ajara) Stand",
+  "Yalgud Stand",
+  "Rajarampuri (Kolhapur City)",
+  "Shiroli MIDC"
+];
+
+const OTHER_MAHARASHTRA_LOCATIONS = [
+  "Pune (Swargate)",
+  "Pune (Shivajinagar)",
+  "Mumbai (Dadar)",
+  "Mumbai (Borivali)",
+  "Nashik (CBS)",
+  "Chhatrapati Sambhajinagar",
+  "Satara Central",
+  "Sangli Central Stand",
+  "Miraj Stand",
+  "Solapur Central",
+  "Nagpur Central",
+  "Mahabaleshwar",
+  "Shirdi Temple",
+  "Ratnagiri Stand",
+  "Goa (Panaji - Inter-State)"
+];
+
+const ALL_TRANSIT_LOCATIONS = [
+  ...KOLHAPUR_DISTRICT_LOCATIONS,
+  ...OTHER_MAHARASHTRA_LOCATIONS
+];
+
+// 4. Realistic Demo Travel & Historical Booking Records
 const INITIAL_BOOKINGS = [
   {
     bookingId: "MSRTC-2026-89472",
@@ -35,11 +91,11 @@ const INITIAL_BOOKINGS = [
     },
     route: {
       from: "Pune (Swargate)",
-      to: "Mumbai (Dadar)",
+      to: "Kolhapur CBS (Central Bus Stand)",
       departureTime: "2026-09-28T07:00:00+05:30",
-      arrivalTime: "2026-09-28T11:00:00+05:30",
+      arrivalTime: "2026-09-28T12:00:00+05:30",
       boardingPoint: "Swargate Platform 3 (Shivneri AC Bay)",
-      duration: "4h 00m"
+      duration: "5h 00m"
     },
     seats: ["14A", "14B"],
     passengers: [
@@ -61,26 +117,26 @@ const INITIAL_BOOKINGS = [
     pnr: "PNR5541902",
     userId: "usr_msrtc_78491",
     busDetails: {
-      busNumber: "MH-15-EG-8834",
+      busNumber: "MH-09-EM-8834",
       busType: "Shivshahi (AC Seater)",
-      operator: "Nashik Division - CBS Depot"
+      operator: "Kolhapur Division - CBS Depot"
     },
     route: {
-      from: "Pune (Shivajinagar)",
-      to: "Nashik (CBS)",
+      from: "Kolhapur CBS (Central Bus Stand)",
+      to: "Ichalkaranji Central Stand",
       departureTime: "2026-08-15T06:30:00+05:30",
-      arrivalTime: "2026-08-15T11:45:00+05:30",
-      boardingPoint: "Shivajinagar Stand Bay 4",
-      duration: "5h 15m"
+      arrivalTime: "2026-08-15T07:30:00+05:30",
+      boardingPoint: "CBS Kolhapur Bay 2",
+      duration: "1h 00m"
     },
     seats: ["08A"],
     passengers: [
       { name: "Pravin Dongare (Self)", age: 29, gender: "Male" }
     ],
     fare: {
-      baseFare: 360,
-      gst: 18,
-      totalAmount: 378,
+      baseFare: 80,
+      gst: 4,
+      totalAmount: 84,
       paymentMethod: "PhonePe UPI",
       paymentStatus: "PAID"
     },
@@ -94,15 +150,15 @@ const INITIAL_BOOKINGS = [
     busDetails: {
       busNumber: "MH-09-EM-9921",
       busType: "Nim-Aramdayi (Asiad Express)",
-      operator: "Kolhapur Division"
+      operator: "Kolhapur Division - Gadhinglaj"
     },
     route: {
-      from: "Pune (Swargate)",
-      to: "Kolhapur Central",
+      from: "Kolhapur CBS (Central Bus Stand)",
+      to: "Gadhinglaj Central Stand",
       departureTime: "2026-07-02T13:00:00+05:30",
-      arrivalTime: "2026-07-02T18:30:00+05:30",
-      boardingPoint: "Swargate Inter-District Platform 8",
-      duration: "5h 30m"
+      arrivalTime: "2026-07-02T14:45:00+05:30",
+      boardingPoint: "Kolhapur Rural Platform 5",
+      duration: "1h 45m"
     },
     seats: ["21B", "21C"],
     passengers: [
@@ -110,9 +166,9 @@ const INITIAL_BOOKINGS = [
       { name: "Anil Kadam", age: 31, gender: "Male" }
     ],
     fare: {
-      baseFare: 480,
-      gst: 24,
-      totalAmount: 504,
+      baseFare: 160,
+      gst: 8,
+      totalAmount: 168,
       paymentMethod: "Debit Card",
       paymentStatus: "PAID"
     },
@@ -124,16 +180,16 @@ const INITIAL_BOOKINGS = [
     pnr: "PNR3109481",
     userId: "usr_msrtc_78491",
     busDetails: {
-      busNumber: "MH-20-CL-1104",
+      busNumber: "MH-09-CL-1104",
       busType: "Shivneri (AC Volvo)",
-      operator: "Chhatrapati Sambhajinagar"
+      operator: "Kolhapur Division"
     },
     route: {
-      from: "Pune (Shivajinagar)",
-      to: "Chhatrapati Sambhajinagar",
+      from: "Panhala Fort Stand",
+      to: "Pune (Swargate)",
       departureTime: "2026-05-18T08:00:00+05:30",
       arrivalTime: "2026-05-18T13:30:00+05:30",
-      boardingPoint: "Shivajinagar AC Platform",
+      boardingPoint: "Panhala Main Gate",
       duration: "5h 30m"
     },
     seats: ["04A"],
@@ -152,7 +208,7 @@ const INITIAL_BOOKINGS = [
   }
 ];
 
-// 4. MSRTC Fleet Services & Base Pricing
+// 5. MSRTC Fleet Services & Base Pricing
 const MSRTC_FLEET = {
   "Shivneri (AC Volvo)": {
     baseFarePerSeat: 535,

@@ -40,6 +40,20 @@ body {
   background-color: #fef2f2 !important;
 }
 
+/* Interactive Seat Styles */
+.seat-btn {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.seat-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+}
+.seat-btn.selected {
+  background-color: #C8102E !important;
+  color: white !important;
+  box-shadow: 0 4px 12px rgba(200, 16, 46, 0.35);
+  border-color: #9B0A20 !important;
+}
+
 /* Electronic Reservation Slip Print Media Styles */
 @media print {
   body * {

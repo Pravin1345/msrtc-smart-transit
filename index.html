@@ -272,40 +272,61 @@
               </button>
             </div>
 
+            <!-- Route Locations (Kolhapur District & Manual Custom Input) -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
               <div>
-                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
-                  <i class="fa-solid fa-location-dot text-msrtc-red mr-1"></i> From (Departure)
-                </label>
-                <select id="book-from" required class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-xl focus:ring-msrtc-red focus:border-msrtc-red p-3 font-medium">
-                  <option value="Pune (Swargate)">Pune (Swargate)</option>
-                  <option value="Pune (Shivajinagar)">Pune (Shivajinagar)</option>
-                  <option value="Mumbai (Dadar)">Mumbai (Dadar)</option>
-                  <option value="Mumbai (Borivali)">Mumbai (Borivali)</option>
-                  <option value="Nashik (CBS)">Nashik (CBS)</option>
-                  <option value="Kolhapur Central">Kolhapur Central</option>
-                  <option value="Chhatrapati Sambhajinagar (Aurangabad)">Chhatrapati Sambhajinagar</option>
-                  <option value="Nagpur Central">Nagpur Central</option>
-                </select>
+                <div class="flex justify-between items-center mb-1.5">
+                  <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                    <i class="fa-solid fa-location-dot text-msrtc-red mr-1"></i> From (Departure)
+                  </label>
+                  <span class="text-[10px] text-slate-400 font-medium">Select or Type Manually</span>
+                </div>
+                <div class="relative">
+                  <input type="text" id="book-from" list="transit-locations-list" value="Kolhapur CBS (Central Bus Stand)" required placeholder="Type or select departure station..." class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-xl focus:ring-msrtc-red focus:border-msrtc-red p-3 font-semibold shadow-sm">
+                </div>
               </div>
 
               <div>
-                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
-                  <i class="fa-solid fa-flag-checkered text-emerald-600 mr-1"></i> To (Destination)
-                </label>
-                <select id="book-to" required class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-xl focus:ring-msrtc-red focus:border-msrtc-red p-3 font-medium">
-                  <option value="Mumbai (Dadar)">Mumbai (Dadar)</option>
-                  <option value="Pune (Swargate)">Pune (Swargate)</option>
-                  <option value="Nashik (CBS)">Nashik (CBS)</option>
-                  <option value="Kolhapur Central">Kolhapur Central</option>
-                  <option value="Mahabaleshwar">Mahabaleshwar</option>
-                  <option value="Shirdi Temple">Shirdi Temple</option>
-                  <option value="Nagpur Central">Nagpur Central</option>
-                </select>
+                <div class="flex justify-between items-center mb-1.5">
+                  <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                    <i class="fa-solid fa-flag-checkered text-emerald-600 mr-1"></i> To (Destination)
+                  </label>
+                  <span class="text-[10px] text-slate-400 font-medium">Select or Type Manually</span>
+                </div>
+                <div class="relative">
+                  <input type="text" id="book-to" list="transit-locations-list" value="Ichalkaranji Central Stand" required placeholder="Type or select destination station..." class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-xl focus:ring-msrtc-red focus:border-msrtc-red p-3 font-semibold shadow-sm">
+                </div>
               </div>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5">
+            <!-- Datalist containing all Kolhapur District and Maharashtra stations -->
+            <datalist id="transit-locations-list">
+              <!-- Dynamically populated from data.js -->
+            </datalist>
+
+            <!-- Quick Kolhapur Popular District Route Chips -->
+            <div class="mb-5 pb-3 border-b border-slate-100">
+              <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-2">Popular Kolhapur District Routes:</span>
+              <div class="flex flex-wrap gap-1.5 text-[11px]">
+                <button type="button" onclick="quickBook('Kolhapur CBS (Central Bus Stand)', 'Ichalkaranji Central Stand', 'Shivshahi (AC Seater)')" class="px-2.5 py-1 bg-slate-100 hover:bg-red-50 text-slate-700 hover:text-msrtc-red rounded-lg font-medium transition border border-slate-200">
+                  Kolhapur ➔ Ichalkaranji
+                </button>
+                <button type="button" onclick="quickBook('Kolhapur CBS (Central Bus Stand)', 'Gadhinglaj Central Stand', 'Nim-Aramdayi (Asiad Express)')" class="px-2.5 py-1 bg-slate-100 hover:bg-red-50 text-slate-700 hover:text-msrtc-red rounded-lg font-medium transition border border-slate-200">
+                  Kolhapur ➔ Gadhinglaj
+                </button>
+                <button type="button" onclick="quickBook('Kolhapur CBS (Central Bus Stand)', 'Panhala Fort Stand', 'Ordinary Lal Dabba')" class="px-2.5 py-1 bg-slate-100 hover:bg-red-50 text-slate-700 hover:text-msrtc-red rounded-lg font-medium transition border border-slate-200">
+                  Kolhapur ➔ Panhala
+                </button>
+                <button type="button" onclick="quickBook('Kolhapur CBS (Central Bus Stand)', 'Kagal Bus Stand', 'Shivshahi (AC Seater)')" class="px-2.5 py-1 bg-slate-100 hover:bg-red-50 text-slate-700 hover:text-msrtc-red rounded-lg font-medium transition border border-slate-200">
+                  Kolhapur ➔ Kagal
+                </button>
+                <button type="button" onclick="quickBook('Kolhapur CBS (Central Bus Stand)', 'Pune (Swargate)', 'Shivneri (AC Volvo)')" class="px-2.5 py-1 bg-slate-100 hover:bg-red-50 text-slate-700 hover:text-msrtc-red rounded-lg font-medium transition border border-slate-200">
+                  Kolhapur ➔ Pune
+                </button>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
               <div>
                 <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
                   <i class="fa-regular fa-calendar text-slate-500 mr-1"></i> Travel Date
@@ -324,35 +345,52 @@
                   <option value="Ordinary Lal Dabba">Ordinary (Lal Dabba) - ₹150/seat</option>
                 </select>
               </div>
+            </div>
 
-              <div>
-                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
-                  <i class="fa-solid fa-users text-slate-500 mr-1"></i> Total Travelers
-                </label>
-                <select id="book-passengers" onchange="renderPassengerInputs()" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-xl focus:ring-msrtc-red focus:border-msrtc-red p-3 font-medium">
-                  <option value="1">1 (Just Myself)</option>
-                  <option value="2">2 Passengers</option>
-                  <option value="3">3 Passengers</option>
-                  <option value="4">4 Passengers</option>
-                </select>
+            <!-- Interactive Visual Bus Cabin (Multiple Seat Selection) -->
+            <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200 mb-6">
+              <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-2 mb-4">
+                <div>
+                  <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                    <i class="fa-solid fa-couch text-msrtc-red"></i> Interactive 2+2 Bus Cabin Seat Selector
+                  </h4>
+                  <p class="text-[11px] text-slate-500">Click multiple seats to select / deselect at once.</p>
+                </div>
+                <span id="seat-badge-display" class="text-xs font-mono font-bold bg-msrtc-red text-white px-3 py-1 rounded-lg self-start sm:self-auto shadow-sm">
+                  Selected (1): 14A
+                </span>
+              </div>
+
+              <!-- Bus Front / Driver Cabin -->
+              <div class="bg-white p-3 rounded-xl border border-slate-200 mb-4 flex justify-between items-center text-xs">
+                <span class="flex items-center gap-2 font-bold text-slate-700">
+                  <i class="fa-solid fa-dharmachakra text-amber-500 text-sm"></i> Driver Cockpit
+                </span>
+                <span class="text-[10px] font-mono text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded font-bold">
+                  <i class="fa-solid fa-door-open mr-1"></i> Front Entry Gate
+                </span>
+              </div>
+
+              <!-- Interactive Seat Matrix Grid (Rendered by app.js) -->
+              <div id="bus-cabin-grid" class="space-y-1 max-w-sm mx-auto bg-slate-100 p-3 rounded-2xl border border-slate-200">
+                <!-- Injected dynamically -->
+              </div>
+
+              <!-- Seat Color Legend -->
+              <div class="flex flex-wrap items-center justify-center gap-4 mt-4 pt-3 border-t border-slate-200 text-[11px] text-slate-600">
+                <span class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded-lg bg-white border border-slate-300"></span> Available</span>
+                <span class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded-lg bg-msrtc-red text-white flex items-center justify-center text-[8px] font-bold">✓</span> Selected (You)</span>
+                <span class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded-lg bg-pink-50 border border-pink-300 text-pink-500 flex items-center justify-center text-[8px]"><i class="fa-solid fa-venus"></i></span> Ladies (50% Off)</span>
+                <span class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded-lg bg-slate-200 border border-slate-300"></span> Booked</span>
               </div>
             </div>
 
             <!-- Dynamic Passenger Manifest Inputs -->
             <div class="mb-6">
-              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-3">Passenger Information Details</label>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-3">Passenger Information Details (Auto-Synced with Selected Seats)</label>
               <div id="passenger-inputs-container" class="space-y-3">
                 <!-- Injected via app.js -->
               </div>
-            </div>
-
-            <!-- Seat Selection Visual -->
-            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-6">
-              <div class="flex justify-between items-center mb-2">
-                <span class="text-xs font-bold text-slate-700 uppercase">Assigned Seats:</span>
-                <span id="seat-badge-display" class="text-xs font-bold bg-msrtc-red text-white px-2.5 py-1 rounded-md">Seat 14A</span>
-              </div>
-              <p class="text-[11px] text-slate-500">Live smart seat allocation optimizes window & aisle preferences for your group.</p>
             </div>
 
             <!-- Submit Button -->

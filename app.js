@@ -37,6 +37,7 @@ function saveStoredBookings(bookings) {
 let currentUser = getStoredUser();
 let currentFilter = 'ALL';
 let includeSelfInBooking = true;
+let currentSelectedSeats = ["14A"]; // Default selected seat
 
 // 2. NAVIGATION CONTROLLER
 function navigateTo(pageId) {
@@ -69,14 +70,132 @@ function navigateTo(pageId) {
     renderSmartIDPass();
   } else if (pageId === 'book') {
     setDefaultBookingDate();
+    populateLocationDatalists();
     renderBookingUserSummary();
+    renderInteractiveSeatCabin();
     renderPassengerInputs();
   }
 
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// 3. AUTHENTICATION & HEADER
+// 3. POPULATE LOCATION DATALISTS & MANUAL LOCATION LOGIC
+function populateLocationDatalists() {
+  const datalist = document.getElementById('transit-locations-list');
+  if (!datalist) return;
+
+  let html = `<optgroup label="Kolhapur District Locations (सर्व कोल्हापूर जिल्हा)">`;
+  KOLHAPUR_DISTRICT_LOCATIONS.forEach(loc => {
+    html += `<option value="${loc}">${loc}</option>`;
+  });
+  html += `</optgroup><optgroup label="Other Major Maharashtra Cities">`;
+  OTHER_MAHARASHTRA_LOCATIONS.forEach(loc => {
+    html += `<option value="${loc}">${loc}</option>`;
+  });
+  html += `</optgroup>`;
+
+  datalist.innerHTML = html;
+}
+
+// 4. INTERACTIVE MULTIPLE SEAT SELECTION
+function renderInteractiveSeatCabin() {
+  const cabinContainer = document.getElementById('bus-cabin-grid');
+  if (!cabinContainer) return;
+
+  cabinContainer.innerHTML = '';
+  const rows = 7; // 7 rows = 28 seats (2+2 layout)
+
+  for (let r = 1; r <= rows; r++) {
+    const rowDiv = document.createElement('div');
+    rowDiv.className = "flex items-center justify-between gap-3 py-1";
+
+    // Left Pair (A & B)
+    const leftPair = document.createElement('div');
+    leftPair.className = "flex gap-2";
+    leftPair.appendChild(createSeatButton(`${r}A`, r <= 2));
+    leftPair.appendChild(createSeatButton(`${r}B`, r <= 2));
+
+    // Aisle Indicator
+    const aisle = document.createElement('div');
+    aisle.className = "text-[10px] font-bold text-slate-400 font-mono tracking-widest px-1";
+    aisle.innerText = `R${r}`;
+
+    // Right Pair (C & D)
+    const rightPair = document.createElement('div');
+    rightPair.className = "flex gap-2";
+    rightPair.appendChild(createSeatButton(`${r}C`, false));
+    rightPair.appendChild(createSeatButton(`${r}D`, false));
+
+    rowDiv.appendChild(leftPair);
+    rowDiv.appendChild(aisle);
+    rowDiv.appendChild(rightPair);
+    cabinContainer.appendChild(rowDiv);
+  }
+
+  updateSeatSelectionDisplay();
+}
+
+function createSeatButton(seatId, isLadiesReserved) {
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.setAttribute('data-seat-id', seatId);
+
+  const isBooked = ['02A', '04B', '06C'].includes(seatId);
+  const isSelected = currentSelectedSeats.includes(seatId);
+
+  if (isBooked) {
+    btn.className = "seat-btn w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-slate-200 text-slate-400 text-xs font-bold border border-slate-300 cursor-not-allowed flex items-center justify-center";
+    btn.disabled = true;
+    btn.title = `Seat ${seatId} - Booked`;
+    btn.innerText = seatId;
+  } else if (isSelected) {
+    btn.className = "seat-btn selected w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-msrtc-red text-white text-xs font-bold border border-msrtc-darkred shadow-md flex items-center justify-center";
+    btn.title = `Seat ${seatId} - Selected by you`;
+    btn.innerText = seatId;
+    btn.onclick = () => toggleSeatSelection(seatId);
+  } else if (isLadiesReserved) {
+    btn.className = "seat-btn w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-pink-50 hover:bg-pink-100 text-pink-700 text-xs font-bold border border-pink-200 flex flex-col items-center justify-center";
+    btn.title = `Seat ${seatId} - Ladies Reserved (50% Concession)`;
+    btn.innerHTML = `<span class="text-[10px] leading-none">${seatId}</span><i class="fa-solid fa-venus text-[8px] text-pink-500 mt-0.5"></i>`;
+    btn.onclick = () => toggleSeatSelection(seatId);
+  } else {
+    btn.className = "seat-btn w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white hover:bg-slate-100 text-slate-700 text-xs font-bold border border-slate-300 shadow-sm flex items-center justify-center";
+    btn.title = `Seat ${seatId} - Available`;
+    btn.innerText = seatId;
+    btn.onclick = () => toggleSeatSelection(seatId);
+  }
+
+  return btn;
+}
+
+function toggleSeatSelection(seatId) {
+  if (currentSelectedSeats.includes(seatId)) {
+    if (currentSelectedSeats.length === 1) {
+      showToast("At least 1 seat must be selected!", "info");
+      return;
+    }
+    currentSelectedSeats = currentSelectedSeats.filter(s => s !== seatId);
+  } else {
+    if (currentSelectedSeats.length >= 6) {
+      showToast("Maximum 6 seats can be selected at a time.", "error");
+      return;
+    }
+    currentSelectedSeats.push(seatId);
+  }
+
+  renderInteractiveSeatCabin();
+  renderPassengerInputs();
+}
+
+function updateSeatSelectionDisplay() {
+  const badge = document.getElementById('seat-badge-display');
+  if (badge) {
+    badge.innerText = `Selected (${currentSelectedSeats.length}): ${currentSelectedSeats.join(', ')}`;
+  }
+  calculateFarePreview();
+}
+
+// 5. AUTHENTICATION & HEADER
 function renderAuthSection() {
   const container = document.getElementById('auth-section');
   if (!container) return;
@@ -200,7 +319,7 @@ function handleLogout() {
   navigateTo('home');
 }
 
-// 4. USER PROFILE & DIGITAL SMART ID
+// 6. USER PROFILE & DIGITAL SMART ID
 function loadUserProfileData() {
   if (!currentUser) {
     openAuthModal('login');
@@ -250,7 +369,7 @@ function renderSmartIDPass() {
   document.getElementById('smartid-code').innerText = currentUser.smartId || "MH-USR-94821";
 }
 
-// 5. HISTORICAL BOOKINGS RENDER & FILTER
+// 7. HISTORICAL BOOKINGS RENDER & FILTER
 function filterBookings(status) {
   currentFilter = status;
   document.querySelectorAll('.history-filter-btn').forEach(btn => {
@@ -334,7 +453,7 @@ function renderBookingsList() {
           </div>
 
           <div class="text-center hidden md:block">
-            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">${b.route.duration} Non-stop</span>
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">${b.route.duration} Express</span>
             <div class="flex items-center justify-center gap-2 my-1">
               <div class="h-0.5 bg-slate-200 flex-grow max-w-[60px]"></div>
               <i class="fa-solid fa-arrow-right text-slate-400 text-xs"></i>
@@ -374,7 +493,7 @@ function renderBookingsList() {
   }).join('');
 }
 
-// 6. TICKET MODAL & PRINT
+// 8. TICKET MODAL & PRINT
 function openTicketModal(bookingId) {
   const allBookings = getStoredBookings();
   const b = allBookings.find(x => x.bookingId === bookingId);
@@ -390,7 +509,7 @@ function openTicketModal(bookingId) {
               <i class="fa-solid fa-bus"></i>
             </div>
             <div>
-              <h3 class="font-extrabold text-slate-900 text-base">MSRTC Smart Mobility</h3>
+              <h3 class="font-extrabold text-slate-900 text-base">Happy Hours • MSRTC Smart Mobility</h3>
               <p class="text-[10px] text-slate-500 font-medium">Govt. of Maharashtra Undertaking</p>
             </div>
           </div>
@@ -491,7 +610,7 @@ function cancelBookingPrompt(bookingId) {
   }
 }
 
-// 7. BOOKING SIMULATOR & PASSENGER ALLOCATION
+// 9. BOOKING SIMULATOR & PASSENGER ALLOCATION
 function setDefaultBookingDate() {
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
@@ -517,32 +636,34 @@ function toggleSelfBooking() {
 }
 
 function renderPassengerInputs() {
-  const select = document.getElementById('book-passengers');
-  if (!select) return;
-  const count = parseInt(select.value || '1');
+  const count = currentSelectedSeats.length;
   const container = document.getElementById('passenger-inputs-container');
   if (!container) return;
 
   let html = '';
   for (let i = 1; i <= count; i++) {
+    let seatNumber = currentSelectedSeats[i - 1] || `${i}A`;
     let isSelf = (i === 1 && includeSelfInBooking && currentUser);
     let defaultName = isSelf ? currentUser.fullName : (i === 1 ? '' : `Family Member ${i}`);
     let defaultAge = isSelf ? (currentUser.age || 29) : (25 + i * 5);
     let defaultGender = isSelf ? currentUser.gender : 'Male';
 
     html += `
-      <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl grid grid-cols-1 sm:grid-cols-3 gap-3 items-center">
-        <div class="sm:col-span-1">
-          <label class="block text-[10px] font-bold text-slate-500 uppercase">Passenger ${i} Name ${isSelf ? '(Self)' : ''}</label>
-          <input type="text" id="pass-name-${i}" value="${defaultName}" required class="w-full text-xs font-bold px-3 py-1.5 bg-white border border-slate-300 rounded-lg">
+      <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl grid grid-cols-1 sm:grid-cols-4 gap-3 items-center">
+        <div class="sm:col-span-2">
+          <div class="flex justify-between items-center mb-1">
+            <label class="block text-[10px] font-bold text-slate-500 uppercase">Passenger ${i} Name ${isSelf ? '(Self)' : ''}</label>
+            <span class="text-[10px] font-mono font-bold bg-msrtc-red text-white px-2 py-0.5 rounded">Seat ${seatNumber}</span>
+          </div>
+          <input type="text" id="pass-name-${i}" value="${defaultName}" required class="w-full text-xs font-bold px-3 py-2 bg-white border border-slate-300 rounded-lg">
         </div>
         <div>
-          <label class="block text-[10px] font-bold text-slate-500 uppercase">Age</label>
-          <input type="number" id="pass-age-${i}" value="${defaultAge}" min="1" max="100" required class="w-full text-xs font-bold px-3 py-1.5 bg-white border border-slate-300 rounded-lg">
+          <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Age</label>
+          <input type="number" id="pass-age-${i}" value="${defaultAge}" min="1" max="100" required class="w-full text-xs font-bold px-3 py-2 bg-white border border-slate-300 rounded-lg">
         </div>
         <div>
-          <label class="block text-[10px] font-bold text-slate-500 uppercase">Gender</label>
-          <select id="pass-gender-${i}" class="w-full text-xs font-bold px-3 py-1.5 bg-white border border-slate-300 rounded-lg">
+          <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Gender</label>
+          <select id="pass-gender-${i}" class="w-full text-xs font-bold px-3 py-2 bg-white border border-slate-300 rounded-lg">
             <option value="Male" ${defaultGender === 'Male' ? 'selected' : ''}>Male</option>
             <option value="Female" ${defaultGender === 'Female' ? 'selected' : ''}>Female (50% Concession)</option>
             <option value="Other" ${defaultGender === 'Other' ? 'selected' : ''}>Other</option>
@@ -557,42 +678,38 @@ function renderPassengerInputs() {
 }
 
 function addSavedCoPassenger(name, age, gender) {
-  const select = document.getElementById('book-passengers');
-  const currentCount = parseInt(select.value);
-  if (currentCount < 4) {
-    select.value = (currentCount + 1).toString();
+  // If seat count is less than co-passengers, add an extra seat
+  if (currentSelectedSeats.length < 6) {
+    const availableSeatNames = ["01C", "02C", "03C", "04C", "05C", "06C", "07C", "01D", "02D", "03D"];
+    const nextSeat = availableSeatNames.find(s => !currentSelectedSeats.includes(s)) || `0${currentSelectedSeats.length + 1}B`;
+    currentSelectedSeats.push(nextSeat);
   }
+
+  renderInteractiveSeatCabin();
   renderPassengerInputs();
-  const targetIndex = parseInt(select.value);
+
+  const targetIndex = currentSelectedSeats.length;
   const nameInput = document.getElementById(`pass-name-${targetIndex}`);
   const ageInput = document.getElementById(`pass-age-${targetIndex}`);
   const genderInput = document.getElementById(`pass-gender-${targetIndex}`);
   if (nameInput) nameInput.value = name;
   if (ageInput) ageInput.value = age;
   if (genderInput) genderInput.value = gender;
-  showToast(`Added ${name} as Passenger ${targetIndex}!`, "info");
+  showToast(`Added ${name} to Seat ${currentSelectedSeats[currentSelectedSeats.length - 1]}!`, "info");
   calculateFarePreview();
 }
 
 function calculateFarePreview() {
   const typeSelect = document.getElementById('book-type');
-  const countSelect = document.getElementById('book-passengers');
-  if (!typeSelect || !countSelect) return;
+  if (!typeSelect) return;
 
   const type = typeSelect.value;
-  const count = parseInt(countSelect.value || '1');
+  const count = currentSelectedSeats.length;
   const fleetInfo = MSRTC_FLEET[type] || { baseFarePerSeat: 535 };
   const total = fleetInfo.baseFarePerSeat * count;
 
   const fareDisplay = document.getElementById('fare-preview-amount');
   if (fareDisplay) fareDisplay.innerText = `₹${total}`;
-
-  let seats = [];
-  for (let i = 1; i <= count; i++) {
-    seats.push(`${12 + i}${i % 2 === 0 ? 'B' : 'A'}`);
-  }
-  const seatBadge = document.getElementById('seat-badge-display');
-  if (seatBadge) seatBadge.innerText = `Seat(s): ${seats.join(', ')}`;
 }
 
 function quickBook(from, to, busType) {
@@ -624,13 +741,18 @@ function renderBookingUserSummary() {
 function handleBookTicketSubmit(e) {
   e.preventDefault();
 
-  const from = document.getElementById('book-from').value;
-  const to = document.getElementById('book-to').value;
+  const from = document.getElementById('book-from').value.trim();
+  const to = document.getElementById('book-to').value.trim();
   const date = document.getElementById('book-date').value;
   const busType = document.getElementById('book-type').value;
-  const count = parseInt(document.getElementById('book-passengers').value);
+  const count = currentSelectedSeats.length;
 
-  if (from === to) {
+  if (!from || !to) {
+    showToast("Please enter both Departure and Destination locations!", "error");
+    return;
+  }
+
+  if (from.toLowerCase() === to.toLowerCase()) {
     showToast("Departure and Destination cannot be the same!", "error");
     return;
   }
@@ -640,10 +762,8 @@ function handleBookTicketSubmit(e) {
   const gst = Math.round(baseFare * 0.05);
   const totalAmount = baseFare + gst;
 
-  let seats = [];
   let passengers = [];
   for (let i = 1; i <= count; i++) {
-    seats.push(`${10 + i}${i % 2 === 0 ? 'B' : 'A'}`);
     const pName = document.getElementById(`pass-name-${i}`)?.value || `Passenger ${i}`;
     const pAge = parseInt(document.getElementById(`pass-age-${i}`)?.value || '28');
     const pGender = document.getElementById(`pass-gender-${i}`)?.value || 'Male';
@@ -655,19 +775,19 @@ function handleBookTicketSubmit(e) {
     pnr: "PNR" + Math.floor(1000000 + Math.random() * 9000000),
     userId: currentUser ? currentUser.userId : "usr_guest",
     busDetails: {
-      busNumber: "MH-" + Math.floor(10 + Math.random() * 40) + "-BT-" + Math.floor(1000 + Math.random() * 9000),
+      busNumber: "MH-09-BT-" + Math.floor(1000 + Math.random() * 9000),
       busType: busType,
-      operator: "MSRTC Smart Transit Division"
+      operator: "MSRTC Kolhapur Division"
     },
     route: {
       from: from,
       to: to,
       departureTime: `${date}T07:30:00+05:30`,
-      arrivalTime: `${date}T12:00:00+05:30`,
-      boardingPoint: `${from} Central Bay Platform`,
-      duration: "4h 30m"
+      arrivalTime: `${date}T11:00:00+05:30`,
+      boardingPoint: `${from} Express Platform`,
+      duration: "3h 30m"
     },
-    seats: seats,
+    seats: [...currentSelectedSeats],
     passengers: passengers,
     fare: {
       baseFare: baseFare,
@@ -691,7 +811,7 @@ function handleBookTicketSubmit(e) {
   }, 500);
 }
 
-// 8. TOAST SYSTEM
+// 10. TOAST SYSTEM
 function showToast(message, type = "info") {
   const container = document.getElementById('toast-container');
   if (!container) return;
@@ -724,8 +844,10 @@ function showToast(message, type = "info") {
   }, 3500);
 }
 
-// 9. INITIALIZE ON DOM READY
+// 11. INITIALIZE ON DOM READY
 document.addEventListener('DOMContentLoaded', () => {
+  populateLocationDatalists();
   renderAuthSection();
   setDefaultBookingDate();
+  renderInteractiveSeatCabin();
 });
