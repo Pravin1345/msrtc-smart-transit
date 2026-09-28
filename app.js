@@ -74,10 +74,18 @@ function navigateTo(pageId) {
     renderBookingUserSummary();
     renderInteractiveSeatCabin();
     renderPassengerInputs();
+  } else {
+    // Reset bus search state when leaving the book page
+    activeBusSelection = null;
+    const resultsPanel = document.getElementById('bus-search-results');
+    const banner = document.getElementById('selected-bus-banner');
+    if (resultsPanel) resultsPanel.classList.add('hidden');
+    if (banner) banner.classList.add('hidden');
   }
 
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
+
 
 // 3. POPULATE LOCATION DATALISTS & MANUAL LOCATION LOGIC
 function populateLocationDatalists() {
@@ -1082,11 +1090,4 @@ function calculateFarePreview() {
   }
 }
 
-// --- Reset search state when navigating away ---
-const _originalNavigateTo = navigateTo;
-function navigateTo(pageId) {
-  if (pageId !== 'book') {
-    activeBusSelection = null;
-  }
-  _originalNavigateTo(pageId);
-}
+// activeBusSelection is reset inside selectBus() on each new search
