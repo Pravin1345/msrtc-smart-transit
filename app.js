@@ -182,8 +182,11 @@ function toggleSeatSelection(seatId) {
     currentSelectedSeats.push(seatId);
   }
 
+  wizardState.selectedSeats = [...currentSelectedSeats];
   renderInteractiveSeatCabin();
-  renderPassengerInputs();
+  if (wizardState.step === 4) {
+    renderWizardPassengerInputs();
+  }
 }
 
 function updateSeatSelectionDisplay() {
@@ -191,7 +194,6 @@ function updateSeatSelectionDisplay() {
   if (badge) {
     badge.innerText = `Selected (${currentSelectedSeats.length}): ${currentSelectedSeats.join(', ')}`;
   }
-  calculateFarePreview();
 }
 
 // 5. AUTHENTICATION & HEADER
@@ -784,7 +786,7 @@ function renderWizardBusList() {
     ` : '';
 
     return `
-      <div class="border-2 ${cfg.cardBorder} rounded-2xl p-4 sm:p-5 shadow-sm hover:shadow-md transition flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+      <div class="border-2 ${cfg.cardBorder} rounded-2xl p-4 sm:p-5 shadow-sm hover:shadow-md transition flex flex-col sm:flex-row justify-between sm:items-center gap-4 cursor-pointer" onclick="chooseWizardBus('${bus.id}')">
         <div class="flex items-start gap-3.5 flex-1">
           <div class="w-11 h-11 rounded-xl bg-msrtc-red/10 text-msrtc-red flex items-center justify-center text-xl flex-shrink-0 mt-1">
             <i class="fa-solid fa-bus-simple"></i>
@@ -828,7 +830,7 @@ function renderWizardBusList() {
               <p class="text-2xl font-black text-slate-900">₹${basePrice}<span class="text-xs font-normal text-slate-500">/seat</span></p>
             `}
           </div>
-          <button onclick="chooseWizardBus('${bus.id}')" class="mt-2 bg-msrtc-red hover:bg-msrtc-darkred text-white text-xs font-bold px-5 py-2.5 rounded-xl transition flex items-center gap-1.5 shadow-md shadow-red-200">
+          <button type="button" onclick="event.stopPropagation(); chooseWizardBus('${bus.id}')" class="mt-2 bg-msrtc-red hover:bg-msrtc-darkred text-white text-xs font-bold px-5 py-2.5 rounded-xl transition flex items-center gap-1.5 shadow-md shadow-red-200">
             Select & Pick Seats <i class="fa-solid fa-arrow-right text-[10px]"></i>
           </button>
         </div>
