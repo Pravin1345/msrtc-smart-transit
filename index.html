@@ -242,283 +242,254 @@
       </div>
     </section>
 
-    <!-- PAGE 2: BOOK TICKET (SELF + CO-PASSENGERS) -->
-    <section id="page-book" class="page-view hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div class="mb-6">
-        <h2 class="text-2xl sm:text-3xl font-bold text-slate-900">Book Bus Ticket (Self-Service)</h2>
-        <p class="text-sm text-slate-500">Book for yourself or add family members directly to your booking</p>
-      </div>
+    <!-- PAGE 2: BOOK TICKET — 5-STEP WIZARD -->
+    <section id="page-book" class="page-view hidden max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <!-- Search and Booking Form -->
-        <div class="lg:col-span-2 bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-sm">
-          <form id="ticket-booking-form" onsubmit="handleBookTicketSubmit(event)">
-            
-            <!-- Quick "Book for Myself" Banner -->
-            <div class="bg-amber-50 border border-amber-200 p-4 rounded-xl mb-6 flex flex-col sm:flex-row justify-between sm:items-center gap-3">
-              <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-full bg-amber-400 text-slate-900 flex items-center justify-center font-bold text-base">
-                  <i class="fa-solid fa-user-check"></i>
-                </div>
-                <div>
-                  <h4 class="text-xs font-bold text-amber-950 uppercase tracking-wider">Primary Passenger (Self)</h4>
-                  <p id="self-booking-indicator" class="text-xs text-amber-800 font-medium">
-                    Autofilled as <b>Pravin Dongare</b> (Male, +91 98765 43210)
-                  </p>
-                </div>
-              </div>
-              <button type="button" onclick="toggleSelfBooking()" id="btn-self-toggle" class="bg-slate-900 hover:bg-black text-white text-xs font-bold px-3 py-1.5 rounded-lg transition self-start sm:self-auto">
-                <i class="fa-solid fa-check mr-1 text-emerald-400"></i> Myself Included
-              </button>
-            </div>
+      <!-- ── STEP PROGRESS BAR ── -->
+      <div class="mb-8">
+        <div class="flex items-center justify-between relative">
+          <!-- connector line -->
+          <div class="absolute top-5 left-0 right-0 h-0.5 bg-slate-200 z-0"></div>
+          <div id="step-progress-line" class="absolute top-5 left-0 h-0.5 bg-msrtc-red z-0 transition-all duration-500" style="width:0%"></div>
 
-            <!-- Route Locations (Kolhapur District & Manual Custom Input) -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
-              <div>
-                <div class="flex justify-between items-center mb-1.5">
-                  <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">
-                    <i class="fa-solid fa-location-dot text-msrtc-red mr-1"></i> From (Departure)
-                  </label>
-                  <span class="text-[10px] text-slate-400 font-medium">Select or Type Manually</span>
-                </div>
-                <div class="relative">
-                  <input type="text" id="book-from" list="transit-locations-list" value="Kolhapur CBS (Central Bus Stand)" required placeholder="Type or select departure station..." class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-xl focus:ring-msrtc-red focus:border-msrtc-red p-3 font-semibold shadow-sm">
-                </div>
-              </div>
-
-              <div>
-                <div class="flex justify-between items-center mb-1.5">
-                  <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">
-                    <i class="fa-solid fa-flag-checkered text-emerald-600 mr-1"></i> To (Destination)
-                  </label>
-                  <span class="text-[10px] text-slate-400 font-medium">Select or Type Manually</span>
-                </div>
-                <div class="relative">
-                  <input type="text" id="book-to" list="transit-locations-list" value="Ichalkaranji Central Stand" required placeholder="Type or select destination station..." class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-xl focus:ring-msrtc-red focus:border-msrtc-red p-3 font-semibold shadow-sm">
-                </div>
-              </div>
-            </div>
-
-            <!-- Datalist containing all Kolhapur District and Maharashtra stations -->
-            <datalist id="transit-locations-list">
-              <!-- Dynamically populated from data.js -->
-            </datalist>
-
-            <!-- Quick Kolhapur Popular District Route Chips -->
-            <div class="mb-5 pb-3 border-b border-slate-100">
-              <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-2">Popular Kolhapur District Routes:</span>
-              <div class="flex flex-wrap gap-1.5 text-[11px]">
-                <button type="button" onclick="quickBook('Kolhapur CBS (Central Bus Stand)', 'Ichalkaranji Central Stand', 'Shivshahi (AC Seater)')" class="px-2.5 py-1 bg-slate-100 hover:bg-red-50 text-slate-700 hover:text-msrtc-red rounded-lg font-medium transition border border-slate-200">
-                  Kolhapur ➔ Ichalkaranji
-                </button>
-                <button type="button" onclick="quickBook('Kolhapur CBS (Central Bus Stand)', 'Gadhinglaj Central Stand', 'Nim-Aramdayi (Asiad Express)')" class="px-2.5 py-1 bg-slate-100 hover:bg-red-50 text-slate-700 hover:text-msrtc-red rounded-lg font-medium transition border border-slate-200">
-                  Kolhapur ➔ Gadhinglaj
-                </button>
-                <button type="button" onclick="quickBook('Kolhapur CBS (Central Bus Stand)', 'Panhala Fort Stand', 'Ordinary Lal Dabba')" class="px-2.5 py-1 bg-slate-100 hover:bg-red-50 text-slate-700 hover:text-msrtc-red rounded-lg font-medium transition border border-slate-200">
-                  Kolhapur ➔ Panhala
-                </button>
-                <button type="button" onclick="quickBook('Kolhapur CBS (Central Bus Stand)', 'Kagal Bus Stand', 'Shivshahi (AC Seater)')" class="px-2.5 py-1 bg-slate-100 hover:bg-red-50 text-slate-700 hover:text-msrtc-red rounded-lg font-medium transition border border-slate-200">
-                  Kolhapur ➔ Kagal
-                </button>
-                <button type="button" onclick="quickBook('Kolhapur CBS (Central Bus Stand)', 'Pune (Swargate)', 'Shivneri (AC Volvo)')" class="px-2.5 py-1 bg-slate-100 hover:bg-red-50 text-slate-700 hover:text-msrtc-red rounded-lg font-medium transition border border-slate-200">
-                  Kolhapur ➔ Pune
-                </button>
-              </div>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
-              <div>
-                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
-                  <i class="fa-regular fa-calendar text-slate-500 mr-1"></i> Travel Date
-                </label>
-                <input type="date" id="book-date" required class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-xl focus:ring-msrtc-red focus:border-msrtc-red p-3 font-medium">
-              </div>
-
-              <div>
-                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
-                  <i class="fa-solid fa-bus text-slate-500 mr-1"></i> Service Class
-                </label>
-                <select id="book-type" onchange="calculateFarePreview()" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-xl focus:ring-msrtc-red focus:border-msrtc-red p-3 font-medium">
-                  <option value="Shivneri (AC Volvo)">Shivneri (AC Volvo) - ₹535/seat</option>
-                  <option value="Shivshahi (AC Seater)">Shivshahi (AC Seater) - ₹360/seat</option>
-                  <option value="Nim-Aramdayi (Asiad Express)">Nim-Aramdayi (Asiad) - ₹240/seat</option>
-                  <option value="Ordinary Lal Dabba">Ordinary (Lal Dabba) - ₹150/seat</option>
-                </select>
-              </div>
-            </div>
-
-            <!-- ===== SEARCH BUSES BUTTON ===== -->
-            <div class="mb-5">
-              <button type="button" onclick="searchAvailableBuses()"
-                class="w-full bg-gradient-to-r from-slate-900 to-slate-800 hover:from-black hover:to-slate-900 text-white font-bold px-6 py-3.5 rounded-xl transition flex items-center justify-center gap-2 shadow-md">
-                <i class="fa-solid fa-magnifying-glass text-amber-400"></i>
-                Search Available Buses
-                <span id="search-spinner" class="hidden ml-1">
-                  <i class="fa-solid fa-spinner fa-spin text-amber-400"></i>
-                </span>
-              </button>
-            </div>
-
-            <!-- ===== BUS SEARCH RESULTS PANEL ===== -->
-            <div id="bus-search-results" class="hidden mb-6 animate-fade-in">
-              <!-- Header -->
-              <div class="flex items-center justify-between mb-3">
-                <div class="flex items-center gap-2">
-                  <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider">
-                    <i class="fa-solid fa-bus-simple text-msrtc-red mr-1"></i>
-                    Available Buses
-                  </h4>
-                  <span id="results-route-label" class="text-[10px] font-bold bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full"></span>
-                  <span id="results-count" class="text-[10px] font-bold bg-msrtc-red text-white px-2 py-0.5 rounded-full"></span>
-                </div>
-                <span class="text-[11px] text-emerald-600 font-bold flex items-center gap-1">
-                  <i class="fa-solid fa-tag"></i> Low Demand = Extra Savings!
-                </span>
-              </div>
-
-              <!-- Discount Legend -->
-              <div class="flex flex-wrap gap-2 mb-3 text-[10px] font-bold">
-                <span class="flex items-center gap-1 bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-1 rounded-lg">
-                  <i class="fa-solid fa-fire"></i> Low Demand: 20–30% OFF
-                </span>
-                <span class="flex items-center gap-1 bg-blue-50 text-blue-700 border border-blue-200 px-2 py-1 rounded-lg">
-                  <i class="fa-solid fa-bolt"></i> Medium Demand: 5–15% OFF
-                </span>
-                <span class="flex items-center gap-1 bg-rose-50 text-rose-700 border border-rose-200 px-2 py-1 rounded-lg">
-                  <i class="fa-solid fa-chart-line"></i> High Demand: Standard Fare
-                </span>
-              </div>
-
-              <!-- Results List -->
-              <div id="bus-results-list" class="space-y-2 max-h-80 overflow-y-auto custom-scroll pr-1">
-                <!-- Injected by app.js -->
-              </div>
-            </div>
-
-            <!-- Selected Bus Summary (shown after choosing a bus) -->
-            <div id="selected-bus-banner" class="hidden mb-5 bg-emerald-50 border border-emerald-200 p-3.5 rounded-xl flex flex-col sm:flex-row justify-between sm:items-center gap-2">
-              <div class="flex items-center gap-2.5">
-                <div class="w-8 h-8 rounded-lg bg-emerald-500 text-white flex items-center justify-center">
-                  <i class="fa-solid fa-circle-check text-sm"></i>
-                </div>
-                <div>
-                  <p class="text-xs font-extrabold text-emerald-900" id="selected-bus-name"></p>
-                  <p class="text-[11px] text-emerald-700 font-medium" id="selected-bus-detail"></p>
-                </div>
-              </div>
-              <div class="text-right">
-                <p class="text-[10px] text-emerald-600 font-semibold uppercase">Discounted Fare</p>
-                <p class="text-base font-extrabold text-emerald-800" id="selected-bus-fare"></p>
-              </div>
-            </div>
-
-            <!-- Interactive Visual Bus Cabin (Multiple Seat Selection) -->
-            <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200 mb-6">
-              <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-2 mb-4">
-                <div>
-                  <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
-                    <i class="fa-solid fa-couch text-msrtc-red"></i> Interactive 2+2 Bus Cabin Seat Selector
-                  </h4>
-                  <p class="text-[11px] text-slate-500">Click multiple seats to select / deselect at once.</p>
-                </div>
-                <span id="seat-badge-display" class="text-xs font-mono font-bold bg-msrtc-red text-white px-3 py-1 rounded-lg self-start sm:self-auto shadow-sm">
-                  Selected (1): 14A
-                </span>
-              </div>
-
-              <!-- Bus Front / Driver Cabin -->
-              <div class="bg-white p-3 rounded-xl border border-slate-200 mb-4 flex justify-between items-center text-xs">
-                <span class="flex items-center gap-2 font-bold text-slate-700">
-                  <i class="fa-solid fa-dharmachakra text-amber-500 text-sm"></i> Driver Cockpit
-                </span>
-                <span class="text-[10px] font-mono text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded font-bold">
-                  <i class="fa-solid fa-door-open mr-1"></i> Front Entry Gate
-                </span>
-              </div>
-
-              <!-- Interactive Seat Matrix Grid (Rendered by app.js) -->
-              <div id="bus-cabin-grid" class="space-y-1 max-w-sm mx-auto bg-slate-100 p-3 rounded-2xl border border-slate-200">
-                <!-- Injected dynamically -->
-              </div>
-
-              <!-- Seat Color Legend -->
-              <div class="flex flex-wrap items-center justify-center gap-4 mt-4 pt-3 border-t border-slate-200 text-[11px] text-slate-600">
-                <span class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded-lg bg-white border border-slate-300"></span> Available</span>
-                <span class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded-lg bg-msrtc-red text-white flex items-center justify-center text-[8px] font-bold">✓</span> Selected (You)</span>
-                <span class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded-lg bg-pink-50 border border-pink-300 text-pink-500 flex items-center justify-center text-[8px]"><i class="fa-solid fa-venus"></i></span> Ladies (50% Off)</span>
-                <span class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded-lg bg-slate-200 border border-slate-300"></span> Booked</span>
-              </div>
-            </div>
-
-            <!-- Dynamic Passenger Manifest Inputs -->
-            <div class="mb-6">
-              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-3">Passenger Information Details (Auto-Synced with Selected Seats)</label>
-              <div id="passenger-inputs-container" class="space-y-3">
-                <!-- Injected via app.js -->
-              </div>
-            </div>
-
-            <!-- Submit Button -->
-            <div class="flex items-center justify-between pt-4 border-t border-slate-200">
-              <div>
-                <span class="text-xs text-slate-500 font-medium">Total Fare Payable:</span>
-                <div id="fare-preview-amount" class="text-2xl font-extrabold text-slate-900">₹535</div>
-              </div>
-              <button type="submit" class="bg-msrtc-red hover:bg-msrtc-darkred text-white font-bold px-8 py-3.5 rounded-xl shadow-md shadow-red-200 transition flex items-center gap-2">
-                <i class="fa-solid fa-lock text-xs"></i> Confirm & Book Ticket
-              </button>
-            </div>
-          </form>
-        </div>
-
-        <!-- Co-Passengers & Self Info Side Panel -->
-        <div class="space-y-6">
-          <div class="bg-gradient-to-br from-slate-900 to-slate-800 text-white p-6 rounded-2xl shadow-sm">
-            <div class="flex items-center justify-between mb-3">
-              <h3 class="font-bold text-lg flex items-center gap-2">
-                <i class="fa-solid fa-address-card text-amber-400"></i> My Self Profile
-              </h3>
-              <button onclick="navigateTo('profile')" class="text-xs text-amber-300 hover:underline">Edit</button>
-            </div>
-            <div id="booking-user-summary" class="text-xs text-slate-300 space-y-1.5 mb-4">
-              <!-- Rendered via app.js -->
-            </div>
-            <div class="bg-white/10 p-3 rounded-xl border border-white/10 text-xs text-slate-200 flex items-center gap-2">
-              <i class="fa-solid fa-bolt text-amber-400"></i> One-click autofill enabled for all Maharashtra state routes.
-            </div>
+          <!-- step dots -->
+          <div class="step-dot flex flex-col items-center z-10" data-step="1">
+            <div id="dot-1" class="w-10 h-10 rounded-full bg-msrtc-red text-white flex items-center justify-center font-bold text-sm border-4 border-white shadow-md">1</div>
+            <span class="text-[10px] font-bold mt-1 text-msrtc-red">Route</span>
           </div>
-
-          <!-- Saved Co-Passengers -->
-          <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-            <h4 class="font-bold text-slate-900 text-sm mb-2 flex items-center justify-between">
-              <span>Saved Co-Passengers</span>
-              <span class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-bold">2 Saved</span>
-            </h4>
-            <p class="text-xs text-slate-500 mb-4">Frequently travel with family? Click to add them:</p>
-            <div class="space-y-2">
-              <div class="flex justify-between items-center p-2.5 bg-slate-50 rounded-xl border border-slate-100 text-xs">
-                <div>
-                  <p class="font-bold text-slate-800">Suresh Dongare</p>
-                  <p class="text-[10px] text-slate-500">Male • 58 yrs (Father)</p>
-                </div>
-                <button type="button" onclick="addSavedCoPassenger('Suresh Dongare', 58, 'Male')" class="text-xs font-bold text-msrtc-red hover:underline">
-                  + Add
-                </button>
-              </div>
-              <div class="flex justify-between items-center p-2.5 bg-slate-50 rounded-xl border border-slate-100 text-xs">
-                <div>
-                  <p class="font-bold text-slate-800">Sunita Dongare</p>
-                  <p class="text-[10px] text-slate-500">Female • 54 yrs (Mother)</p>
-                </div>
-                <button type="button" onclick="addSavedCoPassenger('Sunita Dongare', 54, 'Female')" class="text-xs font-bold text-msrtc-red hover:underline">
-                  + Add
-                </button>
-              </div>
-            </div>
+          <div class="step-dot flex flex-col items-center z-10" data-step="2">
+            <div id="dot-2" class="w-10 h-10 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center font-bold text-sm border-4 border-white shadow-md">2</div>
+            <span class="text-[10px] font-bold mt-1 text-slate-400">Bus</span>
+          </div>
+          <div class="step-dot flex flex-col items-center z-10" data-step="3">
+            <div id="dot-3" class="w-10 h-10 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center font-bold text-sm border-4 border-white shadow-md">3</div>
+            <span class="text-[10px] font-bold mt-1 text-slate-400">Seats</span>
+          </div>
+          <div class="step-dot flex flex-col items-center z-10" data-step="4">
+            <div id="dot-4" class="w-10 h-10 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center font-bold text-sm border-4 border-white shadow-md">4</div>
+            <span class="text-[10px] font-bold mt-1 text-slate-400">Passengers</span>
+          </div>
+          <div class="step-dot flex flex-col items-center z-10" data-step="5">
+            <div id="dot-5" class="w-10 h-10 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center font-bold text-sm border-4 border-white shadow-md">5</div>
+            <span class="text-[10px] font-bold mt-1 text-slate-400">Payment</span>
           </div>
         </div>
       </div>
+
+      <!-- ══════════════════════════════════════════════
+           STEP 1 — ROUTE & DATE
+      ══════════════════════════════════════════════ -->
+      <div id="wizard-step-1" class="wizard-step bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sm:p-8">
+        <h2 class="text-xl font-extrabold text-slate-900 mb-1 flex items-center gap-2">
+          <i class="fa-solid fa-map-location-dot text-msrtc-red"></i> Choose Your Route & Date
+        </h2>
+        <p class="text-xs text-slate-500 mb-6">Enter departure, destination and travel date to search available buses.</p>
+
+        <!-- From / To -->
+        <datalist id="transit-locations-list"></datalist>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+              <i class="fa-solid fa-location-dot text-msrtc-red mr-1"></i> From (Departure)
+            </label>
+            <input type="text" id="book-from" list="transit-locations-list"
+              value="Kolhapur CBS (Central Bus Stand)" placeholder="Type or select station..."
+              class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-xl p-3 font-semibold focus:border-msrtc-red focus:outline-none"/>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+              <i class="fa-solid fa-flag-checkered text-emerald-600 mr-1"></i> To (Destination)
+            </label>
+            <input type="text" id="book-to" list="transit-locations-list"
+              value="Ichalkaranji Central Stand" placeholder="Type or select station..."
+              class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-xl p-3 font-semibold focus:border-msrtc-red focus:outline-none"/>
+          </div>
+        </div>
+
+        <!-- Date -->
+        <div class="mb-5">
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+            <i class="fa-regular fa-calendar text-slate-500 mr-1"></i> Travel Date
+          </label>
+          <input type="date" id="book-date"
+            class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-xl p-3 font-medium focus:border-msrtc-red focus:outline-none"/>
+        </div>
+
+        <!-- Popular routes -->
+        <div class="mb-6 pb-4 border-b border-slate-100">
+          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-2">Popular Routes:</span>
+          <div class="flex flex-wrap gap-1.5 text-[11px]">
+            <button type="button" onclick="setRoute('Kolhapur CBS (Central Bus Stand)','Ichalkaranji Central Stand')" class="px-2.5 py-1 bg-slate-100 hover:bg-red-50 text-slate-700 hover:text-msrtc-red rounded-lg font-medium transition border border-slate-200">Kolhapur ➔ Ichalkaranji</button>
+            <button type="button" onclick="setRoute('Kolhapur CBS (Central Bus Stand)','Gadhinglaj Central Stand')" class="px-2.5 py-1 bg-slate-100 hover:bg-red-50 text-slate-700 hover:text-msrtc-red rounded-lg font-medium transition border border-slate-200">Kolhapur ➔ Gadhinglaj</button>
+            <button type="button" onclick="setRoute('Kolhapur CBS (Central Bus Stand)','Pune (Swargate)')" class="px-2.5 py-1 bg-slate-100 hover:bg-red-50 text-slate-700 hover:text-msrtc-red rounded-lg font-medium transition border border-slate-200">Kolhapur ➔ Pune</button>
+            <button type="button" onclick="setRoute('Kolhapur CBS (Central Bus Stand)','Mumbai (Dadar)')" class="px-2.5 py-1 bg-slate-100 hover:bg-red-50 text-slate-700 hover:text-msrtc-red rounded-lg font-medium transition border border-slate-200">Kolhapur ➔ Mumbai</button>
+            <button type="button" onclick="setRoute('Pune (Swargate)','Mumbai (Dadar)')" class="px-2.5 py-1 bg-slate-100 hover:bg-red-50 text-slate-700 hover:text-msrtc-red rounded-lg font-medium transition border border-slate-200">Pune ➔ Mumbai</button>
+          </div>
+        </div>
+
+        <button onclick="wizardSearchBuses()" class="w-full bg-gradient-to-r from-msrtc-red to-msrtc-darkred hover:opacity-90 text-white font-bold px-6 py-4 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-red-200 transition">
+          <i class="fa-solid fa-magnifying-glass"></i> Search Available Buses
+          <span id="search-spinner" class="hidden"><i class="fa-solid fa-spinner fa-spin"></i></span>
+        </button>
+      </div>
+
+      <!-- ══════════════════════════════════════════════
+           STEP 2 — BUS SELECTION
+      ══════════════════════════════════════════════ -->
+      <div id="wizard-step-2" class="wizard-step hidden bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sm:p-8">
+        <div class="flex items-center justify-between mb-1">
+          <h2 class="text-xl font-extrabold text-slate-900 flex items-center gap-2">
+            <i class="fa-solid fa-bus-simple text-msrtc-red"></i> Select Your Bus
+          </h2>
+          <button onclick="goToStep(1)" class="text-xs text-slate-500 hover:text-msrtc-red font-semibold flex items-center gap-1">
+            <i class="fa-solid fa-arrow-left text-[10px]"></i> Back
+          </button>
+        </div>
+        <p class="text-xs text-slate-500 mb-2" id="step2-route-label"></p>
+
+        <!-- Discount legend -->
+        <div class="flex flex-wrap gap-2 mb-4 text-[10px] font-bold">
+          <span class="flex items-center gap-1 bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-1 rounded-lg"><i class="fa-solid fa-fire"></i> Low Demand: 20–30% OFF</span>
+          <span class="flex items-center gap-1 bg-blue-50 text-blue-700 border border-blue-200 px-2 py-1 rounded-lg"><i class="fa-solid fa-bolt"></i> Medium: 5–15% OFF</span>
+          <span class="flex items-center gap-1 bg-rose-50 text-rose-700 border border-rose-200 px-2 py-1 rounded-lg"><i class="fa-solid fa-chart-line"></i> High: Standard Fare</span>
+        </div>
+
+        <div id="bus-results-list" class="space-y-3 max-h-[520px] overflow-y-auto custom-scroll pr-1"></div>
+      </div>
+
+      <!-- ══════════════════════════════════════════════
+           STEP 3 — SEAT SELECTION
+      ══════════════════════════════════════════════ -->
+      <div id="wizard-step-3" class="wizard-step hidden bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sm:p-8">
+        <div class="flex items-center justify-between mb-1">
+          <h2 class="text-xl font-extrabold text-slate-900 flex items-center gap-2">
+            <i class="fa-solid fa-couch text-msrtc-red"></i> Select Your Seats
+          </h2>
+          <button onclick="goToStep(2)" class="text-xs text-slate-500 hover:text-msrtc-red font-semibold flex items-center gap-1">
+            <i class="fa-solid fa-arrow-left text-[10px]"></i> Back
+          </button>
+        </div>
+        <!-- Selected bus summary strip -->
+        <div id="step3-bus-strip" class="bg-slate-50 border border-slate-200 rounded-xl p-3 mb-5 flex justify-between items-center text-xs font-semibold text-slate-700"></div>
+
+        <p class="text-xs text-slate-500 mb-4">Click seats to select / deselect. Max 6 seats at a time.</p>
+
+        <!-- Driver cabin indicator -->
+        <div class="bg-amber-50 border border-amber-200 p-2.5 rounded-xl mb-3 flex justify-between items-center text-xs font-bold text-amber-800">
+          <span><i class="fa-solid fa-dharmachakra mr-1"></i> Driver Cockpit</span>
+          <span class="text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-lg"><i class="fa-solid fa-door-open mr-1"></i> Front Entry</span>
+        </div>
+
+        <!-- Seat grid -->
+        <div id="bus-cabin-grid" class="space-y-1.5 max-w-sm mx-auto bg-slate-100 p-3 rounded-2xl border border-slate-200 mb-4"></div>
+
+        <!-- Legend -->
+        <div class="flex flex-wrap items-center justify-center gap-4 text-[11px] text-slate-500 mb-4">
+          <span class="flex items-center gap-1.5"><span class="w-4 h-4 rounded-lg bg-white border border-slate-300 inline-block"></span> Available</span>
+          <span class="flex items-center gap-1.5"><span class="w-4 h-4 rounded-lg bg-msrtc-red inline-block"></span> Selected</span>
+          <span class="flex items-center gap-1.5"><span class="w-4 h-4 rounded-lg bg-pink-100 border border-pink-300 inline-block"></span> Ladies</span>
+          <span class="flex items-center gap-1.5"><span class="w-4 h-4 rounded-lg bg-slate-300 inline-block"></span> Booked</span>
+        </div>
+
+        <!-- Selected badge + Next -->
+        <div class="flex items-center justify-between pt-4 border-t border-slate-100">
+          <span id="seat-badge-display" class="text-xs font-mono font-bold bg-msrtc-red text-white px-3 py-1.5 rounded-lg shadow-sm">Selected (1): 14A</span>
+          <button onclick="confirmSeatsGoStep4()" class="bg-msrtc-red hover:bg-msrtc-darkred text-white font-bold px-6 py-2.5 rounded-xl flex items-center gap-2 transition shadow-md shadow-red-200">
+            Next: Passenger Info <i class="fa-solid fa-arrow-right text-xs"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════════
+           STEP 4 — PASSENGER INFORMATION
+      ══════════════════════════════════════════════ -->
+      <div id="wizard-step-4" class="wizard-step hidden bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sm:p-8">
+        <div class="flex items-center justify-between mb-1">
+          <h2 class="text-xl font-extrabold text-slate-900 flex items-center gap-2">
+            <i class="fa-solid fa-users text-msrtc-red"></i> Passenger Details
+          </h2>
+          <button onclick="goToStep(3)" class="text-xs text-slate-500 hover:text-msrtc-red font-semibold flex items-center gap-1">
+            <i class="fa-solid fa-arrow-left text-[10px]"></i> Back
+          </button>
+        </div>
+        <p class="text-xs text-slate-500 mb-1">Fill details for each passenger. Fare is auto-calculated per concession rules.</p>
+
+        <!-- Concession info box -->
+        <div class="bg-blue-50 border border-blue-200 rounded-xl p-3 mb-5 text-[11px] font-semibold text-blue-800 flex flex-wrap gap-3">
+          <span><i class="fa-solid fa-mars text-blue-500 mr-1"></i> Male → Full Fare</span>
+          <span><i class="fa-solid fa-venus text-pink-500 mr-1"></i> Female → 50% Off</span>
+          <span><i class="fa-solid fa-person-cane text-amber-600 mr-1"></i> Age ≥ 60 → 50% Off</span>
+          <span><i class="fa-solid fa-baby text-emerald-600 mr-1"></i> Age &lt; 5 → 50% Off</span>
+        </div>
+
+        <!-- Saved co-passengers quick-add -->
+        <div class="mb-4 flex flex-wrap gap-2">
+          <span class="text-[10px] font-bold text-slate-400 uppercase self-center">Quick Add:</span>
+          <button type="button" onclick="addSavedCoPassenger('Suresh Dongare', 58, 'Male')" class="text-[11px] bg-slate-100 hover:bg-red-50 text-slate-700 hover:text-msrtc-red px-3 py-1 rounded-lg border border-slate-200 font-semibold transition">+ Suresh (Father)</button>
+          <button type="button" onclick="addSavedCoPassenger('Sunita Dongare', 54, 'Female')" class="text-[11px] bg-slate-100 hover:bg-red-50 text-slate-700 hover:text-msrtc-red px-3 py-1 rounded-lg border border-slate-200 font-semibold transition">+ Sunita (Mother)</button>
+        </div>
+
+        <div id="passenger-inputs-container" class="space-y-3 mb-6"></div>
+
+        <!-- Live fare breakdown -->
+        <div id="fare-breakdown-box" class="bg-slate-50 border border-slate-200 rounded-xl p-4 mb-5 text-xs space-y-1"></div>
+
+        <div class="flex justify-end">
+          <button onclick="confirmPassengersGoStep5()" class="bg-msrtc-red hover:bg-msrtc-darkred text-white font-bold px-8 py-3 rounded-xl flex items-center gap-2 transition shadow-md shadow-red-200">
+            Next: Payment <i class="fa-solid fa-arrow-right text-xs"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════════
+           STEP 5 — PAYMENT
+      ══════════════════════════════════════════════ -->
+      <div id="wizard-step-5" class="wizard-step hidden bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sm:p-8">
+        <div class="flex items-center justify-between mb-1">
+          <h2 class="text-xl font-extrabold text-slate-900 flex items-center gap-2">
+            <i class="fa-solid fa-lock text-msrtc-red"></i> Payment
+          </h2>
+          <button onclick="goToStep(4)" class="text-xs text-slate-500 hover:text-msrtc-red font-semibold flex items-center gap-1">
+            <i class="fa-solid fa-arrow-left text-[10px]"></i> Back
+          </button>
+        </div>
+        <p class="text-xs text-slate-500 mb-6">Review your fare and choose a payment method to confirm booking.</p>
+
+        <!-- Order summary -->
+        <div id="payment-summary" class="bg-slate-50 border border-slate-200 rounded-xl p-5 mb-6"></div>
+
+        <!-- Payment methods -->
+        <h3 class="text-sm font-bold text-slate-700 mb-3 uppercase tracking-wider">Choose Payment Method</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6" id="payment-methods">
+          <button onclick="handleWizardPayment('UPI')" class="payment-btn flex flex-col items-center gap-2 p-4 border-2 border-slate-200 rounded-xl hover:border-msrtc-red hover:bg-red-50 transition group">
+            <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center text-xl group-hover:bg-msrtc-red group-hover:text-white transition"><i class="fa-solid fa-mobile-screen"></i></div>
+            <span class="text-xs font-bold text-slate-700 group-hover:text-msrtc-red">UPI / GPay</span>
+          </button>
+          <button onclick="handleWizardPayment('Card')" class="payment-btn flex flex-col items-center gap-2 p-4 border-2 border-slate-200 rounded-xl hover:border-msrtc-red hover:bg-red-50 transition group">
+            <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center text-xl group-hover:bg-msrtc-red group-hover:text-white transition"><i class="fa-solid fa-credit-card"></i></div>
+            <span class="text-xs font-bold text-slate-700 group-hover:text-msrtc-red">Debit / Credit Card</span>
+          </button>
+          <button onclick="handleWizardPayment('Cash')" class="payment-btn flex flex-col items-center gap-2 p-4 border-2 border-slate-200 rounded-xl hover:border-msrtc-red hover:bg-red-50 transition group">
+            <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-xl group-hover:bg-msrtc-red group-hover:text-white transition"><i class="fa-solid fa-money-bill-wave"></i></div>
+            <span class="text-xs font-bold text-slate-700 group-hover:text-msrtc-red">Cash at Counter</span>
+          </button>
+        </div>
+
+        <!-- Total payable -->
+        <div class="bg-msrtc-red/5 border border-msrtc-red/20 rounded-xl p-4 flex justify-between items-center">
+          <div>
+            <p class="text-xs text-slate-500 font-semibold">Total Payable (incl. GST)</p>
+            <p id="final-total-display" class="text-3xl font-extrabold text-msrtc-red"></p>
+          </div>
+          <button onclick="handleWizardPayment('UPI')" class="bg-msrtc-red hover:bg-msrtc-darkred text-white font-bold px-6 py-3 rounded-xl flex items-center gap-2 shadow-lg shadow-red-200 transition">
+            <i class="fa-solid fa-check-circle"></i> Pay & Confirm
+          </button>
+        </div>
+      </div>
+
     </section>
+
+    <!-- PAGE 3: HISTORICAL BOOKING SYSTEM (PAST & UPCOMING) -->
 
     <!-- PAGE 3: HISTORICAL BOOKING SYSTEM (PAST & UPCOMING) -->
     <section id="page-history" class="page-view hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
