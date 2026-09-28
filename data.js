@@ -231,3 +231,79 @@ const MSRTC_FLEET = {
     features: ["High Frequency", "All Village Halts", "State Concessions Valid"]
   }
 };
+
+// 6. Bus Schedule Templates (demand: LOW=big discount, MEDIUM=moderate, HIGH=no discount)
+const BUS_SCHEDULE_TEMPLATES = [
+  {
+    id: "SCH_SHV_06", busType: "Shivneri (AC Volvo)", busNumber: "MH-09-BT-4521",
+    departure: "06:00", arrival: "10:30", duration: "4h 30m",
+    demand: "LOW", discountPercent: 28, availableSeats: 26,
+    amenities: ["AC", "WiFi", "USB Charging", "Water Bottle"]
+  },
+  {
+    id: "SCH_SHV_09", busType: "Shivneri (AC Volvo)", busNumber: "MH-09-BT-7832",
+    departure: "09:00", arrival: "13:30", duration: "4h 30m",
+    demand: "HIGH", discountPercent: 0, availableSeats: 6,
+    amenities: ["AC", "WiFi", "USB Charging", "Water Bottle"]
+  },
+  {
+    id: "SCH_SHV_21", busType: "Shivneri (AC Volvo)", busNumber: "MH-09-BT-2214",
+    departure: "21:30", arrival: "02:00", duration: "4h 30m",
+    demand: "LOW", discountPercent: 30, availableSeats: 30,
+    amenities: ["AC", "WiFi", "USB Charging", "Night Ride"]
+  },
+  {
+    id: "SCH_SSH_07", busType: "Shivshahi (AC Seater)", busNumber: "MH-09-EM-8834",
+    departure: "07:15", arrival: "11:45", duration: "4h 30m",
+    demand: "MEDIUM", discountPercent: 12, availableSeats: 14,
+    amenities: ["AC", "Push-back Seats", "GPS Tracking"]
+  },
+  {
+    id: "SCH_SSH_12", busType: "Shivshahi (AC Seater)", busNumber: "MH-09-EM-5510",
+    departure: "12:00", arrival: "16:30", duration: "4h 30m",
+    demand: "LOW", discountPercent: 20, availableSeats: 22,
+    amenities: ["AC", "Push-back Seats", "GPS Tracking"]
+  },
+  {
+    id: "SCH_SSH_18", busType: "Shivshahi (AC Seater)", busNumber: "MH-09-EM-9201",
+    departure: "18:00", arrival: "22:30", duration: "4h 30m",
+    demand: "HIGH", discountPercent: 0, availableSeats: 3,
+    amenities: ["AC", "Push-back Seats", "GPS Tracking"]
+  },
+  {
+    id: "SCH_ASI_08", busType: "Nim-Aramdayi (Asiad Express)", busNumber: "MH-09-EM-9921",
+    departure: "08:30", arrival: "13:00", duration: "4h 30m",
+    demand: "MEDIUM", discountPercent: 8, availableSeats: 18,
+    amenities: ["Cushioned Seats", "Express Route"]
+  },
+  {
+    id: "SCH_ASI_14", busType: "Nim-Aramdayi (Asiad Express)", busNumber: "MH-09-EM-3341",
+    departure: "14:00", arrival: "18:30", duration: "4h 30m",
+    demand: "LOW", discountPercent: 22, availableSeats: 32,
+    amenities: ["Cushioned Seats", "Express Route"]
+  },
+  {
+    id: "SCH_ASI_20", busType: "Nim-Aramdayi (Asiad Express)", busNumber: "MH-09-EM-6670",
+    departure: "20:00", arrival: "00:30", duration: "4h 30m",
+    demand: "LOW", discountPercent: 25, availableSeats: 28,
+    amenities: ["Cushioned Seats", "Night Express"]
+  },
+  {
+    id: "SCH_ORD_07", busType: "Ordinary Lal Dabba", busNumber: "MH-09-CL-1104",
+    departure: "07:00", arrival: "12:00", duration: "5h 00m",
+    demand: "HIGH", discountPercent: 0, availableSeats: 8,
+    amenities: ["Village Halts", "State Concessions"]
+  },
+  {
+    id: "SCH_ORD_10", busType: "Ordinary Lal Dabba", busNumber: "MH-09-CL-4492",
+    departure: "10:30", arrival: "15:30", duration: "5h 00m",
+    demand: "MEDIUM", discountPercent: 5, availableSeats: 20,
+    amenities: ["Village Halts", "State Concessions"]
+  },
+  {
+    id: "SCH_ORD_15", busType: "Ordinary Lal Dabba", busNumber: "MH-09-CL-7783",
+    departure: "15:00", arrival: "20:00", duration: "5h 00m",
+    demand: "LOW", discountPercent: 15, availableSeats: 38,
+    amenities: ["Village Halts", "Affordable Fare"]
+  }
+];

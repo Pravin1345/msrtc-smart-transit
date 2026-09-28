@@ -851,3 +851,242 @@ document.addEventListener('DOMContentLoaded', () => {
   setDefaultBookingDate();
   renderInteractiveSeatCabin();
 });
+
+// ============================================================
+// 12. BUS SEARCH WITH DEMAND-BASED DISCOUNT ENGINE
+// ============================================================
+
+// Stores the currently selected bus from search results
+let activeBusSelection = null;
+
+// --- Main Search Function ---
+function searchAvailableBuses() {
+  const from = document.getElementById('book-from').value.trim();
+  const to   = document.getElementById('book-to').value.trim();
+  const date = document.getElementById('book-date').value;
+
+  if (!from || !to) {
+    showToast('Please enter both Departure and Destination before searching!', 'error');
+    return;
+  }
+  if (from.toLowerCase() === to.toLowerCase()) {
+    showToast('Departure and Destination cannot be the same!', 'error');
+    return;
+  }
+  if (!date) {
+    showToast('Please select a Travel Date before searching!', 'error');
+    return;
+  }
+
+  // Show spinner
+  const spinner = document.getElementById('search-spinner');
+  spinner.classList.remove('hidden');
+
+  // Simulate async API call with 800ms delay for realism
+  setTimeout(() => {
+    spinner.classList.add('hidden');
+    renderBusResults(from, to, date);
+  }, 800);
+}
+
+// --- Render Bus Cards ---
+function renderBusResults(from, to, date) {
+  const resultsPanel = document.getElementById('bus-search-results');
+  const list         = document.getElementById('bus-results-list');
+  const countBadge   = document.getElementById('results-count');
+  const routeLabel   = document.getElementById('results-route-label');
+
+  // Update labels
+  const fromShort = from.split(' ')[0];
+  const toShort   = to.split(' ')[0];
+  routeLabel.textContent = `${fromShort} → ${toShort}`;
+
+  // Build cards
+  list.innerHTML = BUS_SCHEDULE_TEMPLATES.map(bus => {
+    const fleet      = MSRTC_FLEET[bus.busType] || { baseFarePerSeat: 150 };
+    const basePrice  = fleet.baseFarePerSeat;
+    const discount   = bus.discountPercent;
+    const finalPrice = Math.round(basePrice * (1 - discount / 100));
+    const saving     = basePrice - finalPrice;
+
+    // Demand config
+    const demandCfg = {
+      LOW:    { label: '🔥 Low Demand',    badge: 'bg-emerald-100 text-emerald-800 border-emerald-300', bar: 'bg-emerald-500', barWidth: '25%',  ring: 'border-emerald-400' },
+      MEDIUM: { label: '⚡ Medium Demand', badge: 'bg-blue-100 text-blue-800 border-blue-300',          bar: 'bg-blue-500',    barWidth: '55%',  ring: 'border-blue-300'   },
+      HIGH:   { label: '🔴 High Demand',   badge: 'bg-rose-100 text-rose-800 border-rose-300',          bar: 'bg-rose-500',    barWidth: '90%',  ring: 'border-rose-300'   }
+    };
+    const cfg = demandCfg[bus.demand];
+
+    // Seats bar colour based on availability
+    const seatsClass = bus.availableSeats <= 6 ? 'text-rose-600' :
+                       bus.availableSeats <= 15 ? 'text-amber-600' : 'text-emerald-600';
+
+    // Amenity chips
+    const amenityChips = bus.amenities.map(a =>
+      `<span class="text-[10px] font-semibold bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded">${a}</span>`
+    ).join('');
+
+    // Discount badge
+    const discountBadge = discount > 0
+      ? `<span class="absolute -top-2 -right-2 bg-emerald-500 text-white text-[10px] font-extrabold px-2 py-0.5 rounded-full shadow">
+           ${discount}% OFF
+         </span>`
+      : '';
+
+    return `
+      <div id="bus-card-${bus.id}"
+        class="relative bg-white border-2 ${cfg.ring} rounded-xl p-4 cursor-pointer hover:shadow-md transition-all duration-200 group"
+        onclick="selectBus('${bus.id}', '${bus.busType}', ${finalPrice}, ${discount}, '${bus.departure}', '${bus.arrival}', '${bus.duration}', '${bus.busNumber}')">
+
+        ${discountBadge}
+
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+
+          <!-- Left: Bus info -->
+          <div class="flex items-start gap-3 flex-1">
+            <div class="w-10 h-10 rounded-xl bg-msrtc-red/10 text-msrtc-red flex items-center justify-center text-lg flex-shrink-0">
+              <i class="fa-solid fa-bus-simple"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex flex-wrap items-center gap-1.5 mb-1">
+                <h5 class="text-sm font-extrabold text-slate-900">${bus.busType}</h5>
+                <span class="text-[10px] font-mono font-bold bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded">${bus.busNumber}</span>
+                <span class="text-[10px] font-bold border px-2 py-0.5 rounded-full ${cfg.badge}">${cfg.label}</span>
+              </div>
+              <div class="flex items-center gap-3 text-xs text-slate-600 mb-2">
+                <span class="font-bold text-slate-900">${bus.departure}</span>
+                <span class="text-slate-400">→</span>
+                <span class="font-bold text-slate-900">${bus.arrival}</span>
+                <span class="text-slate-400 font-medium">${bus.duration}</span>
+              </div>
+              <div class="flex flex-wrap gap-1 mb-1">${amenityChips}</div>
+              <!-- Demand bar -->
+              <div class="mt-2">
+                <div class="flex justify-between text-[10px] font-semibold text-slate-500 mb-0.5">
+                  <span>Demand Level</span>
+                  <span class="${seatsClass} font-bold">${bus.availableSeats} seats left</span>
+                </div>
+                <div class="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                  <div class="${cfg.bar} h-full rounded-full transition-all" style="width:${cfg.barWidth}"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Price -->
+          <div class="text-right flex-shrink-0 pl-2">
+            ${discount > 0 ? `
+              <p class="text-xs line-through text-slate-400 font-medium">₹${basePrice}/seat</p>
+              <p class="text-xl font-extrabold text-emerald-700">₹${finalPrice}<span class="text-xs font-semibold text-slate-500">/seat</span></p>
+              <p class="text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full inline-block mt-0.5">Save ₹${saving}/seat</p>
+            ` : `
+              <p class="text-[11px] text-slate-400 font-medium">Standard Fare</p>
+              <p class="text-xl font-extrabold text-slate-900">₹${basePrice}<span class="text-xs font-semibold text-slate-500">/seat</span></p>
+            `}
+            <button class="mt-2 bg-msrtc-red hover:bg-msrtc-darkred text-white text-[11px] font-bold px-4 py-1.5 rounded-lg transition w-full">
+              Select →
+            </button>
+          </div>
+
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  countBadge.textContent = `${BUS_SCHEDULE_TEMPLATES.length} buses`;
+  resultsPanel.classList.remove('hidden');
+
+  // Smooth scroll to results
+  resultsPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  showToast(`Found ${BUS_SCHEDULE_TEMPLATES.length} buses for ${fromShort} → ${toShort}`, 'success');
+}
+
+// --- Select a Bus from Results ---
+function selectBus(scheduleId, busType, discountedPricePerSeat, discountPct, departure, arrival, duration, busNumber) {
+  // Highlight selected card, deselect others
+  document.querySelectorAll('[id^="bus-card-"]').forEach(card => {
+    card.classList.remove('border-msrtc-red', 'bg-red-50', 'shadow-lg');
+    card.classList.add('border-slate-200');
+  });
+  const selected = document.getElementById(`bus-card-${scheduleId}`);
+  if (selected) {
+    selected.classList.remove('border-slate-200');
+    selected.classList.add('border-msrtc-red', 'bg-red-50', 'shadow-lg');
+  }
+
+  // Store active selection globally
+  activeBusSelection = { scheduleId, busType, discountedPricePerSeat, discountPct, departure, arrival, duration, busNumber };
+
+  // Sync service-class dropdown
+  const typeSelect = document.getElementById('book-type');
+  if (typeSelect) typeSelect.value = busType;
+
+  // Show selected bus banner
+  const banner = document.getElementById('selected-bus-banner');
+  const seats  = currentSelectedSeats.length;
+  const total  = discountedPricePerSeat * seats;
+  const gst    = Math.round(total * 0.05);
+
+  document.getElementById('selected-bus-name').textContent =
+    `✅ ${busType} • ${busNumber}`;
+  document.getElementById('selected-bus-detail').textContent =
+    `Departs ${departure} → Arrives ${arrival} (${duration})${discountPct > 0 ? ` • ${discountPct}% Low-Demand Discount Applied` : ''}`;
+  document.getElementById('selected-bus-fare').textContent =
+    `₹${total + gst} total (${seats} seat${seats > 1 ? 's' : ''} + GST)`;
+
+  banner.classList.remove('hidden');
+
+  // Update fare preview with discounted price
+  calculateFarePreview();
+
+  // Scroll down to seat selector
+  const seatSection = document.getElementById('bus-cabin-grid');
+  if (seatSection) seatSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+  showToast(
+    discountPct > 0
+      ? `🎉 ${discountPct}% discount applied! ₹${discountedPricePerSeat}/seat`
+      : `Bus selected: ${busType} at standard fare`,
+    'success'
+  );
+}
+
+// --- Override calculateFarePreview to use discount when bus is selected ---
+// (replaces the original function defined earlier in this file)
+function calculateFarePreview() {
+  const typeSelect = document.getElementById('book-type');
+  if (!typeSelect) return;
+
+  const type  = typeSelect.value;
+  const count = currentSelectedSeats.length;
+
+  let pricePerSeat;
+  if (activeBusSelection && activeBusSelection.busType === type) {
+    pricePerSeat = activeBusSelection.discountedPricePerSeat;
+  } else {
+    const fleetInfo = MSRTC_FLEET[type] || { baseFarePerSeat: 535 };
+    pricePerSeat = fleetInfo.baseFarePerSeat;
+  }
+
+  const total = pricePerSeat * count;
+  const gst   = Math.round(total * 0.05);
+
+  const fareDisplay = document.getElementById('fare-preview-amount');
+  if (fareDisplay) fareDisplay.innerText = `₹${total + gst}`;
+
+  // Also refresh the selected bus banner fare if visible
+  const banner = document.getElementById('selected-bus-banner');
+  if (activeBusSelection && banner && !banner.classList.contains('hidden')) {
+    document.getElementById('selected-bus-fare').textContent =
+      `₹${total + gst} total (${count} seat${count > 1 ? 's' : ''} + GST)`;
+  }
+}
+
+// --- Reset search state when navigating away ---
+const _originalNavigateTo = navigateTo;
+function navigateTo(pageId) {
+  if (pageId !== 'book') {
+    activeBusSelection = null;
+  }
+  _originalNavigateTo(pageId);
+}

@@ -347,6 +347,71 @@
               </div>
             </div>
 
+            <!-- ===== SEARCH BUSES BUTTON ===== -->
+            <div class="mb-5">
+              <button type="button" onclick="searchAvailableBuses()"
+                class="w-full bg-gradient-to-r from-slate-900 to-slate-800 hover:from-black hover:to-slate-900 text-white font-bold px-6 py-3.5 rounded-xl transition flex items-center justify-center gap-2 shadow-md">
+                <i class="fa-solid fa-magnifying-glass text-amber-400"></i>
+                Search Available Buses
+                <span id="search-spinner" class="hidden ml-1">
+                  <i class="fa-solid fa-spinner fa-spin text-amber-400"></i>
+                </span>
+              </button>
+            </div>
+
+            <!-- ===== BUS SEARCH RESULTS PANEL ===== -->
+            <div id="bus-search-results" class="hidden mb-6 animate-fade-in">
+              <!-- Header -->
+              <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center gap-2">
+                  <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider">
+                    <i class="fa-solid fa-bus-simple text-msrtc-red mr-1"></i>
+                    Available Buses
+                  </h4>
+                  <span id="results-route-label" class="text-[10px] font-bold bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full"></span>
+                  <span id="results-count" class="text-[10px] font-bold bg-msrtc-red text-white px-2 py-0.5 rounded-full"></span>
+                </div>
+                <span class="text-[11px] text-emerald-600 font-bold flex items-center gap-1">
+                  <i class="fa-solid fa-tag"></i> Low Demand = Extra Savings!
+                </span>
+              </div>
+
+              <!-- Discount Legend -->
+              <div class="flex flex-wrap gap-2 mb-3 text-[10px] font-bold">
+                <span class="flex items-center gap-1 bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-1 rounded-lg">
+                  <i class="fa-solid fa-fire"></i> Low Demand: 20–30% OFF
+                </span>
+                <span class="flex items-center gap-1 bg-blue-50 text-blue-700 border border-blue-200 px-2 py-1 rounded-lg">
+                  <i class="fa-solid fa-bolt"></i> Medium Demand: 5–15% OFF
+                </span>
+                <span class="flex items-center gap-1 bg-rose-50 text-rose-700 border border-rose-200 px-2 py-1 rounded-lg">
+                  <i class="fa-solid fa-chart-line"></i> High Demand: Standard Fare
+                </span>
+              </div>
+
+              <!-- Results List -->
+              <div id="bus-results-list" class="space-y-2 max-h-80 overflow-y-auto custom-scroll pr-1">
+                <!-- Injected by app.js -->
+              </div>
+            </div>
+
+            <!-- Selected Bus Summary (shown after choosing a bus) -->
+            <div id="selected-bus-banner" class="hidden mb-5 bg-emerald-50 border border-emerald-200 p-3.5 rounded-xl flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+              <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-lg bg-emerald-500 text-white flex items-center justify-center">
+                  <i class="fa-solid fa-circle-check text-sm"></i>
+                </div>
+                <div>
+                  <p class="text-xs font-extrabold text-emerald-900" id="selected-bus-name"></p>
+                  <p class="text-[11px] text-emerald-700 font-medium" id="selected-bus-detail"></p>
+                </div>
+              </div>
+              <div class="text-right">
+                <p class="text-[10px] text-emerald-600 font-semibold uppercase">Discounted Fare</p>
+                <p class="text-base font-extrabold text-emerald-800" id="selected-bus-fare"></p>
+              </div>
+            </div>
+
             <!-- Interactive Visual Bus Cabin (Multiple Seat Selection) -->
             <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200 mb-6">
               <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-2 mb-4">
