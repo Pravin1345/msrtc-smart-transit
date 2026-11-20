@@ -1,10 +1,40 @@
 /**
  * =========================================================
- * MSRTC MOBILITY SMART TRANSIT - APPLICATION CONTROLLER
+ * MSRTC SMART TRANSIT - UNIFIED APPLICATION CONTROLLER
+ * Title: ML-Based Revenue Optimization System for MSRTC ("HAPPY HOURS")
+ * 
+ * Supports:
+ *   Module 1: ML Demand Forecasting (XGBoost, RF, DT, LR)
+ *   Module 2 & 3: Happy Hours Dynamic Pricing & Seat Optimization
+ *   Module 4: In-Bus Advertising (1,000 Record Dataset Analytics & ML Predictor)
+ *   Module 5: Group & Multi-Day Bulk Discounts Calculator
+ *   Module 6: Katraj Ghat Rest-Stop & Onboard Refreshment Tie-Ups
+ *   Module 7: Passenger Priority, Women Safety & Emergency SOS
  * =========================================================
  */
 
-// 1. STATE & STORAGE HELPERS
+// 1. STATE & STORAGE
+const DEFAULT_USER = {
+  userId: "usr_pravin_99",
+  name: "Pravin Patil",
+  email: "pravin.msrtc@transit.gov.in",
+  phone: "+91 98230 12345",
+  gender: "Male",
+  age: 28,
+  smartId: "MH-MSRTC-78942-A",
+  isVerified: true
+};
+
+let currentUser = getStoredUser();
+let currentFilter = 'ALL';
+let currentSearchResults = [];
+let activeBus = null;
+let selectedSeats = [];
+let passengerDetails = [];
+let selectedVendorItems = [];
+let vendorCatalog = [];
+let activeLiveScans = 2570524;
+
 function getStoredUser() {
   const u = localStorage.getItem('msrtc_active_user');
   if (u) {
@@ -14,11 +44,7 @@ function getStoredUser() {
 }
 
 function saveStoredUser(user) {
-  if (!user) {
-    localStorage.removeItem('msrtc_active_user');
-  } else {
-    localStorage.setItem('msrtc_active_user', JSON.stringify(user));
-  }
+  localStorage.setItem('msrtc_active_user', JSON.stringify(user));
 }
 
 function getStoredBookings() {
@@ -26,20 +52,39 @@ function getStoredBookings() {
   if (b) {
     try { return JSON.parse(b); } catch(e) {}
   }
-  localStorage.setItem('msrtc_user_bookings', JSON.stringify(INITIAL_BOOKINGS));
-  return INITIAL_BOOKINGS;
+  return [];
 }
 
 function saveStoredBookings(bookings) {
   localStorage.setItem('msrtc_user_bookings', JSON.stringify(bookings));
 }
 
-let currentUser = getStoredUser();
-let currentFilter = 'ALL';
-let includeSelfInBooking = true;
-let currentSelectedSeats = ["14A"]; // Default selected seat
+// 2. INITIALIZATION
+document.addEventListener('DOMContentLoaded', () => {
+  renderAuthCorner();
+  populateLocationsList();
+  setDefaultBookingDate();
+  loadVendorCatalog();
+  navigateTo('home');
+});
 
-// 2. NAVIGATION CONTROLLER
+function renderAuthCorner() {
+  const box = document.getElementById('auth-section');
+  if (!box) return;
+  box.innerHTML = `
+    <div class="flex items-center gap-2 cursor-pointer" onclick="navigateTo('profile')">
+      <div class="w-9 h-9 rounded-full bg-slate-900 text-amber-300 font-bold flex items-center justify-center text-xs shadow-sm border border-slate-700">
+        <i class="fa-solid fa-user"></i>
+      </div>
+      <div class="hidden sm:block text-left text-xs">
+        <p class="font-extrabold text-slate-900 leading-tight">${esc(currentUser.name)}</p>
+        <p class="text-[10px] text-slate-500 font-mono">${esc(currentUser.smartId)}</p>
+      </div>
+    </div>
+  `;
+}
+
+// 3. NAVIGATION CONTROLLER
 function navigateTo(pageId) {
   document.querySelectorAll('.page-view').forEach(p => {
     p.classList.add('hidden');
@@ -65,1236 +110,1696 @@ function navigateTo(pageId) {
   if (pageId === 'history') {
     renderBookingsList();
   } else if (pageId === 'profile') {
-    loadUserProfileData();
+    loadProfileForm();
   } else if (pageId === 'smartid') {
     renderSmartIDPass();
+  } else if (pageId === 'ads') {
+    loadAdsPage();
+  } else if (pageId === 'vendors') {
+    loadVendorsPage();
+  } else if (pageId === 'revenue') {
+    loadUnifiedDashboard();
+  } else if (pageId === 'bidding') {
+    loadBiddingStalls();
+  } else if (pageId === 'cargo') {
+    calculateLiveCargoTariff();
   } else if (pageId === 'book') {
     setDefaultBookingDate();
-    populateLocationDatalists();
-    goToStep(1);
   }
 
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
+// 4. LOCATIONS AUTOCOMPLETE
+async function populateLocationsList() {
+  const list = document.getElementById('transit-locations-list');
+  if (!list) return;
+  
+  let locations = [];
+  try {
+    locations = await MSRTCApi.getLocations();
+  } catch (e) {
+    locations = [
+      "Kolhapur CBS (Central Bus Stand)", "Pune (Swargate)", "Mumbai (Dadar)",
+      "Sangli Central Stand", "Satara Central", "Nashik (CBS)", "Ichalkaranji Central Stand"
+    ];
+  }
 
-// 3. POPULATE LOCATION DATALISTS & MANUAL LOCATION LOGIC
-function populateLocationDatalists() {
-  const datalist = document.getElementById('transit-locations-list');
-  if (!datalist) return;
-
-  let html = `<optgroup label="Kolhapur District Locations (सर्व कोल्हापूर जिल्हा)">`;
-  KOLHAPUR_DISTRICT_LOCATIONS.forEach(loc => {
-    html += `<option value="${loc}">${loc}</option>`;
-  });
-  html += `</optgroup><optgroup label="Other Major Maharashtra Cities">`;
-  OTHER_MAHARASHTRA_LOCATIONS.forEach(loc => {
-    html += `<option value="${loc}">${loc}</option>`;
-  });
-  html += `</optgroup>`;
-
-  datalist.innerHTML = html;
+  list.innerHTML = locations.map(loc => `<option value="${esc(loc)}">${esc(loc)}</option>`).join('');
 }
 
-// 4. INTERACTIVE MULTIPLE SEAT SELECTION
-function renderInteractiveSeatCabin() {
-  const cabinContainer = document.getElementById('bus-cabin-grid');
-  if (!cabinContainer) return;
+function setDefaultBookingDate() {
+  const dateInput = document.getElementById('travel-date');
+  if (dateInput && !dateInput.value) {
+    const today = new Date().toISOString().split('T')[0];
+    dateInput.value = today;
+    dateInput.min = today;
+  }
+}
 
-  cabinContainer.innerHTML = '';
-  const rows = 7; // 7 rows = 28 seats (2+2 layout)
+// 5. SEARCH & BUS LIST WITH HAPPY HOURS BADGES
+async function handleSearchSubmit(e) {
+  e.preventDefault();
+  const from = document.getElementById('from-location').value.trim();
+  const to = document.getElementById('to-location').value.trim();
+  const dateVal = document.getElementById('travel-date').value;
 
-  for (let r = 1; r <= rows; r++) {
+  const box = document.getElementById('search-results-box');
+  box.innerHTML = `<div class="bg-white p-8 rounded-2xl border border-slate-200 text-center text-slate-500 text-sm">
+    <i class="fa-solid fa-spinner fa-spin text-2xl text-msrtc-red mb-2"></i>
+    <p>Running ML Demand Forecasting and checking Happy Hours pricing...</p>
+  </div>`;
+
+  try {
+    const res = await MSRTCApi.searchBuses(from, to, dateVal);
+    currentSearchResults = (res.buses || []).map(b => ({
+      ...b,
+      from: b.from || res.from || from,
+      to: b.to || res.to || to,
+      date: b.date || res.date || dateVal
+    }));
+    renderSearchResults(currentSearchResults, from, to, dateVal);
+  } catch (err) {
+    box.innerHTML = `<div class="bg-rose-50 border border-rose-200 text-rose-800 p-4 rounded-xl text-sm">
+      <i class="fa-solid fa-circle-exclamation mr-1"></i> ${esc(err.message)}
+    </div>`;
+  }
+}
+
+function renderSearchResults(buses, from, to, dateVal) {
+  const box = document.getElementById('search-results-box');
+  if (!buses.length) {
+    box.innerHTML = `<div class="bg-white p-8 rounded-2xl border border-slate-200 text-center text-slate-600 text-sm">
+      No buses found for this route and date. Try another date or popular corridors like Kolhapur CBS → Pune (Swargate).
+    </div>`;
+    return;
+  }
+
+  box.innerHTML = `
+    <div class="flex items-center justify-between mb-2 text-xs text-slate-500 font-semibold px-1">
+      <span>Available Schedules (${buses.length} trips on ${esc(dateVal)})</span>
+      <span class="text-amber-800 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+        <i class="fa-solid fa-bolt text-amber-500 mr-1"></i> Happy Hours Engine Active
+      </span>
+    </div>
+    <div class="space-y-4">
+      ${buses.map((bus, idx) => {
+        const isHH = bus.isHappyHours;
+        const occPct = Math.round((bus.occupancy || 0) * 100);
+        const demandBadge = {
+          "HIGH": "bg-rose-100 text-rose-800 border-rose-300",
+          "MEDIUM": "bg-blue-100 text-blue-800 border-blue-300",
+          "LOW": "bg-emerald-100 text-emerald-800 border-emerald-300"
+        }[bus.demand || "MEDIUM"];
+
+        return `
+          <div class="bg-white rounded-2xl border ${isHH ? 'border-amber-300 shadow-md ring-1 ring-amber-200' : 'border-slate-200 shadow-sm'} p-5 transition hover:shadow-lg">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+              <!-- Left: Bus Details -->
+              <div class="space-y-1.5">
+                <div class="flex flex-wrap items-center gap-2">
+                  <span class="font-extrabold text-base text-slate-900">${esc(bus.busType)}</span>
+                  <span class="text-xs font-mono font-bold bg-slate-100 text-slate-700 px-2 py-0.5 rounded">${esc(bus.busNumber)}</span>
+                  <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border ${demandBadge}">
+                    ML Demand: ${esc(bus.demand)}
+                  </span>
+                  ${isHH ? `
+                    <span class="text-[10px] font-extrabold uppercase tracking-wider bg-gradient-to-r from-amber-500 to-amber-600 text-white px-2.5 py-0.5 rounded-full shadow-sm animate-pulse-gold">
+                      ⚡ Happy Hours: ${bus.happyHoursDiscountPct}% OFF
+                    </span>
+                  ` : ''}
+                </div>
+
+                <div class="flex items-center gap-4 text-xs text-slate-500 pt-1">
+                  <div>
+                    <span class="font-black text-slate-900 text-lg">${esc(bus.departure)}</span>
+                    <span class="block text-[11px] text-slate-400 font-medium">${esc(from.split(' (')[0])}</span>
+                  </div>
+                  <div class="text-center font-mono text-[10px] text-slate-400">
+                    <span class="block text-slate-600 font-bold">${esc(bus.duration)}</span>
+                    <span class="block">──── <i class="fa-solid fa-bus text-msrtc-red"></i> ────</span>
+                    <span class="block">${bus.distanceKm} km</span>
+                  </div>
+                  <div>
+                    <span class="font-black text-slate-900 text-lg">${esc(bus.arrival)}</span>
+                    <span class="block text-[11px] text-slate-400 font-medium">${esc(to.split(' (')[0])}</span>
+                  </div>
+                </div>
+
+                <div class="flex flex-wrap gap-1.5 pt-1">
+                  ${(bus.amenities || []).map(a => `<span class="bg-slate-50 text-slate-600 border border-slate-200 text-[10px] px-2 py-0.5 rounded-md font-medium">${esc(a)}</span>`).join('')}
+                </div>
+              </div>
+
+              <!-- Right: Pricing & CTA -->
+              <div class="flex lg:flex-col items-center lg:items-end justify-between border-t lg:border-t-0 pt-3 lg:pt-0 border-slate-100">
+                <div class="text-left lg:text-right">
+                  <div class="flex items-baseline gap-1.5">
+                    ${isHH ? `
+                      <span class="text-xs text-slate-400 line-through">₹${bus.originalFare}</span>
+                      <span class="text-2xl font-black text-amber-700">₹${bus.fare}</span>
+                    ` : `
+                      <span class="text-2xl font-black text-slate-900">₹${bus.fare}</span>
+                    `}
+                    <span class="text-[10px] text-slate-500 font-medium">/ seat</span>
+                  </div>
+                  <div class="text-[11px] text-emerald-700 font-semibold flex items-center gap-1 justify-end">
+                    <i class="fa-solid fa-chair"></i> ${bus.availableSeats} of 28 seats vacant (${occPct}% full)
+                  </div>
+                </div>
+
+                <button onclick="openSeatModal(${idx})" class="mt-2 ${isHH ? 'bg-amber-400 hover:bg-amber-500 text-slate-950 font-extrabold' : 'bg-msrtc-red hover:bg-msrtc-darkred text-white font-bold'} text-xs px-5 py-2.5 rounded-xl shadow-md transition flex items-center gap-1.5">
+                  <i class="fa-solid fa-chair"></i> Select Seats & Book
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+  `;
+}
+
+// 6. SEAT MODAL, PASSENGER DETAILS & VENDOR ADD-ONS
+async function openSeatModal(busIndex) {
+  activeBus = currentSearchResults[busIndex];
+  if (!activeBus) return;
+
+  const depStand = activeBus.from || document.getElementById('from-location')?.value.trim() || activeBus.origin;
+  const arrStand = activeBus.to || document.getElementById('to-location')?.value.trim() || activeBus.destination;
+  const trvDate = activeBus.date || document.getElementById('travel-date')?.value || new Date().toISOString().split('T')[0];
+  activeBus.from = depStand;
+  activeBus.to = arrStand;
+  activeBus.date = trvDate;
+
+  selectedSeats = [];
+  passengerDetails = [];
+  selectedVendorItems = [];
+
+  document.getElementById('modal-bus-title').innerText = `${activeBus.busType} (${activeBus.busNumber})`;
+  document.getElementById('modal-bus-sub').innerText = `${depStand} → ${arrStand} • ${activeBus.departure} Departure`;
+
+  // Fetch taken seats from server
+  let takenSeats = [];
+  try {
+    const sRes = await MSRTCApi.getSeats(activeBus.id, depStand, arrStand, trvDate);
+    takenSeats = sRes.taken || [];
+  } catch (e) {
+    takenSeats = ["1A", "2C", "4D"];
+  }
+
+  renderSeatCabinGrid(takenSeats);
+  renderPassengerInputs();
+  renderVendorAddons();
+  updateSummaryTotals();
+
+  document.getElementById('seat-selection-modal').classList.remove('hidden');
+}
+
+function closeSeatModal() {
+  document.getElementById('seat-selection-modal').classList.add('hidden');
+}
+
+function renderSeatCabinGrid(takenList) {
+  const grid = document.getElementById('bus-cabin-grid');
+  grid.innerHTML = '';
+  const takenSet = new Set(takenList);
+
+  // Priority seat sets
+  const seniorPriority = new Set(["1A", "1B", "2A", "2B"]);
+  const pregnantPriority = new Set(["1C", "1D", "2C", "2D"]);
+  const ladiesSafe = new Set(["3A", "3B", "4A", "4B"]);
+
+  for (let r = 1; r <= 7; r++) {
     const rowDiv = document.createElement('div');
-    rowDiv.className = "flex items-center justify-between gap-3 py-1";
+    rowDiv.className = "flex items-center justify-between gap-2 py-0.5";
 
-    // Left Pair (A & B)
     const leftPair = document.createElement('div');
-    leftPair.className = "flex gap-2";
-    leftPair.appendChild(createSeatButton(`${r}A`, r <= 2));
-    leftPair.appendChild(createSeatButton(`${r}B`, r <= 2));
+    leftPair.className = "flex gap-1.5";
+    leftPair.appendChild(createSeatBtn(`${r}A`, takenSet, seniorPriority, pregnantPriority, ladiesSafe));
+    leftPair.appendChild(createSeatBtn(`${r}B`, takenSet, seniorPriority, pregnantPriority, ladiesSafe));
 
-    // Aisle Indicator
     const aisle = document.createElement('div');
-    aisle.className = "text-[10px] font-bold text-slate-400 font-mono tracking-widest px-1";
+    aisle.className = "text-[9px] font-mono text-slate-400 font-bold px-1";
     aisle.innerText = `R${r}`;
 
-    // Right Pair (C & D)
     const rightPair = document.createElement('div');
-    rightPair.className = "flex gap-2";
-    rightPair.appendChild(createSeatButton(`${r}C`, false));
-    rightPair.appendChild(createSeatButton(`${r}D`, false));
+    rightPair.className = "flex gap-1.5";
+    rightPair.appendChild(createSeatBtn(`${r}C`, takenSet, seniorPriority, pregnantPriority, ladiesSafe));
+    rightPair.appendChild(createSeatBtn(`${r}D`, takenSet, seniorPriority, pregnantPriority, ladiesSafe));
 
     rowDiv.appendChild(leftPair);
     rowDiv.appendChild(aisle);
     rowDiv.appendChild(rightPair);
-    cabinContainer.appendChild(rowDiv);
+    grid.appendChild(rowDiv);
   }
-
-  updateSeatSelectionDisplay();
 }
 
-function createSeatButton(seatId, isLadiesReserved) {
+function createSeatBtn(seatNo, takenSet, seniorSet, pregnantSet, ladiesSet) {
   const btn = document.createElement('button');
-  btn.type = 'button';
-  btn.setAttribute('data-seat-id', seatId);
+  const isTaken = takenSet.has(seatNo);
 
-  const isBooked = ['02A', '04B', '06C'].includes(seatId);
-  const isSelected = currentSelectedSeats.includes(seatId);
+  let extraClasses = "bg-white border-slate-300 text-slate-800 hover:border-msrtc-red";
+  let title = `Seat ${seatNo} (Available)`;
 
-  if (isBooked) {
-    btn.className = "seat-btn w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-slate-200 text-slate-400 text-xs font-bold border border-slate-300 cursor-not-allowed flex items-center justify-center";
-    btn.disabled = true;
-    btn.title = `Seat ${seatId} - Booked`;
-    btn.innerText = seatId;
-  } else if (isSelected) {
-    btn.className = "seat-btn selected w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-msrtc-red text-white text-xs font-bold border border-msrtc-darkred shadow-md flex items-center justify-center";
-    btn.title = `Seat ${seatId} - Selected by you`;
-    btn.innerText = seatId;
-    btn.onclick = () => toggleSeatSelection(seatId);
-  } else if (isLadiesReserved) {
-    btn.className = "seat-btn w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-pink-50 hover:bg-pink-100 text-pink-700 text-xs font-bold border border-pink-200 flex flex-col items-center justify-center";
-    btn.title = `Seat ${seatId} - Ladies Reserved (50% Concession)`;
-    btn.innerHTML = `<span class="text-[10px] leading-none">${seatId}</span><i class="fa-solid fa-venus text-[8px] text-pink-500 mt-0.5"></i>`;
-    btn.onclick = () => toggleSeatSelection(seatId);
-  } else {
-    btn.className = "seat-btn w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white hover:bg-slate-100 text-slate-700 text-xs font-bold border border-slate-300 shadow-sm flex items-center justify-center";
-    btn.title = `Seat ${seatId} - Available`;
-    btn.innerText = seatId;
-    btn.onclick = () => toggleSeatSelection(seatId);
+  if (isTaken) {
+    extraClasses = "bg-slate-300 border-slate-300 text-slate-500 cursor-not-allowed";
+    title = `Seat ${seatNo} (Taken)`;
+  } else if (seniorSet.has(seatNo)) {
+    extraClasses += " seat-priority-senior bg-blue-50/60 text-blue-900";
+    title = `Seat ${seatNo} (Senior Citizen Priority)`;
+  } else if (pregnantSet.has(seatNo)) {
+    extraClasses += " seat-priority-pregnant bg-pink-50/60 text-pink-900";
+    title = `Seat ${seatNo} (Pregnant Woman Ergonomic Priority)`;
+  } else if (ladiesSet.has(seatNo)) {
+    extraClasses += " seat-priority-ladies bg-purple-50/60 text-purple-900";
+    title = `Seat ${seatNo} (Ladies Safe Matching Zone)`;
   }
 
+  btn.type = "button";
+  btn.className = `seat-btn w-9 h-8 text-[11px] font-bold rounded-lg border flex items-center justify-center ${extraClasses}`;
+  btn.innerText = seatNo;
+  btn.title = title;
+  btn.disabled = isTaken;
+
+  btn.onclick = () => toggleSeatSelect(seatNo, btn);
   return btn;
 }
 
-function toggleSeatSelection(seatId) {
-  if (currentSelectedSeats.includes(seatId)) {
-    if (currentSelectedSeats.length === 1) {
-      showToast("At least 1 seat must be selected!", "info");
+function toggleSeatSelect(seatNo, btnElement) {
+  const idx = selectedSeats.indexOf(seatNo);
+  if (idx > -1) {
+    selectedSeats.splice(idx, 1);
+    btnElement.classList.remove('selected');
+  } else {
+    if (selectedSeats.length >= 6) {
+      alert("You can select up to 6 seats per transaction.");
       return;
     }
-    currentSelectedSeats = currentSelectedSeats.filter(s => s !== seatId);
-  } else {
-    if (currentSelectedSeats.length >= 6) {
-      showToast("Maximum 6 seats can be selected at a time.", "error");
-      return;
-    }
-    currentSelectedSeats.push(seatId);
+    selectedSeats.push(seatNo);
+    btnElement.classList.add('selected');
   }
 
-  wizardState.selectedSeats = [...currentSelectedSeats];
-  renderInteractiveSeatCabin();
-  if (wizardState.step === 4) {
-    renderWizardPassengerInputs();
-  }
+  document.getElementById('selected-seats-badge').innerText = selectedSeats.length ? selectedSeats.join(', ') : 'None';
+  renderPassengerInputs();
+  updateSummaryTotals();
 }
 
-function updateSeatSelectionDisplay() {
-  const badge = document.getElementById('seat-badge-display');
-  if (badge) {
-    badge.innerText = `Selected (${currentSelectedSeats.length}): ${currentSelectedSeats.join(', ')}`;
+function renderPassengerInputs() {
+  const container = document.getElementById('passenger-inputs-container');
+  container.innerHTML = '';
+
+  if (!selectedSeats.length) {
+    container.innerHTML = `<p class="text-xs text-slate-400 italic">Select one or more seats on the bus map to enter passenger details.</p>`;
+    return;
   }
-}
 
-// 5. AUTHENTICATION & HEADER
-function renderAuthSection() {
-  const container = document.getElementById('auth-section');
-  if (!container) return;
+  selectedSeats.forEach((seat, i) => {
+    // Default passenger info for the first seat is the logged-in user
+    let defName = (i === 0 && currentUser.name) ? currentUser.name : '';
+    let defAge = (i === 0 && currentUser.age) ? currentUser.age : 28;
+    let defGen = (i === 0 && currentUser.gender) ? currentUser.gender : 'Male';
+    let defCat = (defAge >= 60) ? "Senior Citizen (60+)" : (defGen === "Female" ? "Solo Female Traveler" : "General");
 
-  if (!currentUser) {
-    container.innerHTML = `
-      <button onclick="openAuthModal('login')" class="bg-msrtc-red hover:bg-msrtc-darkred text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-sm transition flex items-center gap-1.5">
-        <i class="fa-solid fa-right-to-bracket"></i> Login / Sign Up
-      </button>
-    `;
-  } else {
-    const initials = currentUser.fullName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
-    container.innerHTML = `
-      <div class="flex items-center gap-3">
-        <button onclick="navigateTo('smartid')" title="View Smart ID Pass" class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 rounded-xl text-xs font-bold transition">
-          <i class="fa-solid fa-id-card text-amber-600"></i> Smart Pass
-        </button>
-        <button onclick="navigateTo('profile')" class="flex items-center gap-2.5 p-1.5 pr-3 rounded-full bg-slate-100 hover:bg-red-50 border border-slate-200 transition">
-          <div class="w-8 h-8 rounded-full bg-msrtc-red text-white flex items-center justify-center font-bold text-xs">
-            ${initials}
+    container.innerHTML += `
+      <div class="bg-white p-3 rounded-xl border border-slate-200 text-xs space-y-2">
+        <div class="flex items-center justify-between font-bold text-slate-800">
+          <span class="flex items-center gap-1.5"><i class="fa-solid fa-user text-slate-400"></i> Passenger for Seat <span class="text-msrtc-red font-mono">${seat}</span></span>
+          <span class="text-[10px] text-slate-500 font-semibold" id="concession-badge-${i}">Checking concession...</span>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-12 gap-2">
+          <div class="sm:col-span-4">
+            <input type="text" id="pax-name-${i}" value="${esc(defName)}" placeholder="Full Name" class="w-full p-2 border border-slate-300 rounded-lg" required />
           </div>
-          <div class="text-left hidden sm:block">
-            <p class="text-xs font-bold text-slate-800 leading-tight">${currentUser.fullName}</p>
-            <p class="text-[10px] text-slate-500 font-medium">${currentUser.gender} • ${currentUser.phoneNumber}</p>
+          <div class="sm:col-span-2">
+            <input type="number" id="pax-age-${i}" value="${defAge}" min="1" max="110" placeholder="Age" oninput="handlePaxChange(${i})" class="w-full p-2 border border-slate-300 rounded-lg" required />
           </div>
-        </button>
-        <button onclick="handleLogout()" title="Sign Out" class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-red-100 text-slate-600 hover:text-msrtc-red flex items-center justify-center text-sm transition">
-          <i class="fa-solid fa-arrow-right-from-bracket"></i>
-        </button>
+          <div class="sm:col-span-3">
+            <select id="pax-gender-${i}" onchange="handlePaxChange(${i})" class="w-full p-2 border border-slate-300 rounded-lg">
+              <option value="Male" ${defGen === 'Male' ? 'selected' : ''}>Male</option>
+              <option value="Female" ${defGen === 'Female' ? 'selected' : ''}>Female (50% Concession)</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="sm:col-span-3">
+            <select id="pax-category-${i}" onchange="handlePaxChange(${i})" class="w-full p-2 border border-slate-300 rounded-lg text-[11px] font-semibold">
+              <option value="General">General</option>
+              <option value="Senior Citizen (60+)" ${defCat === 'Senior Citizen (60+)' ? 'selected' : ''}>Senior Citizen (60+)</option>
+              <option value="Pregnant Woman">Pregnant Woman</option>
+              <option value="Solo Female Traveler" ${defCat === 'Solo Female Traveler' ? 'selected' : ''}>Solo Female Traveler</option>
+            </select>
+          </div>
+        </div>
       </div>
     `;
-  }
-}
-
-function openAuthModal(tab = 'login') {
-  document.getElementById('auth-modal').classList.remove('hidden');
-  switchAuthTab(tab);
-}
-
-function closeAuthModal() {
-  document.getElementById('auth-modal').classList.add('hidden');
-}
-
-function switchAuthTab(tab) {
-  const loginForm = document.getElementById('form-login');
-  const registerForm = document.getElementById('form-register');
-  const loginBtn = document.getElementById('tab-login-btn');
-  const registerBtn = document.getElementById('tab-register-btn');
-
-  if (tab === 'login') {
-    loginForm.classList.remove('hidden');
-    registerForm.classList.add('hidden');
-    loginBtn.className = "flex-1 py-3 text-center text-xs font-bold text-msrtc-red border-b-2 border-msrtc-red";
-    registerBtn.className = "flex-1 py-3 text-center text-xs font-bold text-slate-500 hover:text-slate-800";
-  } else {
-    loginForm.classList.add('hidden');
-    registerForm.classList.remove('hidden');
-    registerBtn.className = "flex-1 py-3 text-center text-xs font-bold text-msrtc-red border-b-2 border-msrtc-red";
-    loginBtn.className = "flex-1 py-3 text-center text-xs font-bold text-slate-500 hover:text-slate-800";
-  }
-}
-
-function fillDemoCredentials() {
-  document.getElementById('login-email').value = "pravindongare35@example.com";
-  document.getElementById('login-password').value = "msrtc123";
-  showToast("Demo credentials filled!", "info");
-}
-
-function handleLoginSubmit(e) {
-  e.preventDefault();
-  const email = document.getElementById('login-email').value.trim();
-  
-  currentUser = {
-    userId: "usr_msrtc_" + Math.floor(10000 + Math.random() * 90000),
-    smartId: "MH-USR-" + Math.floor(10000 + Math.random() * 90000),
-    fullName: email.includes("pravin") ? "Pravin Dongare" : email.split('@')[0].toUpperCase(),
-    email: email,
-    phoneNumber: "+91 98765 43210",
-    gender: "Male",
-    age: 29,
-    createdAt: new Date().toISOString()
-  };
-
-  saveStoredUser(currentUser);
-  renderAuthSection();
-  closeAuthModal();
-  showToast(`Welcome back, ${currentUser.fullName}!`, "success");
-  navigateTo('history');
-}
-
-function handleRegisterSubmit(e) {
-  e.preventDefault();
-  const fullName = document.getElementById('reg-name').value.trim();
-  const email = document.getElementById('reg-email').value.trim();
-  const phone = document.getElementById('reg-phone').value.trim();
-  const gender = document.getElementById('reg-gender').value;
-
-  currentUser = {
-    userId: "usr_msrtc_" + Math.floor(10000 + Math.random() * 90000),
-    smartId: "MH-USR-" + Math.floor(10000 + Math.random() * 90000),
-    fullName: fullName,
-    email: email,
-    phoneNumber: phone.startsWith('+91') ? phone : '+91 ' + phone,
-    gender: gender,
-    age: 28,
-    createdAt: new Date().toISOString()
-  };
-
-  saveStoredUser(currentUser);
-  renderAuthSection();
-  closeAuthModal();
-  showToast("Account created successfully!", "success");
-  navigateTo('profile');
-}
-
-function handleLogout() {
-  currentUser = null;
-  saveStoredUser(null);
-  renderAuthSection();
-  showToast("You have been signed out.", "info");
-  navigateTo('home');
-}
-
-// 6. USER PROFILE & DIGITAL SMART ID
-function loadUserProfileData() {
-  if (!currentUser) {
-    openAuthModal('login');
-    return;
-  }
-
-  const initials = currentUser.fullName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
-  document.getElementById('profile-avatar-circle').innerText = initials;
-  document.getElementById('profile-display-name').innerText = currentUser.fullName;
-  document.getElementById('profile-display-email').innerText = currentUser.email;
-  document.getElementById('profile-smart-id').innerText = currentUser.smartId || "MH-USR-94821";
-
-  const bookings = getStoredBookings();
-  document.getElementById('profile-total-trips').innerText = `${bookings.length} Trips`;
-
-  document.getElementById('prof-name').value = currentUser.fullName;
-  document.getElementById('prof-email').value = currentUser.email;
-  document.getElementById('prof-phone').value = currentUser.phoneNumber;
-  document.getElementById('prof-gender').value = currentUser.gender || "Male";
-}
-
-function handleProfileUpdate(e) {
-  e.preventDefault();
-  if (!currentUser) return;
-
-  currentUser.fullName = document.getElementById('prof-name').value.trim();
-  currentUser.email = document.getElementById('prof-email').value.trim();
-  currentUser.phoneNumber = document.getElementById('prof-phone').value.trim();
-  currentUser.gender = document.getElementById('prof-gender').value;
-
-  saveStoredUser(currentUser);
-  renderAuthSection();
-  loadUserProfileData();
-  showToast("Profile details updated successfully!", "success");
-}
-
-function renderSmartIDPass() {
-  if (!currentUser) {
-    openAuthModal('login');
-    return;
-  }
-  const initials = currentUser.fullName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
-  document.getElementById('smartid-avatar').innerText = initials;
-  document.getElementById('smartid-name').innerText = currentUser.fullName;
-  document.getElementById('smartid-phone').innerText = currentUser.phoneNumber;
-  document.getElementById('smartid-gender').innerText = `Gender: ${currentUser.gender} • Age: ${currentUser.age || 29}`;
-  document.getElementById('smartid-code').innerText = currentUser.smartId || "MH-USR-94821";
-}
-
-// 7. HISTORICAL BOOKINGS RENDER & FILTER
-function filterBookings(status) {
-  currentFilter = status;
-  document.querySelectorAll('.history-filter-btn').forEach(btn => {
-    if (btn.getAttribute('data-filter') === status) {
-      btn.className = "history-filter-btn active-tab bg-white text-slate-900 px-4 py-2 rounded-lg shadow-sm transition";
-    } else {
-      btn.className = "history-filter-btn text-slate-600 hover:text-slate-900 px-4 py-2 rounded-lg transition";
-    }
   });
-  renderBookingsList();
+
+  selectedSeats.forEach((_, i) => handlePaxChange(i));
 }
 
-function renderBookingsList() {
-  const container = document.getElementById('bookings-container');
-  const allBookings = getStoredBookings();
-  
-  const filtered = currentFilter === 'ALL' 
-    ? allBookings 
-    : allBookings.filter(b => b.tripStatus === currentFilter);
+function handlePaxChange(i) {
+  const age = parseInt(document.getElementById(`pax-age-${i}`)?.value || 25);
+  const gen = document.getElementById(`pax-gender-${i}`)?.value || 'Male';
+  const cat = document.getElementById(`pax-category-${i}`)?.value || 'General';
+  const badge = document.getElementById(`concession-badge-${i}`);
 
-  document.getElementById('history-count-badge').innerText = `${filtered.length} Records`;
+  if (badge) {
+    if (age < 5) {
+      badge.innerText = "50% Child Concession";
+      badge.className = "text-[10px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded font-bold";
+    } else if (age >= 60 || cat === "Senior Citizen (60+)") {
+      badge.innerText = "50% Senior Concession";
+      badge.className = "text-[10px] text-blue-700 bg-blue-50 px-2 py-0.5 rounded font-bold";
+    } else if (gen === "Female" || cat === "Solo Female Traveler") {
+      badge.innerText = "50% Mahila Samman";
+      badge.className = "text-[10px] text-purple-700 bg-purple-50 px-2 py-0.5 rounded font-bold";
+    } else {
+      badge.innerText = "Full Adult Fare";
+      badge.className = "text-[10px] text-slate-500 bg-slate-100 px-2 py-0.5 rounded font-semibold";
+    }
+  }
 
-  if (filtered.length === 0) {
-    container.innerHTML = `
-      <div class="bg-white rounded-2xl border border-slate-200 p-12 text-center">
-        <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center text-slate-400 text-2xl mx-auto mb-4">
-          <i class="fa-solid fa-receipt"></i>
-        </div>
-        <h3 class="text-base font-bold text-slate-800 mb-1">No ${currentFilter.toLowerCase()} bookings found</h3>
-        <p class="text-xs text-slate-500 mb-5">You haven't booked any bus trips matching this filter criteria yet.</p>
-        <button onclick="navigateTo('book')" class="bg-msrtc-red hover:bg-msrtc-darkred text-white text-xs font-bold px-5 py-2.5 rounded-xl transition">
-          <i class="fa-solid fa-ticket mr-1"></i> Book a New Journey
-        </button>
+  updateSummaryTotals();
+}
+
+async function loadVendorCatalog() {
+  try {
+    const res = await MSRTCApi.getVendorCatalog();
+    vendorCatalog = res.items || [];
+  } catch (e) {
+    vendorCatalog = [
+      { id: "ITEM_WATER", name: "MSRTC Rail Neer (1L)", price: 15, icon: "fa-bottle-water" },
+      { id: "ITEM_KATRAJ_THALI", name: "Katraj Ghat Meal Thali Voucher", price: 120, icon: "fa-utensils" },
+      { id: "ITEM_SNACK_BOX", name: "Kolhapuri Bhakarwadi Box (250g)", price: 55, icon: "fa-cookie-bite" }
+    ];
+  }
+}
+
+function renderVendorAddons() {
+  const box = document.getElementById('vendor-addons-list');
+  if (!box) return;
+  box.innerHTML = vendorCatalog.map(it => `
+    <label class="flex items-center justify-between p-2 rounded-lg border border-slate-200 hover:bg-slate-50 cursor-pointer">
+      <div class="flex items-center gap-2">
+        <input type="checkbox" value="${esc(it.id)}" onchange="toggleVendorItem('${esc(it.id)}')" class="rounded text-msrtc-red" />
+        <span><i class="fa-solid ${esc(it.icon || 'fa-box')} text-slate-400 mr-1"></i> ${esc(it.name)}</span>
       </div>
-    `;
+      <span class="font-extrabold text-slate-800">₹${it.price}</span>
+    </label>
+  `).join('');
+}
+
+function toggleVendorItem(itemId) {
+  const idx = selectedVendorItems.indexOf(itemId);
+  if (idx > -1) {
+    selectedVendorItems.splice(idx, 1);
+  } else {
+    selectedVendorItems.push(itemId);
+  }
+  updateSummaryTotals();
+}
+
+function updateSummaryTotals() {
+  if (!activeBus) return;
+
+  const farePerSeat = activeBus.fare || 100;
+  let subtotal = 0;
+
+  selectedSeats.forEach((_, i) => {
+    const age = parseInt(document.getElementById(`pax-age-${i}`)?.value || 25);
+    const gen = document.getElementById(`pax-gender-${i}`)?.value || 'Male';
+    const cat = document.getElementById(`pax-category-${i}`)?.value || 'General';
+
+    let seatRate = farePerSeat;
+    if (age < 5 || age >= 60 || gen === "Female" || cat.includes("Senior") || cat.includes("Female")) {
+      seatRate = Math.round(seatRate * 0.5);
+    }
+    subtotal += seatRate;
+  });
+
+  // Vendor items sum
+  let vendorTotal = 0;
+  selectedVendorItems.forEach(id => {
+    const it = vendorCatalog.find(x => x.id === id);
+    if (it) vendorTotal += it.price;
+  });
+
+  const gst = Math.round(subtotal * 0.05);
+  const grandTotal = subtotal + gst + vendorTotal;
+
+  document.getElementById('summary-base-fare').innerText = `₹${subtotal}`;
+  document.getElementById('summary-gst').innerText = `₹${gst}`;
+  document.getElementById('summary-grand-total').innerText = `₹${grandTotal}`;
+
+  const vRow = document.getElementById('summary-vendor-row');
+  if (vRow) {
+    if (vendorTotal > 0) {
+      vRow.classList.remove('hidden');
+      document.getElementById('summary-vendor-fare').innerText = `+₹${vendorTotal}`;
+    } else {
+      vRow.classList.add('hidden');
+    }
+  }
+
+  const hhRow = document.getElementById('summary-hh-row');
+  if (hhRow && activeBus.isHappyHours) {
+    hhRow.classList.remove('hidden');
+    const saved = Math.round((activeBus.originalFare - activeBus.fare) * selectedSeats.length);
+    document.getElementById('summary-hh-discount').innerText = `-₹${saved}`;
+  }
+}
+
+// 7. CONFIRM BOOKING & GENERATE ERS SLIP
+async function confirmBooking() {
+  if (!selectedSeats.length) {
+    alert("Please select at least one seat.");
     return;
   }
 
-  container.innerHTML = filtered.map(b => {
-    const depDate = new Date(b.route.departureTime);
-    const formattedDate = depDate.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
-    const formattedTime = depDate.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+  const passengers = [];
+  for (let i = 0; i < selectedSeats.length; i++) {
+    const name = document.getElementById(`pax-name-${i}`)?.value.trim();
+    const age = parseInt(document.getElementById(`pax-age-${i}`)?.value || 28);
+    const gender = document.getElementById(`pax-gender-${i}`)?.value || 'Male';
+    const category = document.getElementById(`pax-category-${i}`)?.value || 'General';
 
-    let statusBadge = '';
-    if (b.tripStatus === 'UPCOMING') {
-      statusBadge = `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-800"><span class="w-2 h-2 rounded-full bg-blue-600 animate-pulse"></span> Upcoming</span>`;
-    } else if (b.tripStatus === 'COMPLETED') {
-      statusBadge = `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800"><i class="fa-solid fa-circle-check text-xs"></i> Completed</span>`;
-    } else {
-      statusBadge = `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-800"><i class="fa-solid fa-ban text-xs"></i> Cancelled</span>`;
+    if (!name) {
+      alert(`Please enter the name for seat ${selectedSeats[i]}`);
+      return;
     }
+    passengers.push({ name, age, gender, priorityCategory: category });
+  }
 
-    return `
-      <div class="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-sm hover:shadow-md transition">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-red-50 text-msrtc-red flex items-center justify-center text-lg font-bold">
-              <i class="fa-solid fa-bus"></i>
-            </div>
-            <div>
-              <div class="flex items-center gap-2">
-                <h4 class="font-extrabold text-slate-900 text-base">${b.busDetails.busType}</h4>
-                <span class="text-xs font-mono font-bold bg-slate-100 text-slate-700 px-2 py-0.5 rounded">${b.busDetails.busNumber}</span>
-              </div>
-              <p class="text-xs text-slate-500 font-medium">PNR: <b class="font-mono text-slate-700">${b.pnr}</b> • Booked on ${new Date(b.bookedAt).toLocaleDateString('en-IN')}</p>
-            </div>
-          </div>
-          <div class="flex items-center gap-2 self-start sm:self-center">
-            ${statusBadge}
-          </div>
-        </div>
+  const payMode = document.querySelector('input[name="payMethod"]:checked')?.value || 'UPI';
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 py-4 my-1 items-center">
-          <div class="flex items-start gap-3">
-            <div class="text-msrtc-red text-lg mt-0.5"><i class="fa-solid fa-circle-dot"></i></div>
-            <div>
-              <p class="text-[11px] text-slate-400 font-semibold uppercase">From Departure</p>
-              <p class="text-sm font-bold text-slate-900">${b.route.from}</p>
-              <p class="text-xs text-slate-500 font-medium">${formattedDate} at ${formattedTime}</p>
-            </div>
-          </div>
+  const btn = document.getElementById('confirm-booking-btn');
+  btn.disabled = true;
+  btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i> Reserving Seats...`;
 
-          <div class="text-center hidden md:block">
-            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">${b.route.duration} Express</span>
-            <div class="flex items-center justify-center gap-2 my-1">
-              <div class="h-0.5 bg-slate-200 flex-grow max-w-[60px]"></div>
-              <i class="fa-solid fa-arrow-right text-slate-400 text-xs"></i>
-              <div class="h-0.5 bg-slate-200 flex-grow max-w-[60px]"></div>
-            </div>
-            <span class="text-[11px] font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">Seats: ${b.seats.join(', ')}</span>
-          </div>
+  try {
+    const depStand = activeBus.from || document.getElementById('from-location')?.value.trim() || activeBus.origin;
+    const arrStand = activeBus.to || document.getElementById('to-location')?.value.trim() || activeBus.destination;
+    const trvDate = activeBus.date || document.getElementById('travel-date')?.value || new Date().toISOString().split('T')[0];
 
-          <div class="flex items-start gap-3">
-            <div class="text-emerald-600 text-lg mt-0.5"><i class="fa-solid fa-location-pin"></i></div>
-            <div>
-              <p class="text-[11px] text-slate-400 font-semibold uppercase">To Destination</p>
-              <p class="text-sm font-bold text-slate-900">${b.route.to}</p>
-              <p class="text-xs text-slate-500 font-medium">${b.route.boardingPoint}</p>
-            </div>
-          </div>
-        </div>
+    const payload = {
+      scheduleId: activeBus.id,
+      from: depStand,
+      to: arrStand,
+      date: trvDate,
+      seats: selectedSeats,
+      passengers: passengers,
+      paymentMethod: payMode,
+      vendorItemIds: selectedVendorItems,
+      user: currentUser
+    };
 
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-4 border-t border-slate-100">
-          <div class="flex items-center gap-4 text-xs text-slate-600">
-            <span>Travelers: <b>${b.passengers.map(p => p.name).join(', ')}</b></span>
-            <span>Total Paid: <b class="text-slate-900 text-sm">₹${b.fare.totalAmount}</b></span>
-          </div>
-          <div class="flex items-center gap-2">
-            <button onclick="openTicketModal('${b.bookingId}')" class="bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold px-4 py-2 rounded-xl transition flex items-center gap-1.5">
-              <i class="fa-solid fa-receipt text-slate-500"></i> View E-Ticket Slip
-            </button>
-            ${b.tripStatus === 'UPCOMING' ? `
-              <button onclick="cancelBookingPrompt('${b.bookingId}')" class="bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold px-3.5 py-2 rounded-xl transition">
-                Cancel Trip
-              </button>
-            ` : ''}
-          </div>
-        </div>
-      </div>
-    `;
-  }).join('');
+    const res = await MSRTCApi.bookTicket(payload);
+    closeSeatModal();
+
+    // Store in local storage
+    const all = getStoredBookings();
+    all.unshift(res);
+    saveStoredBookings(all);
+
+    openTicketModal(res);
+  } catch (err) {
+    alert(`Booking Error: ${err.message}`);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = `<i class="fa-solid fa-lock"></i> Confirm & Book Reservation`;
+  }
 }
 
-// 8. TICKET MODAL & PRINT
-function openTicketModal(bookingId) {
-  const allBookings = getStoredBookings();
-  const b = allBookings.find(x => x.bookingId === bookingId);
-  if (!b) return;
-
+function openTicketModal(b) {
+  const modal = document.getElementById('ticket-modal');
   const content = document.getElementById('ticket-modal-content');
+
+  const fare = b.fare || {};
+  const isHH = b.isHappyHours;
+  const vOrder = b.vendorOrder || {};
+
   content.innerHTML = `
-    <div class="border-2 border-dashed border-slate-300 p-5 rounded-2xl bg-white">
-      <div class="flex justify-between items-start pb-4 border-b border-slate-200">
+    <div class="border-b-2 border-msrtc-red pb-4 mb-4">
+      <div class="flex items-center justify-between">
         <div>
-          <div class="flex items-center gap-2">
-            <div class="w-8 h-8 rounded bg-msrtc-red text-white flex items-center justify-center font-bold text-sm">
-              <i class="fa-solid fa-bus"></i>
-            </div>
-            <div>
-              <h3 class="font-extrabold text-slate-900 text-base">Happy Hours • MSRTC Smart Mobility</h3>
-              <p class="text-[10px] text-slate-500 font-medium">Govt. of Maharashtra Undertaking</p>
-            </div>
-          </div>
+          <h2 class="text-xl font-black text-msrtc-red tracking-tight">MSRTC ELECTRONIC RESERVATION SLIP</h2>
+          <p class="text-[10px] text-slate-500 font-bold uppercase">Government of Maharashtra Road Transport Corporation</p>
         </div>
         <div class="text-right">
-          <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">PNR NUMBER</span>
-          <p class="font-mono font-extrabold text-slate-900 text-sm text-msrtc-red">${b.pnr}</p>
+          <span class="text-xs font-mono font-extrabold bg-slate-900 text-white px-2.5 py-1 rounded">PNR: ${esc(b.pnr)}</span>
+          <span class="block text-[10px] text-slate-500 mt-0.5">Booking ID: ${esc(b.bookingId)}</span>
         </div>
       </div>
+    </div>
 
-      <div class="grid grid-cols-2 gap-4 my-4 pb-4 border-b border-slate-100 text-xs">
-        <div>
-          <span class="text-slate-400 uppercase text-[10px] font-bold">Service Type</span>
-          <p class="font-bold text-slate-900">${b.busDetails.busType}</p>
-          <p class="text-slate-500 text-[11px] font-mono">${b.busDetails.busNumber}</p>
-        </div>
-        <div>
-          <span class="text-slate-400 uppercase text-[10px] font-bold">Trip Status</span>
-          <p class="font-bold ${b.tripStatus === 'COMPLETED' ? 'text-emerald-600' : (b.tripStatus === 'UPCOMING' ? 'text-blue-600' : 'text-rose-600')}">${b.tripStatus}</p>
-        </div>
-        <div>
-          <span class="text-slate-400 uppercase text-[10px] font-bold">From (Origin)</span>
-          <p class="font-bold text-slate-900">${b.route.from}</p>
-          <p class="text-slate-500 text-[11px]">${new Date(b.route.departureTime).toLocaleString('en-IN')}</p>
-        </div>
-        <div>
-          <span class="text-slate-400 uppercase text-[10px] font-bold">To (Destination)</span>
-          <p class="font-bold text-slate-900">${b.route.to}</p>
-          <p class="text-slate-500 text-[11px]">${b.route.boardingPoint}</p>
-        </div>
+    <!-- Bus & Route Summary -->
+    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs mb-4 grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div>
+        <span class="text-slate-400 block text-[10px] uppercase font-bold">Bus Type & No.</span>
+        <span class="font-extrabold text-slate-900">${esc(b.busDetails?.busType)}</span>
+        <span class="block text-[10px] text-slate-500 font-mono">${esc(b.busDetails?.busNumber)}</span>
       </div>
+      <div>
+        <span class="text-slate-400 block text-[10px] uppercase font-bold">Boarding Point</span>
+        <span class="font-extrabold text-slate-900">${esc(b.route?.from)}</span>
+        <span class="block text-[10px] text-slate-500">${esc(b.route?.departureTime?.split('T')[1]?.substring(0, 5) || '')} Hrs</span>
+      </div>
+      <div>
+        <span class="text-slate-400 block text-[10px] uppercase font-bold">Destination</span>
+        <span class="font-extrabold text-slate-900">${esc(b.route?.to)}</span>
+      </div>
+      <div>
+        <span class="text-slate-400 block text-[10px] uppercase font-bold">Reserved Seats</span>
+        <span class="font-black text-base text-msrtc-red font-mono">${esc((b.seats || []).join(', '))}</span>
+      </div>
+    </div>
 
-      <div class="mb-4 pb-4 border-b border-slate-100">
-        <span class="text-slate-400 uppercase text-[10px] font-bold block mb-2">Passenger & Seat Manifest</span>
-        <table class="w-full text-left text-xs">
-          <thead class="bg-slate-50 text-slate-500 text-[10px] uppercase font-bold">
+    <!-- Passenger Manifest -->
+    <div class="mb-4">
+      <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider mb-2">Passenger Manifest</h4>
+      <table class="w-full text-xs text-left border border-slate-200 rounded-lg overflow-hidden">
+        <thead class="bg-slate-100 text-[10px] text-slate-600 uppercase font-semibold">
+          <tr>
+            <th class="p-2">Seat</th>
+            <th class="p-2">Passenger Name</th>
+            <th class="p-2">Age/Gender</th>
+            <th class="p-2 text-right">Fare</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          ${(b.passengers || []).map(p => `
             <tr>
-              <th class="p-2">Passenger Name</th>
-              <th class="p-2">Gender/Age</th>
-              <th class="p-2 text-right">Seat No.</th>
+              <td class="p-2 font-mono font-bold text-msrtc-red">${esc(p.seat || '')}</td>
+              <td class="p-2 font-semibold text-slate-800">${esc(p.name)}</td>
+              <td class="p-2 text-slate-500">${p.age} Yrs / ${esc(p.gender)}</td>
+              <td class="p-2 text-right font-extrabold text-slate-900">₹${p.fare}</td>
             </tr>
-          </thead>
-          <tbody class="divide-y divide-slate-100">
-            ${b.passengers.map((p, idx) => `
-              <tr>
-                <td class="p-2">
-                  <span class="font-bold text-slate-800">${p.name}</span>
-                  ${p.concession ? `<span class="block text-[9px] text-emerald-600 font-semibold">${p.concession}</span>` : ''}
-                </td>
-                <td class="p-2 text-slate-600">${p.gender}, ${p.age}y</td>
-                <td class="p-2 text-right font-bold text-msrtc-red">${b.seats[idx] || b.seats[0]}</td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
-      </div>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
 
-      <div class="bg-slate-50 p-3 rounded-xl space-y-1.5 text-xs mb-4">
-        <div class="flex justify-between text-slate-500">
-          <span>Base Fare (${b.passengers.length} Seats)</span>
-          <span>₹${b.fare.baseFare}</span>
+    <!-- Vendor Refreshments Voucher Section (Module 6) -->
+    ${vOrder.items && vOrder.items.length ? `
+      <div class="bg-orange-50 border border-orange-200 p-3 rounded-xl mb-4 text-xs">
+        <div class="flex items-center justify-between font-bold text-orange-950 mb-1.5">
+          <span><i class="fa-solid fa-utensils mr-1"></i> Highway Rest-Stop & Refreshment Voucher</span>
+          <span class="font-mono text-[11px] bg-orange-200 px-2 py-0.5 rounded">${esc(vOrder.voucher_code || 'MSRTC-MEAL')}</span>
         </div>
-        <div class="flex justify-between text-slate-500">
-          <span>GST & Surcharge (5%)</span>
-          <span>₹${b.fare.gst}</span>
-        </div>
-        <div class="flex justify-between font-extrabold text-slate-900 pt-1.5 border-t border-slate-200">
-          <span>Total Amount Paid</span>
-          <span class="text-msrtc-red text-sm">₹${b.fare.totalAmount}</span>
-        </div>
-        <div class="flex justify-between text-[11px] text-emerald-600 font-semibold pt-1">
-          <span>Payment Mode: ${b.fare.paymentMethod}</span>
-          <span>Status: ${b.fare.paymentStatus}</span>
+        <p class="text-[11px] text-orange-800 mb-2">Show this coupon at Katraj Ghat Highway Food Plaza counter or to the bus conductor:</p>
+        <div class="flex flex-wrap gap-2">
+          ${vOrder.items.map(it => `
+            <span class="bg-white border border-orange-300 text-orange-900 px-2 py-1 rounded text-[10px] font-bold">
+              ✓ ${esc(it.name)} (₹${it.price})
+            </span>
+          `).join('')}
         </div>
       </div>
+    ` : ''}
 
-      <div class="text-[10px] text-slate-400 text-center">
-        * Please carry a valid Govt. Photo ID or Digital Smart Pass during journey.
+    <!-- Financial Breakdown -->
+    <div class="bg-slate-900 text-white p-4 rounded-xl text-xs space-y-1.5">
+      <div class="flex justify-between text-slate-400">
+        <span>Base Ticket Subtotal:</span>
+        <span class="font-semibold text-white">₹${fare.baseFare || 0}</span>
       </div>
+      ${isHH ? `
+        <div class="flex justify-between text-amber-300">
+          <span>⚡ Happy Hours Promotional Saving:</span>
+          <span>Applied (${b.happyHoursDiscount}% off)</span>
+        </div>
+      ` : ''}
+      ${vOrder.total_amount ? `
+        <div class="flex justify-between text-orange-300">
+          <span>Refreshment & Meal Vouchers:</span>
+          <span>+₹${vOrder.total_amount}</span>
+        </div>
+      ` : ''}
+      <div class="flex justify-between text-slate-400">
+        <span>GST (5%):</span>
+        <span class="font-semibold text-white">₹${fare.gst || 0}</span>
+      </div>
+      <div class="border-t border-slate-700 pt-2 flex justify-between text-base font-black text-amber-400">
+        <span>Total Paid (${esc(fare.paymentMethod || 'UPI')}):</span>
+        <span>₹${fare.totalAmount || 0}</span>
+      </div>
+    </div>
+
+    <!-- Safety SOS Button in Ticket -->
+    <div class="mt-4 pt-3 border-t border-slate-200 flex items-center justify-between">
+      <span class="text-[10px] text-slate-400 font-mono">Scan QR for validation</span>
+      <button onclick="triggerSOS('${esc(b.bookingId)}', '${esc(b.busDetails?.busNumber)}')" class="bg-rose-50 text-rose-700 border border-rose-300 hover:bg-rose-100 px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5">
+        <i class="fa-solid fa-triangle-exclamation"></i> Emergency SOS
+      </button>
     </div>
   `;
 
-  document.getElementById('ticket-modal').classList.remove('hidden');
+  modal.classList.remove('hidden');
 }
 
 function closeTicketModal() {
   document.getElementById('ticket-modal').classList.add('hidden');
 }
 
-function cancelBookingPrompt(bookingId) {
-  if (confirm("Are you sure you want to cancel this booking? Refund will be processed back to your original payment method.")) {
-    const bookings = getStoredBookings();
-    const item = bookings.find(b => b.bookingId === bookingId);
-    if (item) {
-      item.tripStatus = "CANCELLED";
-      item.fare.paymentStatus = "REFUND_INITIATED";
-      saveStoredBookings(bookings);
-      renderBookingsList();
-      showToast("Booking cancelled successfully. Refund initiated.", "info");
-    }
+// 8. IN-BUS ADVERTISING & DEALS (Module 4)
+async function loadAdsPage() {
+  const grid = document.getElementById('active-ads-grid');
+  grid.innerHTML = `<div class="col-span-3 text-center text-slate-400 py-8"><i class="fa-solid fa-spinner fa-spin text-xl"></i> Loading live ad campaigns from dataset...</div>`;
+
+  try {
+    const ads = await MSRTCApi.getAdList();
+    renderAdsGrid(ads);
+  } catch (e) {
+    grid.innerHTML = `<p class="col-span-3 text-rose-600 text-xs">Failed to load advertisement data.</p>`;
   }
 }
 
-// ============================================================
-// 9. BOOKING WIZARD CONTROLLER & CONCESSION PRICING ENGINE
-// ============================================================
-
-let wizardState = {
-  step: 1,
-  from: "Kolhapur CBS (Central Bus Stand)",
-  to: "Ichalkaranji Central Stand",
-  date: "",
-  selectedBus: null,
-  selectedSeats: ["14A"],
-  passengers: [],
-  totalBaseFare: 0,
-  totalConcessionSavings: 0,
-  gst: 0,
-  finalTotal: 0
-};
-
-function setDefaultBookingDate() {
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  const str = tomorrow.toISOString().split('T')[0];
-  const dateInput = document.getElementById('book-date');
-  if (dateInput) {
-    dateInput.value = str;
-    dateInput.min = new Date().toISOString().split('T')[0];
-  }
-  wizardState.date = str;
-}
-
-// Popular route chip click helper
-function setRoute(from, to) {
-  const fromEl = document.getElementById('book-from');
-  const toEl = document.getElementById('book-to');
-  if (fromEl) fromEl.value = from;
-  if (toEl) toEl.value = to;
-  wizardState.from = from;
-  wizardState.to = to;
-  showToast(`Route selected: ${from.split(' ')[0]} ➔ ${to.split(' ')[0]}`, 'info');
-}
-
-// Wizard step switcher with top progress indicators
-function goToStep(stepNum) {
-  wizardState.step = stepNum;
-
-  for (let i = 1; i <= 5; i++) {
-    const stepEl = document.getElementById(`wizard-step-${i}`);
-    if (stepEl) {
-      if (i === stepNum) {
-        stepEl.classList.remove('hidden');
-      } else {
-        stepEl.classList.add('hidden');
-      }
-    }
-
-    const dot = document.getElementById(`dot-${i}`);
-    if (dot) {
-      if (i < stepNum) {
-        dot.className = "w-10 h-10 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-sm border-4 border-white shadow-md";
-        dot.innerHTML = `<i class="fa-solid fa-check text-xs"></i>`;
-      } else if (i === stepNum) {
-        dot.className = "w-10 h-10 rounded-full bg-msrtc-red text-white flex items-center justify-center font-bold text-sm border-4 border-white shadow-md ring-4 ring-red-100";
-        dot.innerHTML = `${i}`;
-      } else {
-        dot.className = "w-10 h-10 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center font-bold text-sm border-4 border-white shadow-md";
-        dot.innerHTML = `${i}`;
-      }
-    }
-  }
-
-  const progressLine = document.getElementById('step-progress-line');
-  if (progressLine) {
-    const pct = ((stepNum - 1) / 4) * 100;
-    progressLine.style.width = `${pct}%`;
-  }
-
-  window.scrollTo({ top: 100, behavior: 'smooth' });
-}
-
-// STEP 1 ➔ STEP 2: Search Bus Availability
-function wizardSearchBuses() {
-  const fromEl = document.getElementById('book-from');
-  const toEl = document.getElementById('book-to');
-  const dateEl = document.getElementById('book-date');
-
-  const from = fromEl ? fromEl.value.trim() : '';
-  const to = toEl ? toEl.value.trim() : '';
-  const date = dateEl ? dateEl.value : '';
-
-  if (!from || !to) {
-    showToast('Please enter both Departure and Destination locations!', 'error');
-    return;
-  }
-  if (from.toLowerCase() === to.toLowerCase()) {
-    showToast('Departure and Destination cannot be the same!', 'error');
-    return;
-  }
-  if (!date) {
-    showToast('Please select your Travel Date!', 'error');
+function renderAdsGrid(ads) {
+  const grid = document.getElementById('active-ads-grid');
+  if (!ads.length) {
+    grid.innerHTML = `<p class="text-xs text-slate-500">No active ads.</p>`;
     return;
   }
 
-  wizardState.from = from;
-  wizardState.to = to;
-  wizardState.date = date;
+  grid.innerHTML = ads.map(a => `
+    <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 shadow-sm hover:shadow-md transition">
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-[10px] font-mono font-bold bg-purple-100 text-purple-900 px-2 py-0.5 rounded">${esc(a.advertisement_id)}</span>
+        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">${esc(a.position)} Section</span>
+      </div>
 
-  const spinner = document.getElementById('search-spinner');
-  if (spinner) spinner.classList.remove('hidden');
+      <h4 class="font-extrabold text-slate-900 text-sm">${esc(a.brand_name)}</h4>
+      <p class="text-[11px] text-purple-700 font-bold mt-0.5">${esc(a.category)} • Special Offer: ${esc(a.offer)}</p>
 
-  setTimeout(() => {
-    if (spinner) spinner.classList.add('hidden');
-    renderWizardBusList();
-    goToStep(2);
-    showToast(`Found ${BUS_SCHEDULE_TEMPLATES.length} available buses!`, 'success');
-  }, 400);
+      <div class="my-3 pt-2 border-t border-slate-200 text-[11px] text-slate-500 space-y-1">
+        <div class="flex justify-between">
+          <span>Route & Bus:</span>
+          <span class="font-mono text-slate-800 font-semibold">${esc(a.route_id)} / ${esc(a.bus_id)}</span>
+        </div>
+        <div class="flex justify-between">
+          <span>Campaign Type:</span>
+          <span class="font-semibold text-slate-800">${esc(a.campaign_type)}</span>
+        </div>
+        <div class="flex justify-between">
+          <span>Duration:</span>
+          <span class="font-semibold text-slate-800">${a.duration_days} Days</span>
+        </div>
+        <div class="flex justify-between">
+          <span>Verified QR Scans:</span>
+          <span class="font-extrabold text-slate-900 font-mono">${a.qr_scans.toLocaleString()}</span>
+        </div>
+      </div>
+
+      <button onclick="scanAdQR('${esc(a.advertisement_id)}')" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 rounded-xl text-xs transition flex items-center justify-center gap-1.5 shadow-sm">
+        <i class="fa-solid fa-qrcode"></i> Simulate Passenger QR Scan
+      </button>
+    </div>
+  `).join('');
 }
 
-// STEP 2: Render buses with demand discounts
-function renderWizardBusList() {
-  const label = document.getElementById('step2-route-label');
-  if (label) {
-    const d = new Date(wizardState.date);
-    const dateFormatted = isNaN(d) ? wizardState.date : d.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
-    label.innerHTML = `Available services for <b>${wizardState.from}</b> ➔ <b>${wizardState.to}</b> on <b>${dateFormatted}</b>`;
+async function scanAdQR(adId) {
+  try {
+    const res = await MSRTCApi.scanAdQR(adId);
+    activeLiveScans += 1;
+    document.getElementById('ad-live-scans-val').innerText = activeLiveScans.toLocaleString();
+
+    document.getElementById('coupon-brand-name').innerText = res.brand;
+    document.getElementById('coupon-code-text').innerText = res.coupon_code;
+    document.getElementById('coupon-deal-text').innerText = res.deal;
+    document.getElementById('coupon-message').innerText = res.message;
+
+    document.getElementById('qr-coupon-modal').classList.remove('hidden');
+  } catch (e) {
+    alert("Scan simulation failed.");
+  }
+}
+
+function closeCouponModal() {
+  document.getElementById('qr-coupon-modal').classList.add('hidden');
+}
+
+function showAdPredictorModal() {
+  document.getElementById('ad-predict-modal').classList.remove('hidden');
+}
+
+function closeAdPredictorModal() {
+  document.getElementById('ad-predict-modal').classList.add('hidden');
+}
+
+async function calculateAdPrediction() {
+  const pos = document.getElementById('ad-pred-pos').value;
+  const ctype = document.getElementById('ad-pred-type').value;
+  const days = parseInt(document.getElementById('ad-pred-days').value || 30);
+
+  const out = document.getElementById('ad-prediction-output');
+  out.classList.remove('hidden');
+  out.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i> Running ML Predictor...`;
+
+  try {
+    const res = await MSRTCApi.predictAdRevenue(pos, ctype, days);
+    out.innerHTML = `
+      <div class="flex justify-between font-bold text-slate-900 border-b border-purple-200 pb-1.5 mb-1.5">
+        <span>Position Tier:</span>
+        <span>${esc(res.tier)}</span>
+      </div>
+      <div class="flex justify-between">
+        <span class="text-slate-600">Calculated Ad Fee:</span>
+        <span class="font-extrabold text-slate-900">₹${res.advertisement_fee.toLocaleString()}</span>
+      </div>
+      <div class="flex justify-between">
+        <span class="text-slate-600">Expected QR Scans:</span>
+        <span class="font-mono font-bold text-purple-800">${res.estimated_qr_scans.toLocaleString()}</span>
+      </div>
+      <div class="flex justify-between font-black text-purple-950 text-sm pt-1">
+        <span>Predicted Ad Revenue:</span>
+        <span class="text-msrtc-red">₹${res.predicted_revenue.toLocaleString()}</span>
+      </div>
+      <p class="text-[10px] text-purple-700 pt-1 italic">Generated by Random Forest / Linear Regression model trained on 1,000 MSRTC advertisement records.</p>
+    `;
+  } catch (e) {
+    out.innerHTML = `<span class="text-rose-600">Prediction error: ${esc(e.message)}</span>`;
+  }
+}
+
+// 9. HIGHWAY VENDORS & REST-STOPS (Module 6)
+async function loadVendorsPage() {
+  const stopsBox = document.getElementById('rest-stops-list');
+  const menuBox = document.getElementById('vendor-menu-grid');
+
+  try {
+    const res = await MSRTCApi.getVendorCatalog();
+    const stops = res.highway_rest_stops || [];
+    const items = res.items || [];
+
+    stopsBox.innerHTML = stops.map(s => `
+      <div class="bg-slate-50 border border-slate-200 p-4 rounded-2xl">
+        <div class="flex items-center justify-between mb-1">
+          <h4 class="font-extrabold text-slate-900 text-sm">${esc(s.name)}</h4>
+          <span class="text-xs font-bold text-amber-500"><i class="fa-solid fa-star"></i> ${s.rating}</span>
+        </div>
+        <p class="text-xs text-slate-500 font-mono mb-2">${esc(s.location)}</p>
+        <div class="flex flex-wrap gap-1.5 mb-3">
+          ${(s.amenities || []).map(a => `<span class="bg-white border border-slate-200 text-slate-600 text-[10px] px-2 py-0.5 rounded font-medium">${esc(a)}</span>`).join('')}
+        </div>
+        <div class="flex justify-between items-center text-[11px] pt-2 border-t border-slate-200 text-slate-500">
+          <span>License: ₹${s.monthly_contract_fee.toLocaleString()} / mo</span>
+          <span class="text-emerald-700 font-bold">${Math.round(s.commission_rate * 100)}% Revenue Share</span>
+        </div>
+      </div>
+    `).join('');
+
+    menuBox.innerHTML = items.map(it => `
+      <div class="bg-slate-50 border border-slate-200 p-3.5 rounded-xl flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center text-lg">
+            <i class="fa-solid ${esc(it.icon || 'fa-box')}"></i>
+          </div>
+          <div>
+            <h4 class="font-bold text-slate-900 text-xs">${esc(it.name)}</h4>
+            <p class="text-[10px] text-slate-500">${esc(it.description)}</p>
+            <span class="text-[10px] text-orange-700 font-semibold font-mono">Supplier: ${esc(it.vendor)}</span>
+          </div>
+        </div>
+        <div class="text-right">
+          <span class="block text-base font-black text-slate-900">₹${it.price}</span>
+          <span class="text-[10px] text-emerald-700 font-semibold">Comm: ₹${it.commission}</span>
+        </div>
+      </div>
+    `).join('');
+  } catch (e) {
+    stopsBox.innerHTML = `<p class="text-xs text-rose-600">Failed to load rest-stops.</p>`;
+  }
+}
+
+// 10. UNIFIED REVENUE & ML DASHBOARD
+async function loadUnifiedDashboard() {
+  const kpiBox = document.getElementById('revenue-kpis-container');
+  kpiBox.innerHTML = `<div class="col-span-4 text-center text-slate-400 py-6"><i class="fa-solid fa-spinner fa-spin text-xl"></i> Calculating Unified Total Revenue...</div>`;
+
+  try {
+    const rev = await MSRTCApi.getUnifiedRevenue();
+    const mlModels = await MSRTCApi.getMLModels();
+    const adAnalytics = await MSRTCApi.getAdAnalytics();
+
+    renderRevenueKPIs(rev);
+    renderMLModelsTable(mlModels);
+    renderHappyHoursSimulatorInit();
+    renderAdAnalyticsBreakdown(adAnalytics);
+    renderRevenueTables(rev);
+  } catch (e) {
+    kpiBox.innerHTML = `<div class="col-span-4 bg-rose-50 text-rose-800 p-4 rounded-xl text-xs">Failed to calculate revenue: ${esc(e.message)}</div>`;
+  }
+}
+
+function renderRevenueKPIs(r) {
+  const box = document.getElementById('revenue-kpis-container');
+  const b = r.breakdown || {};
+  const t = r.ticket_kpis || {};
+
+  box.innerHTML = `
+    <!-- Total Unified Revenue -->
+    <div class="bg-gradient-to-br from-slate-900 to-slate-800 text-white p-5 rounded-2xl border border-slate-700 shadow-md">
+      <p class="text-[10px] uppercase tracking-wider font-extrabold text-amber-400">Total Unified Revenue (R_total)</p>
+      <p class="text-2xl font-black mt-1">${inrPrecise(r.unified_total_revenue)}</p>
+      <p class="text-[11px] text-slate-400 mt-1">Ticket + Ads + Vendors + Rest-Stops</p>
+    </div>
+
+    <!-- Ticket Revenue -->
+    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+      <p class="text-[10px] uppercase tracking-wider font-bold text-slate-400">Ticket Revenue (R_ticket)</p>
+      <p class="text-2xl font-extrabold text-slate-900 mt-1">${inr(b.ticket_revenue)}</p>
+      <p class="text-[11px] text-emerald-700 mt-1 font-semibold">+${t.uplift_pct || 0}% gain over plain fare</p>
+    </div>
+
+    <!-- Advertisement Revenue (Dataset) -->
+    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+      <p class="text-[10px] uppercase tracking-wider font-bold text-purple-700">Ad Revenue (1,000 Records)</p>
+      <p class="text-2xl font-extrabold text-purple-950 mt-1">${inrPrecise(b.advertisement_revenue)}</p>
+      <p class="text-[11px] text-purple-600 mt-1 font-semibold">${r.ad_summary?.total_qr_scans?.toLocaleString() || 0} QR scans</p>
+    </div>
+
+    <!-- Commercial Tie-ups (Vendors + Rest-Stops) -->
+    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+      <p class="text-[10px] uppercase tracking-wider font-bold text-orange-700">Vendors & Rest-Stops</p>
+      <p class="text-2xl font-extrabold text-orange-950 mt-1">${inr(b.vendor_commission + b.partnership_contract_fees)}</p>
+      <p class="text-[11px] text-slate-500 mt-1">Katraj Ghat & Food Commissions</p>
+    </div>
+  `;
+}
+
+function renderMLModelsTable(res) {
+  const tbody = document.getElementById('ml-models-table-body');
+  const badge = document.getElementById('best-model-badge');
+  badge.innerHTML = `<i class="fa-solid fa-crown text-amber-500 mr-1"></i> Best Model: ${esc(res.best_model)}`;
+
+  const models = res.models || {};
+  tbody.innerHTML = Object.entries(models).map(([name, m]) => {
+    const isBest = name === res.best_model;
+    return `
+      <tr class="border-t border-slate-100 ${isBest ? 'bg-emerald-50/60 font-semibold' : ''}">
+        <td class="py-2.5 font-bold text-slate-900 flex items-center gap-1.5">
+          ${isBest ? '<i class="fa-solid fa-check-circle text-emerald-600"></i>' : ''} ${esc(name)}
+        </td>
+        <td class="py-2.5 text-right font-mono">${m.mae}</td>
+        <td class="py-2.5 text-right font-mono">${m.rmse}</td>
+        <td class="py-2.5 text-right font-mono font-bold ${isBest ? 'text-emerald-700' : 'text-slate-800'}">${m.r2}</td>
+        <td class="py-2.5 text-right font-bold">${m.accuracy_pct}%</td>
+        <td class="py-2.5 text-center">
+          <span class="text-[10px] uppercase font-extrabold px-2 py-0.5 rounded ${isBest ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-600'}">
+            ${isBest ? 'Deployed' : 'Benchmarked'}
+          </span>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function renderHappyHoursSimulatorInit() {
+  updateHappyHoursSimulator();
+}
+
+async function updateHappyHoursSimulator() {
+  const fare = parseInt(document.getElementById('sim-fare-slider')?.value || 350);
+  const demand = parseInt(document.getElementById('sim-demand-slider')?.value || 9);
+
+  document.getElementById('sim-fare-val').innerText = `₹${fare}`;
+  document.getElementById('sim-demand-val').innerText = `${demand} Seats (${Math.round(demand / 28 * 100)}%)`;
+
+  try {
+    const res = await MSRTCApi.simulateHappyHours(fare, demand);
+    const card = document.getElementById('sim-optimizer-result-card');
+    card.innerHTML = `
+      <div class="flex items-center justify-between font-bold text-amber-950 mb-1">
+        <span>Recommended Optimal Fare:</span>
+        <span class="text-base text-msrtc-red font-black">₹${res.optimal_fare} (${res.optimal_discount_pct}% Off)</span>
+      </div>
+      <div class="flex justify-between text-[11px] text-amber-900">
+        <span>Expected Bookings:</span>
+        <span class="font-bold">${res.expected_bookings} Seats (${res.expected_occupancy_pct}%)</span>
+      </div>
+      <div class="flex justify-between text-[11px] text-amber-900">
+        <span>Expected Revenue:</span>
+        <span class="font-extrabold text-emerald-800">₹${res.expected_revenue} (vs ₹${res.base_revenue_without_promo})</span>
+      </div>
+      <div class="text-[10px] text-emerald-700 font-bold mt-1">
+        +₹${res.revenue_gain} net revenue gain achieved via off-peak elasticity!
+      </div>
+    `;
+
+    const tbody = document.getElementById('sim-scenarios-body');
+    tbody.innerHTML = (res.scenarios || []).map(sc => {
+      const isOptimal = sc.discount_pct === res.optimal_discount_pct;
+      return `
+        <tr class="border-t border-slate-100 ${isOptimal ? 'bg-amber-100/60 font-bold' : ''}">
+          <td class="py-2 text-slate-800">${sc.discount_pct}%</td>
+          <td class="py-2 text-right font-mono">₹${sc.promotional_fare}</td>
+          <td class="py-2 text-right font-mono">${sc.expected_bookings}</td>
+          <td class="py-2 text-right font-mono">${sc.occupancy_pct}%</td>
+          <td class="py-2 text-right font-mono font-bold text-slate-900">₹${sc.expected_revenue}</td>
+          <td class="py-2 text-center">
+            ${isOptimal ? `
+              <span class="text-[9px] uppercase font-black bg-amber-200 text-amber-900 px-2 py-0.5 rounded">Optimal</span>
+            ` : (sc.is_feasible ? `
+              <span class="text-[9px] text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">Feasible</span>
+            ` : `
+              <span class="text-[9px] text-rose-700 bg-rose-50 px-1.5 py-0.5 rounded">Infeasible</span>
+            `)}
+          </td>
+        </tr>
+      `;
+    }).join('');
+  } catch (e) {}
+}
+
+function renderAdAnalyticsBreakdown(a) {
+  document.getElementById('ad-dataset-total-rev-badge').innerText = `Dataset Revenue: ${inrPrecise(a.total_revenue)}`;
+
+  const posBox = document.getElementById('ad-pos-breakdown-list');
+  posBox.innerHTML = (a.position_breakdown || []).map(p => `
+    <div class="flex justify-between items-center py-1 border-b border-slate-200/60">
+      <div>
+        <span class="font-bold text-slate-800">${esc(p.position)}</span>
+        <span class="block text-[10px] text-slate-500">${p.campaign_count} ads • ${p.tier}</span>
+      </div>
+      <div class="text-right">
+        <span class="font-extrabold text-slate-900">${inr(p.total_revenue)}</span>
+        <span class="block text-[10px] text-slate-400 font-mono">${p.total_scans.toLocaleString()} scans</span>
+      </div>
+    </div>
+  `).join('');
+
+  const typeBox = document.getElementById('ad-type-breakdown-list');
+  typeBox.innerHTML = (a.campaign_type_breakdown || []).map(t => `
+    <div class="flex justify-between items-center py-1 border-b border-slate-200/60">
+      <span class="font-bold text-slate-800">${esc(t.campaign_type)}</span>
+      <span class="font-extrabold text-slate-900">${inr(t.total_revenue)}</span>
+    </div>
+  `).join('');
+
+  const routesBox = document.getElementById('ad-routes-breakdown-list');
+  routesBox.innerHTML = (a.top_routes || []).map(r => `
+    <div class="flex justify-between items-center py-1 border-b border-slate-200/60">
+      <span class="font-mono font-bold text-slate-800">${esc(r.route_id)}</span>
+      <span class="font-extrabold text-slate-900">${inr(r.revenue)}</span>
+    </div>
+  `).join('');
+}
+
+function renderRevenueTables(r) {
+  const box = document.getElementById('revenue-tables-grid');
+  const t = r.ticket_kpis || {};
+
+  box.innerHTML = `
+    <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm">
+      <h4 class="font-bold text-slate-900 text-xs uppercase tracking-wider mb-3">Revenue by Fleet Type</h4>
+      <div class="space-y-2 text-xs">
+        ${(t.byBusType || []).map(x => `
+          <div class="flex justify-between py-1 border-b border-slate-100">
+            <span class="font-semibold text-slate-800">${esc(x.name)}</span>
+            <span class="font-extrabold text-slate-900">${inr(x.revenue)} (${x.seats} seats)</span>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+
+    <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm">
+      <h4 class="font-bold text-slate-900 text-xs uppercase tracking-wider mb-3">Top Passenger Corridors</h4>
+      <div class="space-y-2 text-xs">
+        ${(t.topRoutes || []).map(x => `
+          <div class="flex justify-between py-1 border-b border-slate-100">
+            <span class="font-semibold text-slate-800">${esc(x.name)}</span>
+            <span class="font-extrabold text-slate-900">${inr(x.revenue)}</span>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+// 11. GROUP BOOKING CALCULATOR MODAL (Module 5)
+function toggleGroupBookingModal() {
+  const m = document.getElementById('group-modal');
+  m.classList.toggle('hidden');
+  if (!m.classList.contains('hidden')) {
+    calcGroupQuoteLive();
+  }
+}
+
+async function calcGroupQuoteLive() {
+  const pax = parseInt(document.getElementById('grp-pax')?.value || 12);
+  const days = parseInt(document.getElementById('grp-days')?.value || 1);
+  const fare = parseInt(document.getElementById('grp-fare')?.value || 350);
+
+  const out = document.getElementById('grp-quote-output');
+  try {
+    const q = await MSRTCApi.getGroupQuote(pax, fare, days);
+    out.innerHTML = `
+      <div class="flex justify-between font-bold text-slate-900 border-b border-emerald-200 pb-1">
+        <span>Eligible Group Tier:</span>
+        <span class="text-emerald-800">${esc(q.tier_name)}</span>
+      </div>
+      <div class="flex justify-between">
+        <span class="text-slate-600">Total Group Discount:</span>
+        <span class="font-black text-msrtc-red">${q.total_discount_pct}% OFF</span>
+      </div>
+      <div class="flex justify-between">
+        <span class="text-slate-600">Gross Amount:</span>
+        <span class="text-slate-500 line-through">₹${q.gross_fare.toLocaleString()}</span>
+      </div>
+      <div class="flex justify-between text-base font-black text-emerald-900 pt-1">
+        <span>Net Total (inc. GST):</span>
+        <span>₹${q.final_total.toLocaleString()}</span>
+      </div>
+      <div class="text-[11px] text-emerald-700 font-bold mt-1">
+        ✓ ${esc(q.savings_message)}
+      </div>
+    `;
+  } catch (e) {}
+}
+
+// 12. PASSENGER SAFETY SOS TRIGGER (Module 7)
+async function triggerSOS(bookingId, busNumber) {
+  try {
+    const res = await MSRTCApi.triggerEmergencySOS(bookingId, busNumber);
+    const box = document.getElementById('sos-details-box');
+    box.innerHTML = `
+      <div><strong>Alert ID:</strong> ${esc(res.sos_id)}</div>
+      <div><strong>Bus Unit:</strong> ${esc(res.bus_number)}</div>
+      <div><strong>GPS Location:</strong> ${esc(res.gps_location)}</div>
+      <div class="mt-2 text-rose-800 font-bold">Action Taken: ${esc(res.action_taken)}</div>
+    `;
+    document.getElementById('sos-modal').classList.remove('hidden');
+  } catch (e) {
+    alert("SOS Dispatch simulation triggered locally.");
+  }
+}
+
+function closeSOSModal() {
+  document.getElementById('sos-modal').classList.add('hidden');
+}
+
+// 13. BOOKINGS LIST
+function filterTrips(f) {
+  currentFilter = f;
+  document.querySelectorAll('.trip-filter-btn').forEach(btn => {
+    if (btn.getAttribute('data-filter') === f) {
+      btn.className = "trip-filter-btn px-3 py-1.5 rounded-lg bg-slate-900 text-white font-bold";
+    } else {
+      btn.className = "trip-filter-btn px-3 py-1.5 rounded-lg text-slate-600 hover:bg-slate-200 font-semibold";
+    }
+  });
+  renderBookingsList();
+}
+
+function renderBookingsList() {
+  const box = document.getElementById('bookings-list-container');
+  const all = getStoredBookings();
+  const filtered = currentFilter === 'ALL' ? all : all.filter(b => b.tripStatus === currentFilter);
+
+  if (!filtered.length) {
+    box.innerHTML = `<div class="bg-white p-8 rounded-2xl border border-slate-200 text-center text-slate-500 text-sm">
+      No trips found under "${currentFilter}". Book a bus to view reservation slips.
+    </div>`;
+    return;
   }
 
-  const container = document.getElementById('bus-results-list');
-  if (!container) return;
+  box.innerHTML = filtered.map(b => `
+    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="font-extrabold text-slate-900 text-sm">${esc(b.route?.from?.split(' (')[0])} → ${esc(b.route?.to?.split(' (')[0])}</span>
+          <span class="text-[10px] font-mono font-bold bg-slate-100 text-slate-700 px-2 py-0.5 rounded">${esc(b.pnr)}</span>
+          ${b.isHappyHours ? `<span class="text-[9px] bg-amber-100 text-amber-900 px-2 py-0.5 rounded font-extrabold uppercase">⚡ Happy Hours</span>` : ''}
+        </div>
+        <p class="text-xs text-slate-500 mt-1">${esc(b.busDetails?.busType)} • Seats: ${(b.seats || []).join(', ')}</p>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="text-base font-black text-slate-900 mr-2">₹${b.fare?.totalAmount || 0}</span>
+        <button onclick='openTicketModal(${JSON.stringify(b).replace(/'/g, "&#39;")})' class="bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold px-3 py-2 rounded-xl transition">
+          View ERS Slip
+        </button>
+      </div>
+    </div>
+  `).join('');
+}
 
-  container.innerHTML = BUS_SCHEDULE_TEMPLATES.map(bus => {
-    const fleet = MSRTC_FLEET[bus.busType] || { baseFarePerSeat: 150 };
-    const basePrice = fleet.baseFarePerSeat;
-    const discount = bus.discountPercent;
-    const finalPrice = Math.round(basePrice * (1 - discount / 100));
-    const savings = basePrice - finalPrice;
+// 14. PROFILE & SMART ID
+function loadProfileForm() {
+  document.getElementById('prof-name').value = currentUser.name || '';
+  document.getElementById('prof-email').value = currentUser.email || '';
+  document.getElementById('prof-phone').value = currentUser.phone || '';
+  document.getElementById('prof-gender').value = currentUser.gender || 'Male';
+  document.getElementById('prof-age').value = currentUser.age || 28;
+}
 
-    const demandCfg = {
-      LOW: {
-        badge: "bg-emerald-100 text-emerald-800 border-emerald-300",
-        label: "🔥 Low Demand (Save 20-30%)",
-        bar: "bg-emerald-500",
-        width: "25%",
-        cardBorder: "border-emerald-300 hover:border-emerald-500 bg-emerald-50/20"
-      },
-      MEDIUM: {
-        badge: "bg-blue-100 text-blue-800 border-blue-300",
-        label: "⚡ Medium Demand",
-        bar: "bg-blue-500",
-        width: "60%",
-        cardBorder: "border-blue-200 hover:border-blue-400 bg-white"
-      },
-      HIGH: {
-        badge: "bg-rose-100 text-rose-800 border-rose-300",
-        label: "🔴 High Demand (Fast Filling)",
-        bar: "bg-rose-500",
-        width: "90%",
-        cardBorder: "border-slate-200 hover:border-msrtc-red bg-white"
-      }
-    };
-    const cfg = demandCfg[bus.demand] || demandCfg.MEDIUM;
+function handleProfileUpdate(e) {
+  e.preventDefault();
+  currentUser.name = document.getElementById('prof-name').value.trim();
+  currentUser.email = document.getElementById('prof-email').value.trim();
+  currentUser.phone = document.getElementById('prof-phone').value.trim();
+  currentUser.gender = document.getElementById('prof-gender').value;
+  currentUser.age = parseInt(document.getElementById('prof-age').value || 28);
 
-    const amenityChips = (bus.amenities || []).map(a =>
-      `<span class="text-[10px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded font-medium">${a}</span>`
-    ).join('');
+  saveStoredUser(currentUser);
+  renderAuthCorner();
+  alert("Profile updated successfully!");
+}
 
-    const discountPill = discount > 0 ? `
-      <span class="bg-emerald-600 text-white text-[10px] font-extrabold px-2 py-0.5 rounded-full shadow-sm">
-        ${discount}% OFF
-      </span>
-    ` : '';
+function renderSmartIDPass() {
+  const box = document.getElementById('smartid-card-container');
+  box.innerHTML = `
+    <div class="bg-gradient-to-br from-msrtc-red to-msrtc-darkred text-white p-6 rounded-3xl shadow-xl border-4 border-amber-300 relative overflow-hidden">
+      <div class="flex justify-between items-center pb-3 border-b border-red-300/40">
+        <div>
+          <span class="text-[10px] font-bold uppercase tracking-wider text-amber-300">Government of Maharashtra</span>
+          <h3 class="text-base font-extrabold tracking-tight">MSRTC Digital Smart Transit Pass</h3>
+        </div>
+        <i class="fa-solid fa-id-card text-2xl text-amber-300"></i>
+      </div>
+
+      <div class="my-4 flex items-center justify-between">
+        <div>
+          <span class="text-[10px] text-red-200 uppercase font-semibold">Pass Holder</span>
+          <p class="text-lg font-black">${esc(currentUser.name)}</p>
+          <p class="text-xs text-red-100 font-mono">${esc(currentUser.smartId)}</p>
+          <span class="inline-block mt-2 text-[10px] font-bold bg-amber-400 text-slate-900 px-2 py-0.5 rounded">
+            Verified Citizen Pass
+          </span>
+        </div>
+        <div class="bg-white p-2 rounded-xl text-slate-900 text-center shadow">
+          <i class="fa-solid fa-qrcode text-4xl"></i>
+          <span class="block text-[8px] font-mono mt-0.5">SCAN PASS</span>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// =========================================================
+// 14. REST-STOP TENDER BIDDING & RESTAURANT REGISTRATION (MODULE 6)
+// =========================================================
+function switchBiddingSubTab(sub) {
+  ['bids', 'register', 'directory'].forEach(tab => {
+    const view = document.getElementById('bidding-view-' + tab);
+    const btn = document.getElementById('tab-btn-' + (tab === 'directory' ? 'dir' : (tab === 'register' ? 'reg' : 'bids')));
+    if (tab === sub) {
+      view?.classList.remove('hidden');
+      btn?.classList.add('bg-slate-900', 'text-white');
+      btn?.classList.remove('bg-white', 'text-slate-700');
+    } else {
+      view?.classList.add('hidden');
+      btn?.classList.remove('bg-slate-900', 'text-white');
+      btn?.classList.add('bg-white', 'text-slate-700');
+    }
+  });
+
+  if (sub === 'bids') loadBiddingStalls();
+  if (sub === 'directory') loadRegisteredVendorsList();
+}
+
+let cachedStalls = [];
+
+async function loadBiddingStalls() {
+  const grid = document.getElementById('stalls-bidding-grid');
+  if (!grid) return;
+  grid.innerHTML = `<div class="col-span-2 text-center py-8 text-slate-500"><i class="fa-solid fa-spinner fa-spin text-2xl text-amber-500 mb-2"></i><p>Loading live rest-stop auction tenders...</p></div>`;
+
+  try {
+    const stalls = await MSRTCApi.getBiddingStalls();
+    cachedStalls = stalls || [];
+    renderBiddingStalls(cachedStalls);
+  } catch (err) {
+    grid.innerHTML = `<div class="col-span-2 bg-rose-50 border border-rose-200 text-rose-800 p-4 rounded-xl text-xs">${esc(err.message)}</div>`;
+  }
+}
+
+function renderBiddingStalls(stalls) {
+  const grid = document.getElementById('stalls-bidding-grid');
+  if (!grid) return;
+
+  if (!stalls.length) {
+    grid.innerHTML = `<div class="col-span-2 text-center text-slate-500 py-6">No active stall tenders right now.</div>`;
+    return;
+  }
+
+  grid.innerHTML = stalls.map(s => {
+    const minBid = s.current_highest_bid + s.min_increment;
+    const recentBidsHtml = (s.recentBids || []).map(b => `
+      <div class="flex justify-between text-[11px] text-slate-600 border-b border-slate-100 py-1">
+        <span>${esc(b.vendor_name)}</span>
+        <span class="font-mono font-bold text-slate-900">₹${Number(b.bid_amount).toLocaleString('en-IN')}</span>
+      </div>
+    `).join('') || '<div class="text-[11px] text-slate-400">No competitive bids yet. Be the first!</div>';
 
     return `
-      <div class="border-2 ${cfg.cardBorder} rounded-2xl p-4 sm:p-5 shadow-sm hover:shadow-md transition flex flex-col sm:flex-row justify-between sm:items-center gap-4 cursor-pointer" onclick="chooseWizardBus('${bus.id}')">
-        <div class="flex items-start gap-3.5 flex-1">
-          <div class="w-11 h-11 rounded-xl bg-msrtc-red/10 text-msrtc-red flex items-center justify-center text-xl flex-shrink-0 mt-1">
-            <i class="fa-solid fa-bus-simple"></i>
+      <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition space-y-4">
+        <div class="flex justify-between items-start gap-2 border-b border-slate-100 pb-3">
+          <div>
+            <span class="text-[10px] font-extrabold uppercase tracking-wider text-amber-800 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">
+              ${esc(s.corridor)}
+            </span>
+            <h3 class="text-base font-black text-slate-900 mt-1">${esc(s.stall_number)}</h3>
+            <p class="text-xs text-slate-500 font-medium">${esc(s.rest_stop_name)} • ${esc(s.location_area)}</p>
           </div>
-          <div class="flex-1">
-            <div class="flex flex-wrap items-center gap-2 mb-1.5">
-              <h4 class="font-extrabold text-slate-900 text-base">${bus.busType}</h4>
-              <span class="text-xs font-mono font-bold bg-slate-100 text-slate-700 px-2 py-0.5 rounded">${bus.busNumber}</span>
-              <span class="text-[10px] font-bold border px-2 py-0.5 rounded-full ${cfg.badge}">${cfg.label}</span>
-              ${discountPill}
+          <span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">
+            ${s.status}
+          </span>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3 text-xs bg-slate-50 p-3.5 rounded-2xl border border-slate-200">
+          <div>
+            <span class="text-slate-400 block text-[10px] uppercase font-bold">Stall Category</span>
+            <span class="font-semibold text-slate-800 text-[11px]">${esc(s.stall_category)} (${s.sqft_area} sq.ft)</span>
+          </div>
+          <div>
+            <span class="text-slate-400 block text-[10px] uppercase font-bold">Base Reserve Bid</span>
+            <span class="font-bold text-slate-700">₹${Number(s.base_bid_monthly).toLocaleString('en-IN')}/mo</span>
+          </div>
+          <div class="col-span-2 border-t border-slate-200 pt-2 flex justify-between items-center">
+            <div>
+              <span class="text-[10px] font-bold text-slate-500 uppercase">Current Winning Bid:</span>
+              <span class="text-lg font-black text-msrtc-red font-mono ml-1">₹${Number(s.current_highest_bid).toLocaleString('en-IN')}</span>
             </div>
-
-            <div class="flex items-center gap-4 text-xs text-slate-700 mb-2">
-              <span class="font-extrabold text-sm text-slate-900">${bus.departure}</span>
-              <span class="text-slate-400">➔ ${bus.duration} Express ➔</span>
-              <span class="font-extrabold text-sm text-slate-900">${bus.arrival}</span>
-            </div>
-
-            <div class="flex flex-wrap gap-1.5 mb-2">${amenityChips}</div>
-
-            <div class="max-w-xs">
-              <div class="flex justify-between text-[10px] font-semibold text-slate-500 mb-1">
-                <span>Occupancy</span>
-                <span class="text-emerald-700 font-bold">${bus.availableSeats} seats left</span>
-              </div>
-              <div class="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden">
-                <div class="${cfg.bar} h-full rounded-full" style="width: ${cfg.width}"></div>
-              </div>
+            <div class="text-right">
+              <span class="text-[10px] text-slate-400 block">Leading Bidder</span>
+              <span class="text-[11px] font-bold text-slate-900">${esc(s.highest_bidder_name || 'None')}</span>
             </div>
           </div>
         </div>
 
-        <div class="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center border-t sm:border-t-0 pt-3 sm:pt-0 border-slate-100 flex-shrink-0">
-          <div class="text-left sm:text-right">
-            ${discount > 0 ? `
-              <p class="text-xs line-through text-slate-400 font-medium">₹${basePrice}</p>
-              <p class="text-2xl font-black text-emerald-700">₹${finalPrice}<span class="text-xs font-normal text-slate-500">/seat</span></p>
-              <p class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full inline-block mt-0.5">Save ₹${savings}/seat</p>
-            ` : `
-              <p class="text-[10px] text-slate-400 font-semibold uppercase">Regular Fare</p>
-              <p class="text-2xl font-black text-slate-900">₹${basePrice}<span class="text-xs font-normal text-slate-500">/seat</span></p>
-            `}
+        <!-- Recent Bid Log -->
+        <div class="bg-white border border-slate-100 rounded-xl p-3">
+          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Recent Bidding Activity (${s.total_bids} bids)</span>
+          <div class="space-y-0.5">
+            ${recentBidsHtml}
           </div>
-          <button type="button" onclick="event.stopPropagation(); chooseWizardBus('${bus.id}')" class="mt-2 bg-msrtc-red hover:bg-msrtc-darkred text-white text-xs font-bold px-5 py-2.5 rounded-xl transition flex items-center gap-1.5 shadow-md shadow-red-200">
-            Select & Pick Seats <i class="fa-solid fa-arrow-right text-[10px]"></i>
-          </button>
+        </div>
+
+        <!-- Place Bid Action -->
+        <div class="bg-amber-50/70 border border-amber-200 p-4 rounded-2xl space-y-2.5 text-xs">
+          <div class="flex justify-between items-center">
+            <span class="font-bold text-amber-950">Place Competitive Tender Bid:</span>
+            <span class="text-[10px] text-slate-500">Min Bid: ₹${Number(minBid).toLocaleString('en-IN')}</span>
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <input type="text" id="bid-name-${s.id}" placeholder="Your Restaurant / Vendor Name" value="${esc(currentUser.name)}" class="p-2.5 border border-slate-300 rounded-xl bg-white text-xs">
+            <input type="tel" id="bid-phone-${s.id}" placeholder="Phone Number" value="${esc(currentUser.phone)}" class="p-2.5 border border-slate-300 rounded-xl bg-white text-xs">
+          </div>
+          <div class="flex gap-2 items-center">
+            <div class="relative flex-grow">
+              <span class="absolute left-3 top-2.5 text-slate-400 font-bold">₹</span>
+              <input type="number" id="bid-amt-${s.id}" min="${minBid}" step="${s.min_increment}" value="${minBid}" class="w-full pl-7 pr-3 py-2.5 border border-slate-300 rounded-xl bg-white font-mono font-bold text-sm">
+            </div>
+            <button onclick="handlePlaceBid('${s.id}')" class="bg-slate-900 hover:bg-slate-800 text-white font-extrabold px-4 py-2.5 rounded-xl whitespace-nowrap transition flex items-center gap-1.5">
+              <i class="fa-solid fa-gavel text-amber-400"></i> Submit Bid
+            </button>
+          </div>
         </div>
       </div>
     `;
   }).join('');
 }
 
-// STEP 2 ➔ STEP 3: Choose bus & move to seat selection
-function chooseWizardBus(busId) {
-  const bus = BUS_SCHEDULE_TEMPLATES.find(b => b.id === busId);
-  if (!bus) return;
+async function handlePlaceBid(stallId) {
+  const name = document.getElementById(`bid-name-${stallId}`)?.value.trim();
+  const phone = document.getElementById(`bid-phone-${stallId}`)?.value.trim();
+  const amt = document.getElementById(`bid-amt-${stallId}`)?.value;
 
-  const fleet = MSRTC_FLEET[bus.busType] || { baseFarePerSeat: 150 };
-  const basePrice = fleet.baseFarePerSeat;
-  const discount = bus.discountPercent;
-  const discountedPrice = Math.round(basePrice * (1 - discount / 100));
-
-  wizardState.selectedBus = {
-    ...bus,
-    basePrice,
-    discountedPrice
-  };
-
-  const strip = document.getElementById('step3-bus-strip');
-  if (strip) {
-    strip.innerHTML = `
-      <div class="flex items-center gap-2">
-        <span class="w-7 h-7 rounded-lg bg-msrtc-red text-white flex items-center justify-center font-bold text-xs"><i class="fa-solid fa-bus"></i></span>
-        <div>
-          <span class="font-bold text-slate-900">${bus.busType}</span>
-          <span class="text-[10px] font-mono text-slate-500 ml-1">(${bus.busNumber})</span>
-        </div>
-      </div>
-      <div class="flex items-center gap-3">
-        <span>⏰ ${bus.departure} ➔ ${bus.arrival} (${bus.duration})</span>
-        <span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold">₹${discountedPrice} / seat</span>
-      </div>
-    `;
-  }
-
-  if (!wizardState.selectedSeats || wizardState.selectedSeats.length === 0) {
-    wizardState.selectedSeats = ["14A"];
-  }
-  currentSelectedSeats = [...wizardState.selectedSeats];
-
-  renderInteractiveSeatCabin();
-  goToStep(3);
-  showToast(`Selected ${bus.busType}! Pick your seats.`, 'info');
-}
-
-// STEP 3 ➔ STEP 4: Confirm seats & open passenger details
-function confirmSeatsGoStep4() {
-  if (!currentSelectedSeats || currentSelectedSeats.length === 0) {
-    showToast("Please select at least one seat to proceed!", "error");
+  if (!name || !phone || !amt) {
+    alert("Please enter your vendor name, phone number, and bid amount.");
     return;
   }
-  wizardState.selectedSeats = [...currentSelectedSeats];
-  renderWizardPassengerInputs();
-  goToStep(4);
-}
 
-// ============================================================
-// CONCESSION PRICING RULE:
-// "if male ticket should be full else if female and age>60, age<5 half fare pricing"
-// ============================================================
-function calculatePassengerFare(gender, age, baseSeatPrice) {
-  let isHalfFare = false;
-  let reason = "Full Fare (Adult Male)";
-
-  const numAge = parseInt(age, 10);
-
-  if (!isNaN(numAge) && numAge < 5) {
-    isHalfFare = true;
-    reason = "50% Off (Child < 5 yrs)";
-  } else if (!isNaN(numAge) && numAge >= 60) {
-    isHalfFare = true;
-    reason = "50% Off (Senior Citizen ≥ 60 yrs)";
-  } else if (gender === 'Female') {
-    isHalfFare = true;
-    reason = "50% Off (Female Passenger Concession)";
+  try {
+    const res = await MSRTCApi.placeStallBid(stallId, name, phone, parseInt(amt));
+    alert(res.message);
+    loadBiddingStalls();
+  } catch (err) {
+    alert(`Bidding Error: ${err.message}`);
   }
-
-  const finalFare = isHalfFare ? Math.round(baseSeatPrice * 0.5) : baseSeatPrice;
-  const savings = baseSeatPrice - finalFare;
-
-  return { isHalfFare, finalFare, savings, reason };
 }
 
-// STEP 4: Render passenger input rows and calculate live breakdown
-function renderWizardPassengerInputs() {
-  const container = document.getElementById('passenger-inputs-container');
+async function handleVendorRegistrationSubmit(e) {
+  e.preventDefault();
+  const btn = document.getElementById('reg-vendor-btn');
+  btn.disabled = true;
+  btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i> Registering Partner...`;
+
+  const payload = {
+    restaurantName: document.getElementById('reg-rest-name').value.trim(),
+    ownerName: document.getElementById('reg-owner-name').value.trim(),
+    phone: document.getElementById('reg-phone').value.trim(),
+    email: document.getElementById('reg-email').value.trim(),
+    fssaiLicense: document.getElementById('reg-fssai').value.trim(),
+    corridor: document.getElementById('reg-corridor').value,
+    locationStand: document.getElementById('reg-location').value.trim(),
+    cuisineType: document.getElementById('reg-cuisine').value,
+    seatingCapacity: parseInt(document.getElementById('reg-capacity').value || 75),
+    hasRestrooms: document.getElementById('reg-restrooms').checked,
+    hasEvCharging: document.getElementById('reg-ev').checked,
+    commissionPct: 12.0
+  };
+
+  try {
+    const res = await MSRTCApi.registerVendor(payload);
+    openVendorCertModal(res);
+    e.target.reset();
+  } catch (err) {
+    alert(`Registration Error: ${err.message}`);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = `<i class="fa-solid fa-stamp"></i> Submit Official Partner Registration`;
+  }
+}
+
+function openVendorCertModal(res) {
+  document.getElementById('cert-restaurant-name').innerText = res.restaurantName;
+  document.getElementById('cert-partner-id').innerText = res.vendorId;
+  document.getElementById('cert-no').innerText = res.certificateNumber;
+  document.getElementById('vendor-cert-modal').classList.remove('hidden');
+}
+
+function closeVendorCertModal() {
+  document.getElementById('vendor-cert-modal').classList.add('hidden');
+  switchBiddingSubTab('directory');
+}
+
+async function loadRegisteredVendorsList() {
+  const container = document.getElementById('registered-vendors-container');
+  if (!container) return;
+  container.innerHTML = `<div class="col-span-3 text-center py-8 text-slate-500"><i class="fa-solid fa-spinner fa-spin text-2xl text-amber-500 mb-2"></i><p>Loading verified vendor network...</p></div>`;
+
+  try {
+    const list = await MSRTCApi.getRegisteredVendors();
+    renderRegisteredVendors(list || []);
+  } catch (err) {
+    container.innerHTML = `<div class="col-span-3 text-xs text-rose-700 bg-rose-50 p-4 rounded-xl">${esc(err.message)}</div>`;
+  }
+}
+
+function renderRegisteredVendors(list) {
+  const container = document.getElementById('registered-vendors-container');
   if (!container) return;
 
-  const count = wizardState.selectedSeats.length;
-  const baseRate = wizardState.selectedBus ? wizardState.selectedBus.discountedPrice : 240;
+  const samplePartners = list.length ? list : [
+    {
+      restaurant_name: "Katraj Ghat Highway Food Plaza",
+      owner_name: "Patil & Sons Hospitality",
+      phone: "+91 98220 54321",
+      location_stand: "NH48 Katraj Bypass",
+      corridor: "Pune - Kolhapur NH48 Corridor",
+      cuisine_type: "Maharashtrian Pure Veg & Thali",
+      fssai_license: "11524021000492",
+      status: "VERIFIED"
+    },
+    {
+      restaurant_name: "Krishna Valley Highway Plaza",
+      owner_name: "Sanjay Deshmukh",
+      phone: "+91 97654 32109",
+      location_stand: "Karad Bypass Junction",
+      corridor: "Pune - Kolhapur NH48 Corridor",
+      cuisine_type: "Family Food Court & Snacks",
+      fssai_license: "11524021000881",
+      status: "VERIFIED"
+    },
+    {
+      restaurant_name: "Amrutdhara Refreshment Center",
+      owner_name: "Ramesh Pawar",
+      phone: "+91 94230 11982",
+      location_stand: "Swargate Bus Depot Food Bay",
+      corridor: "Pune City Transit Hub",
+      cuisine_type: "24x7 Tea, Misal Pav & Rail Neer",
+      fssai_license: "11524021000109",
+      status: "VERIFIED"
+    }
+  ];
 
-  let html = '';
-  for (let i = 1; i <= count; i++) {
-    const seat = wizardState.selectedSeats[i - 1] || `${i}A`;
-    const isSelf = (i === 1 && currentUser);
-    const defaultName = isSelf ? currentUser.fullName : `Passenger ${i}`;
-    const defaultAge = isSelf ? (currentUser.age || 29) : (i === 2 ? 54 : (25 + i * 4));
-    const defaultGender = isSelf ? (currentUser.gender || 'Male') : (i === 2 ? 'Female' : 'Male');
-
-    html += `
-      <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl" id="passenger-card-${i}">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-            <span class="w-5 h-5 rounded-full bg-slate-800 text-white flex items-center justify-center text-[10px] font-bold">${i}</span>
-            Passenger ${i} ${isSelf ? '(Primary / Self)' : ''}
-          </span>
-          <span class="text-xs font-mono font-bold bg-msrtc-red text-white px-2.5 py-0.5 rounded-lg">
-            Seat ${seat}
-          </span>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 items-center">
-          <div class="sm:col-span-2">
-            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Full Name</label>
-            <input type="text" id="wiz-pass-name-${i}" value="${defaultName}" placeholder="Enter name"
-              oninput="updateWizardFareBreakdown()"
-              class="w-full text-xs font-bold px-3 py-2 bg-white border border-slate-300 rounded-lg focus:border-msrtc-red focus:outline-none">
-          </div>
-          <div>
-            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Age</label>
-            <input type="number" id="wiz-pass-age-${i}" value="${defaultAge}" min="1" max="110"
-              oninput="updateWizardFareBreakdown()"
-              class="w-full text-xs font-bold px-3 py-2 bg-white border border-slate-300 rounded-lg focus:border-msrtc-red focus:outline-none">
-          </div>
-          <div>
-            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Gender</label>
-            <select id="wiz-pass-gender-${i}" onchange="updateWizardFareBreakdown()"
-              class="w-full text-xs font-bold px-3 py-2 bg-white border border-slate-300 rounded-lg focus:border-msrtc-red focus:outline-none">
-              <option value="Male" ${defaultGender === 'Male' ? 'selected' : ''}>Male (Full Fare)</option>
-              <option value="Female" ${defaultGender === 'Female' ? 'selected' : ''}>Female (50% Off)</option>
-              <option value="Other" ${defaultGender === 'Other' ? 'selected' : ''}>Other</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- Concession indicator badge for this passenger -->
-        <div id="wiz-pass-concession-${i}" class="mt-2.5 pt-2 border-t border-slate-200/80 flex items-center justify-between text-[11px]">
-        </div>
+  container.innerHTML = samplePartners.map(p => `
+    <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 text-xs space-y-2">
+      <div class="flex justify-between items-start">
+        <h4 class="font-extrabold text-slate-900">${esc(p.restaurant_name)}</h4>
+        <span class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+          <i class="fa-solid fa-check"></i> ${p.status || 'VERIFIED'}
+        </span>
       </div>
-    `;
-  }
-
-  container.innerHTML = html;
-  updateWizardFareBreakdown();
+      <p class="text-slate-500 text-[11px]">${esc(p.location_stand)} • ${esc(p.corridor)}</p>
+      <div class="pt-2 border-t border-slate-200/80 flex justify-between text-[11px]">
+        <span class="text-slate-500">FSSAI: <span class="font-mono text-slate-700 font-semibold">${esc(p.fssai_license)}</span></span>
+        <span class="text-slate-700 font-semibold">${esc(p.phone)}</span>
+      </div>
+    </div>
+  `).join('');
 }
 
-function updateWizardFareBreakdown() {
-  const count = wizardState.selectedSeats.length;
-  const baseRate = wizardState.selectedBus ? wizardState.selectedBus.discountedPrice : 240;
 
-  let passengers = [];
-  let totalBase = 0;
-  let totalPayableNoGst = 0;
-  let totalSavings = 0;
+// =========================================================
+// 15. COURIER, CARGO & LUGGAGE BOOKING (MSRTC VAHATUK)
+// =========================================================
+function switchCargoSubTab(sub) {
+  ['book', 'luggage', 'track'].forEach(tab => {
+    const view = document.getElementById('cargo-view-' + tab);
+    const btn = document.getElementById('tab-btn-cargo' + tab);
+    if (tab === sub) {
+      view?.classList.remove('hidden');
+      btn?.classList.add('bg-slate-900', 'text-white');
+      btn?.classList.remove('bg-white', 'text-slate-700');
+    } else {
+      view?.classList.add('hidden');
+      btn?.classList.remove('bg-slate-900', 'text-white');
+      btn?.classList.add('bg-white', 'text-slate-700');
+    }
+  });
 
-  for (let i = 1; i <= count; i++) {
-    const seat = wizardState.selectedSeats[i - 1] || `${i}A`;
-    const nameInput = document.getElementById(`wiz-pass-name-${i}`);
-    const ageInput = document.getElementById(`wiz-pass-age-${i}`);
-    const genderSelect = document.getElementById(`wiz-pass-gender-${i}`);
+  if (sub === 'book') calculateLiveCargoTariff();
+  if (sub === 'luggage') calculatePassengerLuggageLive();
+  if (sub === 'track') trackConsignmentLive();
+}
 
-    const name = nameInput ? nameInput.value.trim() : `Passenger ${i}`;
-    const age = ageInput ? parseInt(ageInput.value, 10) || 28 : 28;
-    const gender = genderSelect ? genderSelect.value : 'Male';
+async function calculateLiveCargoTariff() {
+  const from = document.getElementById('cargo-from')?.value.trim() || "Kolhapur CBS (Central Bus Stand)";
+  const to = document.getElementById('cargo-to')?.value.trim() || "Pune (Swargate)";
+  const weight = parseFloat(document.getElementById('cargo-weight')?.value || 8);
+  const category = document.getElementById('cargo-category')?.value || "General Commercial";
+  const speed = document.querySelector('input[name="cargoSpeed"]:checked')?.value || "STANDARD";
+  const packages = parseInt(document.getElementById('cargo-packages')?.value || 1);
 
-    const { isHalfFare, finalFare, savings, reason } = calculatePassengerFare(gender, age, baseRate);
-
-    passengers.push({
-      seat,
-      name,
-      age,
-      gender,
-      baseFare: baseRate,
-      isHalfFare,
-      finalFare,
-      savings,
-      reason
+  try {
+    const quote = await MSRTCApi.getCargoQuote({
+      fromStand: from,
+      toStand: to,
+      weightKg: weight,
+      category: category,
+      speedTier: speed,
+      packagesCount: packages,
+      isExcessLuggage: false
     });
 
-    totalBase += baseRate;
-    totalPayableNoGst += finalFare;
-    totalSavings += savings;
-
-    const badgeEl = document.getElementById(`wiz-pass-concession-${i}`);
-    if (badgeEl) {
-      if (isHalfFare) {
-        badgeEl.innerHTML = `
-          <span class="text-emerald-700 font-bold flex items-center gap-1">
-            <i class="fa-solid fa-circle-check text-emerald-500"></i> ${reason}
-          </span>
-          <span class="font-extrabold text-slate-800">
-            <span class="line-through text-slate-400 font-normal mr-1.5">₹${baseRate}</span>
-            <span class="text-emerald-700">₹${finalFare}</span>
-          </span>
-        `;
-      } else {
-        badgeEl.innerHTML = `
-          <span class="text-slate-500 font-semibold flex items-center gap-1">
-            <i class="fa-solid fa-mars text-blue-500"></i> Adult Male — Full Fare
-          </span>
-          <span class="font-extrabold text-slate-800">₹${finalFare}</span>
-        `;
-      }
-    }
-  }
-
-  const gst = Math.round(totalPayableNoGst * 0.05);
-  const finalTotal = totalPayableNoGst + gst;
-
-  wizardState.passengers = passengers;
-  wizardState.totalBaseFare = totalBase;
-  wizardState.totalConcessionSavings = totalSavings;
-  wizardState.gst = gst;
-  wizardState.finalTotal = finalTotal;
-
-  const box = document.getElementById('fare-breakdown-box');
-  if (box) {
-    box.innerHTML = `
-      <div class="flex justify-between text-slate-600">
-        <span>Standard Base Total (${count} Seat${count > 1 ? 's' : ''} @ ₹${baseRate})</span>
-        <span class="font-semibold">₹${totalBase}</span>
-      </div>
-      ${totalSavings > 0 ? `
-        <div class="flex justify-between text-emerald-700 font-semibold">
-          <span><i class="fa-solid fa-tag mr-1"></i> Concession Savings (Female / Senior / Child)</span>
-          <span>- ₹${totalSavings}</span>
-        </div>
-      ` : ''}
-      <div class="flex justify-between text-slate-600">
-        <span>GST & Surcharge (5%)</span>
-        <span class="font-semibold">+ ₹${gst}</span>
-      </div>
-      <div class="flex justify-between items-center text-sm font-extrabold text-slate-900 pt-2 border-t border-slate-200 mt-1">
-        <span>Total Fare Payable</span>
-        <span class="text-lg text-msrtc-red">₹${finalTotal}</span>
-      </div>
-    `;
+    document.getElementById('cargo-calc-dist').innerText = `${quote.distanceKm} km`;
+    document.getElementById('cargo-calc-weight').innerText = `${quote.weightKg} kg`;
+    document.getElementById('cargo-calc-base').innerText = `₹${quote.baseFreight}`;
+    document.getElementById('cargo-calc-distcharge').innerText = `₹${quote.distanceCharge}`;
+    document.getElementById('cargo-calc-surcharge').innerText = `₹${quote.surcharge}`;
+    document.getElementById('cargo-calc-gst').innerText = `₹${quote.gst}`;
+    document.getElementById('cargo-calc-total').innerText = `₹${quote.total}`;
+  } catch (err) {
+    document.getElementById('cargo-calc-total').innerText = `₹205`;
   }
 }
 
-// STEP 4 ➔ STEP 5: Validate and go to payment
-function confirmPassengersGoStep5() {
-  const count = wizardState.selectedSeats.length;
-  for (let i = 1; i <= count; i++) {
-    const nameInput = document.getElementById(`wiz-pass-name-${i}`);
-    if (!nameInput || !nameInput.value.trim()) {
-      showToast(`Please enter name for Passenger ${i}!`, "error");
-      if (nameInput) nameInput.focus();
-      return;
-    }
-  }
+async function handleCargoBookingSubmit(e) {
+  e.preventDefault();
+  const btn = document.getElementById('book-cargo-btn');
+  btn.disabled = true;
+  btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i> Processing Waybill...`;
 
-  updateWizardFareBreakdown();
-  renderWizardPaymentSummary();
-  goToStep(5);
-}
-
-// Quick add saved co-passenger
-function addSavedCoPassenger(name, age, gender) {
-  if (currentSelectedSeats.length < 6) {
-    const availableSeatNames = ["01C", "02C", "03C", "04C", "05C", "06C", "07C", "01D", "02D", "03D"];
-    const nextSeat = availableSeatNames.find(s => !currentSelectedSeats.includes(s)) || `0${currentSelectedSeats.length + 1}B`;
-    currentSelectedSeats.push(nextSeat);
-    wizardState.selectedSeats = [...currentSelectedSeats];
-  }
-
-  renderWizardPassengerInputs();
-
-  const targetIndex = wizardState.selectedSeats.length;
-  const nameInput = document.getElementById(`wiz-pass-name-${targetIndex}`);
-  const ageInput = document.getElementById(`wiz-pass-age-${targetIndex}`);
-  const genderInput = document.getElementById(`wiz-pass-gender-${targetIndex}`);
-  if (nameInput) nameInput.value = name;
-  if (ageInput) ageInput.value = age;
-  if (genderInput) genderInput.value = gender;
-
-  updateWizardFareBreakdown();
-  showToast(`Added ${name} to Seat ${wizardState.selectedSeats[targetIndex - 1]}!`, "info");
-}
-
-// STEP 5: Payment summary & handling
-function renderWizardPaymentSummary() {
-  const container = document.getElementById('payment-summary');
-  const bus = wizardState.selectedBus || {
-    busType: "Shivshahi (AC Seater)",
-    busNumber: "MH-09-EM-8834",
-    departure: "07:15",
-    arrival: "11:45",
-    duration: "4h 30m"
+  const payload = {
+    bookingType: 'PARCEL',
+    fromStand: document.getElementById('cargo-from').value.trim(),
+    toStand: document.getElementById('cargo-to').value.trim(),
+    senderName: document.getElementById('cargo-s-name').value.trim(),
+    senderPhone: document.getElementById('cargo-s-phone').value.trim(),
+    receiverName: document.getElementById('cargo-r-name').value.trim(),
+    receiverPhone: document.getElementById('cargo-r-phone').value.trim(),
+    category: document.getElementById('cargo-category').value,
+    weightKg: parseFloat(document.getElementById('cargo-weight').value || 5),
+    packagesCount: parseInt(document.getElementById('cargo-packages').value || 1),
+    speedTier: document.querySelector('input[name="cargoSpeed"]:checked')?.value || 'STANDARD',
+    declaredValue: 2500
   };
 
-  const d = new Date(wizardState.date);
-  const dateFormatted = isNaN(d) ? wizardState.date : d.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+  try {
+    const res = await MSRTCApi.bookCargo(payload);
+    openCargoModal(res);
+  } catch (err) {
+    alert(`Cargo Booking Error: ${err.message}`);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = `<i class="fa-solid fa-file-invoice"></i> Confirm & Generate MSRTC Waybill`;
+  }
+}
 
-  if (container) {
-    container.innerHTML = `
-      <div class="flex flex-col sm:flex-row justify-between pb-3 mb-3 border-b border-slate-200 gap-2">
+function calculatePassengerLuggageLive() {
+  const totalWeight = parseFloat(document.getElementById('luggage-weight-input')?.value || 25);
+  const freeAllowance = 15.0;
+  const excess = Math.max(0, totalWeight - freeAllowance);
+  const fee = Math.round(excess * 10 * 1.05);
+
+  document.getElementById('luggage-excess-kg').innerText = `${excess.toFixed(1)} kg`;
+  document.getElementById('luggage-excess-total').innerText = `₹${fee} (incl. 5% GST)`;
+}
+
+function bookExcessLuggagePass() {
+  const totalWeight = parseFloat(document.getElementById('luggage-weight-input')?.value || 25);
+  const excess = Math.max(0, totalWeight - 15.0);
+  const fee = Math.round(excess * 10 * 1.05);
+
+  const mockPass = {
+    consignmentId: `MSRTC-LUG-2026-${Math.floor(10000 + Math.random() * 90000)}`,
+    from: "Kolhapur CBS (Central Bus Stand)",
+    to: "Pune (Swargate)",
+    tariff: {
+      isExcessLuggage: true,
+      weightKg: totalWeight,
+      excessWeightKg: excess,
+      total: fee
+    },
+    sender: { name: currentUser.name, phone: currentUser.phone },
+    receiver: { name: currentUser.name, phone: currentUser.phone },
+    createdAt: new Date().toISOString().replace('T', ' ').substring(0, 19)
+  };
+
+  openCargoModal(mockPass);
+}
+
+function openCargoModal(cargo) {
+  const content = document.getElementById('cargo-modal-content');
+  const t = cargo.tariff || {};
+
+  content.innerHTML = `
+    <div class="border-4 border-slate-900 rounded-2xl p-6 bg-white space-y-4 font-sans">
+      <div class="flex justify-between items-start border-b-2 border-slate-900 pb-3">
         <div>
-          <span class="text-[10px] font-bold uppercase text-slate-400">Journey</span>
-          <p class="font-extrabold text-slate-900 text-sm">${wizardState.from} ➔ ${wizardState.to}</p>
-          <p class="text-xs text-slate-500 font-medium">📅 ${dateFormatted} • ⏰ ${bus.departure} to ${bus.arrival} (${bus.duration})</p>
+          <span class="text-[10px] font-black uppercase tracking-widest text-msrtc-red">महाराष्ट्र राज्य मार्ग परिवहन महामंडळ</span>
+          <h2 class="text-xl font-black text-slate-900 uppercase">MSRTC Official Cargo Waybill (AWB)</h2>
+          <p class="text-xs text-slate-500">State Transport Express Goods & Parcel Consignment Note</p>
         </div>
-        <div class="sm:text-right">
-          <span class="text-[10px] font-bold uppercase text-slate-400">Bus & Seats</span>
-          <p class="font-extrabold text-slate-900 text-sm">${bus.busType}</p>
-          <p class="text-xs text-msrtc-red font-bold font-mono">Seats: ${wizardState.selectedSeats.join(', ')}</p>
-        </div>
-      </div>
-
-      <div class="mb-3">
-        <span class="text-[10px] font-bold uppercase text-slate-400 block mb-1.5">Passengers (${wizardState.passengers.length})</span>
-        <div class="space-y-1">
-          ${wizardState.passengers.map(p => `
-            <div class="flex justify-between items-center text-xs bg-white p-2 rounded-lg border border-slate-100">
-              <div>
-                <b class="text-slate-800">${p.name}</b>
-                <span class="text-[11px] text-slate-500">(${p.gender}, ${p.age}y) — Seat ${p.seat}</span>
-              </div>
-              <div class="text-right">
-                <span class="font-bold text-slate-800">₹${p.finalFare}</span>
-                ${p.isHalfFare ? `<span class="block text-[10px] text-emerald-600 font-semibold">${p.reason}</span>` : ''}
-              </div>
-            </div>
-          `).join('')}
+        <div class="text-right">
+          <span class="text-[10px] text-slate-400 block uppercase font-bold">Consignment Number</span>
+          <span class="text-sm font-mono font-black text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-lg border border-indigo-200 block">
+            ${esc(cargo.consignmentId || cargo.trackingNumber)}
+          </span>
         </div>
       </div>
 
-      <div class="pt-2 border-t border-slate-200 text-xs space-y-1 text-slate-600">
-        <div class="flex justify-between">
-          <span>Base Bus Tickets</span>
-          <span>₹${wizardState.totalBaseFare}</span>
+      <div class="grid grid-cols-2 gap-4 text-xs bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+        <div>
+          <span class="text-[10px] text-slate-400 uppercase font-bold">Origin Bus Stand</span>
+          <p class="font-extrabold text-slate-900">${esc(cargo.from || 'Kolhapur CBS')}</p>
         </div>
-        ${wizardState.totalConcessionSavings > 0 ? `
-          <div class="flex justify-between text-emerald-700 font-semibold">
-            <span>Concession Discount</span>
-            <span>- ₹${wizardState.totalConcessionSavings}</span>
+        <div>
+          <span class="text-[10px] text-slate-400 uppercase font-bold">Destination Bus Stand</span>
+          <p class="font-extrabold text-slate-900">${esc(cargo.to || 'Pune (Swargate)')}</p>
+        </div>
+        <div>
+          <span class="text-[10px] text-slate-400 uppercase font-bold">Consignor (Sender)</span>
+          <p class="font-bold text-slate-800">${esc(cargo.sender?.name || 'Pravin Dongare')} • ${esc(cargo.sender?.phone || '+91 98220 12345')}</p>
+        </div>
+        <div>
+          <span class="text-[10px] text-slate-400 uppercase font-bold">Consignee (Receiver)</span>
+          <p class="font-bold text-slate-800">${esc(cargo.receiver?.name || 'Amit Deshmukh')} • ${esc(cargo.receiver?.phone || '+91 94220 99887')}</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-3 gap-2 text-xs text-center border border-slate-200 rounded-xl p-3 bg-white">
+        <div>
+          <span class="text-[10px] text-slate-400 uppercase font-bold block">Weight</span>
+          <span class="font-mono font-bold text-slate-800">${t.weightKg || 8.0} kg</span>
+        </div>
+        <div>
+          <span class="text-[10px] text-slate-400 uppercase font-bold block">Service</span>
+          <span class="font-bold text-indigo-700">${t.isExcessLuggage ? 'Excess Luggage Pass' : 'Bus Freight (Express)'}</span>
+        </div>
+        <div>
+          <span class="text-[10px] text-slate-400 uppercase font-bold block">Total Paid</span>
+          <span class="font-mono font-black text-msrtc-red text-sm">₹${t.total || 205}</span>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between pt-2 border-t border-slate-100 text-[10px] text-slate-500">
+        <div class="flex items-center gap-2">
+          <i class="fa-solid fa-qrcode text-3xl text-slate-900"></i>
+          <div>
+            <span class="font-bold text-slate-800 block">Depot Scan Verification</span>
+            <span>OTP Required at Collection Counter</span>
           </div>
-        ` : ''}
-        <div class="flex justify-between">
-          <span>GST & Toll Fee (5%)</span>
-          <span>+ ₹${wizardState.gst}</span>
         </div>
+        <span class="font-mono">${cargo.createdAt || 'Just now'}</span>
       </div>
-    `;
-  }
-
-  const finalTotalEl = document.getElementById('final-total-display');
-  if (finalTotalEl) {
-    finalTotalEl.innerText = `₹${wizardState.finalTotal}`;
-  }
-}
-
-// Payment method click & confirm
-function handleWizardPayment(method) {
-  const bus = wizardState.selectedBus || {
-    busType: "Shivshahi (AC Seater)",
-    busNumber: "MH-09-EM-8834",
-    departure: "07:15",
-    arrival: "11:45",
-    duration: "4h 30m"
-  };
-
-  const newBooking = {
-    bookingId: "MSRTC-2026-" + Math.floor(10000 + Math.random() * 90000),
-    pnr: "PNR" + Math.floor(1000000 + Math.random() * 9000000),
-    userId: currentUser ? currentUser.userId : "usr_guest",
-    busDetails: {
-      busNumber: bus.busNumber,
-      busType: bus.busType,
-      operator: "MSRTC State Express Division"
-    },
-    route: {
-      from: wizardState.from,
-      to: wizardState.to,
-      departureTime: `${wizardState.date}T${bus.departure}:00+05:30`,
-      arrivalTime: `${wizardState.date}T${bus.arrival}:00+05:30`,
-      boardingPoint: `${wizardState.from} Express Bay`,
-      duration: bus.duration
-    },
-    seats: [...wizardState.selectedSeats],
-    passengers: wizardState.passengers.map(p => ({
-      name: p.name,
-      age: p.age,
-      gender: p.gender,
-      fare: p.finalFare,
-      concession: p.reason
-    })),
-    fare: {
-      baseFare: wizardState.totalBaseFare - wizardState.totalConcessionSavings,
-      gst: wizardState.gst,
-      totalAmount: wizardState.finalTotal,
-      paymentMethod: method === 'UPI' ? 'UPI Instant Pay' : (method === 'Card' ? 'Debit/Credit Card' : 'Cash at Counter'),
-      paymentStatus: 'PAID'
-    },
-    tripStatus: "UPCOMING",
-    bookedAt: new Date().toISOString()
-  };
-
-  const bookings = getStoredBookings();
-  bookings.unshift(newBooking);
-  saveStoredBookings(bookings);
-
-  showToast(`🎉 Booking Successful! PNR: ${newBooking.pnr}`, "success");
-
-  goToStep(1);
-  navigateTo('history');
-  setTimeout(() => {
-    openTicketModal(newBooking.bookingId);
-  }, 400);
-}
-
-function quickBook(from, to, busType) {
-  navigateTo('book');
-  const fromEl = document.getElementById('book-from');
-  const toEl = document.getElementById('book-to');
-  if (fromEl) fromEl.value = from;
-  if (toEl) toEl.value = to;
-  goToStep(1);
-  wizardSearchBuses();
-}
-
-// 10. TOAST SYSTEM
-function showToast(message, type = "info") {
-  const container = document.getElementById('toast-container');
-  if (!container) return;
-  const toast = document.createElement('div');
-  
-  let bg = "bg-slate-900 text-white";
-  let icon = "fa-circle-info text-blue-400";
-  if (type === "success") {
-    bg = "bg-emerald-900 text-white border border-emerald-700";
-    icon = "fa-circle-check text-emerald-400";
-  } else if (type === "error") {
-    bg = "bg-rose-900 text-white border border-rose-700";
-    icon = "fa-triangle-exclamation text-rose-400";
-  }
-
-  toast.className = `${bg} px-4 py-3 rounded-2xl shadow-xl flex items-center gap-3 text-xs font-semibold transform transition-all duration-300 translate-y-2 opacity-0`;
-  toast.innerHTML = `
-    <i class="fa-solid ${icon} text-base"></i>
-    <span>${message}</span>
+    </div>
   `;
 
-  container.appendChild(toast);
-  setTimeout(() => {
-    toast.classList.remove('translate-y-2', 'opacity-0');
-  }, 20);
-
-  setTimeout(() => {
-    toast.classList.add('opacity-0', 'translate-x-full');
-    setTimeout(() => toast.remove(), 300);
-  }, 3500);
+  document.getElementById('cargo-modal').classList.remove('hidden');
 }
 
-// 11. INITIALIZE ON DOM READY
-document.addEventListener('DOMContentLoaded', () => {
-  populateLocationDatalists();
-  renderAuthSection();
-  setDefaultBookingDate();
-  renderInteractiveSeatCabin();
-});
+function closeCargoModal() {
+  document.getElementById('cargo-modal').classList.add('hidden');
+}
+
+async function trackConsignmentLive() {
+  const query = document.getElementById('cargo-track-input')?.value.trim() || 'MSRTC-CRG-2026-10492';
+  const box = document.getElementById('cargo-tracking-result-box');
+  if (!box) return;
+
+  box.innerHTML = `<div class="bg-white p-8 rounded-3xl border border-slate-200 text-center text-slate-500 text-xs"><i class="fa-solid fa-spinner fa-spin text-2xl text-indigo-600 mb-2"></i><p>Locating parcel across transit network...</p></div>`;
+
+  try {
+    const data = await MSRTCApi.trackCargo(query);
+    renderCargoTrackingTimeline(data);
+  } catch (err) {
+    box.innerHTML = `<div class="bg-rose-50 border border-rose-200 text-rose-800 p-4 rounded-2xl text-xs">${esc(err.message)}</div>`;
+  }
+}
+
+function renderCargoTrackingTimeline(cargo) {
+  const box = document.getElementById('cargo-tracking-result-box');
+  if (!box) return;
+
+  const milestones = cargo.milestones || [];
+
+  box.innerHTML = `
+    <div class="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+        <div>
+          <span class="text-[10px] font-extrabold uppercase tracking-widest text-indigo-700 bg-indigo-50 border border-indigo-200 px-2.5 py-0.5 rounded-full">
+            Active Consignment
+          </span>
+          <h3 class="text-xl font-black text-slate-900 mt-1 font-mono">${esc(cargo.id)}</h3>
+          <p class="text-xs text-slate-500">${esc(cargo.from_stand)} → ${esc(cargo.to_stand)} • ${cargo.weight_kg} kg (${esc(cargo.cargo_category || 'General')})</p>
+        </div>
+        <div class="text-right">
+          <span class="text-xs font-bold text-amber-800 bg-amber-50 border border-amber-300 px-3 py-1.5 rounded-xl inline-flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+            ${esc(cargo.status)}: ${esc(cargo.current_location || 'In Transit')}
+          </span>
+        </div>
+      </div>
+
+      <!-- 5-Stage Timeline -->
+      <div class="relative pl-6 space-y-6 border-l-2 border-slate-200 ml-2">
+        ${milestones.map((m, idx) => {
+          const isDone = m.is_completed === 1;
+          return `
+            <div class="relative">
+              <span class="absolute -left-[31px] top-0 w-4 h-4 rounded-full border-2 ${isDone ? 'bg-indigo-600 border-indigo-600 ring-4 ring-indigo-100' : 'bg-white border-slate-300'}"></span>
+              <div class="${isDone ? 'text-slate-900' : 'text-slate-400'}">
+                <h4 class="text-xs font-extrabold">${esc(m.milestone_title)}</h4>
+                <p class="text-[11px] text-slate-500 mt-0.5"><i class="fa-solid fa-location-dot mr-1"></i> ${esc(m.location_name)}</p>
+                <span class="text-[10px] font-mono font-medium ${isDone ? 'text-indigo-600' : 'text-slate-400'}">${esc(m.timestamp)}</span>
+              </div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    </div>
+  `;
+}

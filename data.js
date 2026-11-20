@@ -5,7 +5,7 @@
  */
 
 // 1. Default Primary User Profile (Self)
-const DEFAULT_USER = {
+const DEMO_SEED_USER = {
   userId: "usr_msrtc_78491",
   smartId: "MH-USR-94821",
   fullName: "Pravin Dongare",

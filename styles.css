@@ -15,6 +15,14 @@ body {
   background: linear-gradient(135deg, #9B0A20 0%, #C8102E 50%, #E63946 100%);
 }
 
+.gradient-card-ad {
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+}
+
+.gradient-card-hh {
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+}
+
 /* Custom Slim Scrollbars */
 .custom-scroll::-webkit-scrollbar {
   width: 6px;
@@ -43,6 +51,7 @@ body {
 /* Interactive Seat Styles */
 .seat-btn {
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
 }
 .seat-btn:hover:not(:disabled) {
   transform: translateY(-2px);
@@ -52,6 +61,26 @@ body {
   color: white !important;
   box-shadow: 0 4px 12px rgba(200, 16, 46, 0.35);
   border-color: #9B0A20 !important;
+}
+
+/* Priority Seat Badges */
+.seat-btn.seat-priority-senior {
+  border: 2px solid #2563eb !important;
+}
+.seat-btn.seat-priority-pregnant {
+  border: 2px solid #ec4899 !important;
+}
+.seat-btn.seat-priority-ladies {
+  border: 2px solid #9333ea !important;
+}
+
+/* Pulse animation for live Happy Hours indicator */
+@keyframes pulse-gold {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.85; transform: scale(1.03); }
+}
+.animate-pulse-gold {
+  animation: pulse-gold 2s infinite ease-in-out;
 }
 
 /* Electronic Reservation Slip Print Media Styles */
