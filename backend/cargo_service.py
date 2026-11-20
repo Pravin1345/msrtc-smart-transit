@@ -24,6 +24,15 @@ IST = timezone(timedelta(hours=5, minutes=30))
 DB_PATH = os.path.join(os.path.dirname(__file__), "msrtc.db")
 
 
+def _haversine_km(lat1, lon1, lat2, lon2):
+    """Straight-line great-circle distance in km."""
+    import math
+    p1, p2 = math.radians(lat1), math.radians(lat2)
+    h = (math.sin((p2 - p1) / 2) ** 2
+         + math.cos(p1) * math.cos(p2) * math.sin(math.radians(lon2 - lon1) / 2) ** 2)
+    return 12742 * math.asin(math.sqrt(h))
+
+
 class CargoService:
     def __init__(self, db_path=DB_PATH):
         self.db_path = db_path
@@ -115,9 +124,12 @@ class CargoService:
 
     def calculate_tariff(self, from_stand, to_stand, weight_kg, category="General Commercial", speed_tier="STANDARD", packages=1, is_excess_luggage=False):
         """Calculate cargo / courier / excess luggage price."""
-        from_coord = P.COORDS.get(from_stand) or (16.7050, 74.2433)
-        to_coord = P.COORDS.get(to_stand) or (18.5018, 73.8586)
-        dist = round(P.haversine(from_coord[0], from_coord[1], to_coord[0], to_coord[1]) * 1.25, 1)
+        from_coord = P.COORDS.get(from_stand)
+        to_coord = P.COORDS.get(to_stand)
+        if from_coord and to_coord:
+            dist = round(_haversine_km(from_coord[0], from_coord[1], to_coord[0], to_coord[1]) * 1.25, 1)
+        else:
+            dist = 150.0
 
         weight_kg = max(0.5, float(weight_kg))
         packages = max(1, int(packages))
