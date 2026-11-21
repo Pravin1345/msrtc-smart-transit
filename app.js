@@ -15,16 +15,19 @@
 
 // 1. STATE & STORAGE
 const DEFAULT_USER = {
-  userId: "usr_pravin_99",
-  name: "Pravin Patil",
-  email: "pravin.msrtc@transit.gov.in",
-  phone: "+91 98230 12345",
+  userId: "usr_guest",
+  name: "Guest Passenger",
+  fullName: "Guest Passenger",
+  email: "",
+  phone: "",
   gender: "Male",
   age: 28,
-  smartId: "MH-MSRTC-78942-A",
-  isVerified: true
+  category: "General",
+  smartId: "MH-MSRTC-GUEST",
+  isVerified: false
 };
 
+let authToken = localStorage.getItem('msrtc_auth_token') || null;
 let currentUser = getStoredUser();
 let currentFilter = 'ALL';
 let currentSearchResults = [];
@@ -34,6 +37,10 @@ let passengerDetails = [];
 let selectedVendorItems = [];
 let vendorCatalog = [];
 let activeLiveScans = 2570524;
+
+function isAuthenticated() {
+  return Boolean(authToken && currentUser && currentUser.email);
+}
 
 function getStoredUser() {
   const u = localStorage.getItem('msrtc_active_user');
@@ -60,7 +67,23 @@ function saveStoredBookings(bookings) {
 }
 
 // 2. INITIALIZATION
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  if (authToken) {
+    try {
+      const res = await MSRTCApi.verifySession(authToken);
+      if (res && res.valid && res.user) {
+        currentUser = res.user;
+        saveStoredUser(currentUser);
+      } else {
+        authToken = null;
+        currentUser = DEFAULT_USER;
+        localStorage.removeItem('msrtc_auth_token');
+        localStorage.removeItem('msrtc_active_user');
+      }
+    } catch (e) {
+      // Keep cached user if network glitch
+    }
+  }
   renderAuthCorner();
   populateLocationsList();
   setDefaultBookingDate();
@@ -71,17 +94,32 @@ document.addEventListener('DOMContentLoaded', () => {
 function renderAuthCorner() {
   const box = document.getElementById('auth-section');
   if (!box) return;
-  box.innerHTML = `
-    <div class="flex items-center gap-2 cursor-pointer" onclick="navigateTo('profile')">
-      <div class="w-9 h-9 rounded-full bg-slate-900 text-amber-300 font-bold flex items-center justify-center text-xs shadow-sm border border-slate-700">
-        <i class="fa-solid fa-user"></i>
+
+  if (isAuthenticated()) {
+    box.innerHTML = `
+      <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 cursor-pointer bg-red-50 hover:bg-red-100 py-1.5 px-3 rounded-xl border border-red-200 transition" onclick="navigateTo('profile')">
+          <div class="w-8 h-8 rounded-full bg-slate-900 text-amber-300 font-bold flex items-center justify-center text-xs shadow-sm">
+            <i class="fa-solid fa-user"></i>
+          </div>
+          <div class="hidden sm:block text-left text-xs">
+            <p class="font-extrabold text-slate-900 leading-tight">${esc(currentUser.fullName || currentUser.name)}</p>
+            <p class="text-[10px] text-slate-500 font-mono">${esc(currentUser.smartId)}</p>
+          </div>
+        </div>
+        <button onclick="handleLogout()" title="Sign Out" class="text-xs text-slate-500 hover:text-msrtc-red p-2 rounded-xl hover:bg-slate-100 transition border border-transparent hover:border-slate-200">
+          <i class="fa-solid fa-arrow-right-from-bracket"></i>
+        </button>
       </div>
-      <div class="hidden sm:block text-left text-xs">
-        <p class="font-extrabold text-slate-900 leading-tight">${esc(currentUser.name)}</p>
-        <p class="text-[10px] text-slate-500 font-mono">${esc(currentUser.smartId)}</p>
-      </div>
-    </div>
-  `;
+    `;
+  } else {
+    box.innerHTML = `
+      <button onclick="openAuthModal('login')" class="bg-msrtc-red hover:bg-msrtc-darkred text-white font-bold py-2 px-3 sm:px-4 rounded-xl text-xs shadow-sm transition flex items-center gap-1.5">
+        <i class="fa-solid fa-right-to-bracket"></i>
+        <span>Sign In / Register</span>
+      </button>
+    `;
+  }
 }
 
 // 3. NAVIGATION CONTROLLER
@@ -1243,30 +1281,109 @@ function renderBookingsList() {
   `).join('');
 }
 
-// 14. PROFILE & SMART ID
+// 14. PROFILE & SMART ID (AUTHENTICATION GATED)
 function loadProfileForm() {
-  document.getElementById('prof-name').value = currentUser.name || '';
-  document.getElementById('prof-email').value = currentUser.email || '';
-  document.getElementById('prof-phone').value = currentUser.phone || '';
-  document.getElementById('prof-gender').value = currentUser.gender || 'Male';
-  document.getElementById('prof-age').value = currentUser.age || 28;
+  const unauthCard = document.getElementById('profile-unauth-card');
+  const authCard = document.getElementById('profile-auth-card');
+  const msgBox = document.getElementById('profile-msg');
+  if (msgBox) msgBox.classList.add('hidden');
+
+  if (!isAuthenticated()) {
+    unauthCard?.classList.remove('hidden');
+    authCard?.classList.add('hidden');
+    return;
+  }
+
+  unauthCard?.classList.add('hidden');
+  authCard?.classList.remove('hidden');
+
+  const nameInput = document.getElementById('prof-name');
+  const emailInput = document.getElementById('prof-email');
+  const phoneInput = document.getElementById('prof-phone');
+  const genderInput = document.getElementById('prof-gender');
+  const ageInput = document.getElementById('prof-age');
+  const catInput = document.getElementById('prof-category');
+  const smartIdBadge = document.getElementById('prof-smart-id-badge');
+  const catBadge = document.getElementById('prof-category-badge');
+
+  if (nameInput) nameInput.value = currentUser.fullName || currentUser.name || '';
+  if (emailInput) emailInput.value = currentUser.email || '';
+  if (phoneInput) phoneInput.value = currentUser.phone || '';
+  if (genderInput) genderInput.value = currentUser.gender || 'Male';
+  if (ageInput) ageInput.value = currentUser.age || 28;
+  if (catInput) catInput.value = currentUser.category || 'General';
+  if (smartIdBadge) smartIdBadge.textContent = currentUser.smartId || 'MH-MSRTC-PENDING';
+  if (catBadge) catBadge.textContent = currentUser.category || 'General';
 }
 
-function handleProfileUpdate(e) {
+async function handleProfileUpdate(e) {
   e.preventDefault();
-  currentUser.name = document.getElementById('prof-name').value.trim();
-  currentUser.email = document.getElementById('prof-email').value.trim();
-  currentUser.phone = document.getElementById('prof-phone').value.trim();
-  currentUser.gender = document.getElementById('prof-gender').value;
-  currentUser.age = parseInt(document.getElementById('prof-age').value || 28);
+  const msgBox = document.getElementById('profile-msg');
+  const btn = document.getElementById('prof-submit-btn');
 
-  saveStoredUser(currentUser);
-  renderAuthCorner();
-  alert("Profile updated successfully!");
+  if (!isAuthenticated()) {
+    openAuthModal('login');
+    return;
+  }
+
+  const fullName = document.getElementById('prof-name').value.trim();
+  const phone = document.getElementById('prof-phone').value.trim();
+  const gender = document.getElementById('prof-gender').value;
+  const age = parseInt(document.getElementById('prof-age').value || 28);
+  const category = document.getElementById('prof-category').value;
+
+  if (btn) btn.disabled = true;
+  try {
+    const res = await MSRTCApi.updateProfile(authToken, {
+      fullName, phone, gender, age, category
+    });
+    if (res && res.user) {
+      currentUser = res.user;
+      saveStoredUser(currentUser);
+      renderAuthCorner();
+      loadProfileForm();
+      if (msgBox) {
+        msgBox.textContent = res.message || "Profile updated successfully!";
+        msgBox.className = "mb-4 p-3 rounded-xl text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 block";
+      }
+    }
+  } catch (err) {
+    if (msgBox) {
+      msgBox.textContent = err.message || "Failed to update profile.";
+      msgBox.className = "mb-4 p-3 rounded-xl text-xs font-semibold bg-red-50 text-red-700 border border-red-200 block";
+    }
+  } finally {
+    if (btn) btn.disabled = false;
+  }
 }
 
 function renderSmartIDPass() {
   const box = document.getElementById('smartid-card-container');
+  if (!box) return;
+
+  if (!isAuthenticated()) {
+    box.innerHTML = `
+      <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm text-center">
+        <div class="w-16 h-16 bg-amber-50 text-amber-600 rounded-full flex items-center justify-center mx-auto text-2xl mb-4 border border-amber-200">
+          <i class="fa-solid fa-id-card"></i>
+        </div>
+        <h3 class="text-lg font-bold text-slate-900 mb-1">Smart ID Pass Not Loaded</h3>
+        <p class="text-xs text-slate-500 mb-5">Please register or log in to view your verified conductor QR digital pass and concessional fare quota.</p>
+        <button onclick="openAuthModal('login')" class="bg-msrtc-red hover:bg-msrtc-darkred text-white font-bold py-2.5 px-5 rounded-xl text-xs shadow-md transition inline-flex items-center gap-2">
+          <i class="fa-solid fa-right-to-bracket"></i> Sign In to View Smart ID
+        </button>
+      </div>
+    `;
+    return;
+  }
+
+  const isFemale = currentUser.gender === 'Female';
+  const isSenior = (Number(currentUser.age) || 0) >= 60;
+  let quotaTag = "Verified Citizen Pass";
+  if (isFemale) quotaTag = "⚡ 50% Mahila Samman Concession";
+  else if (isSenior) quotaTag = "👴 Senior Citizen Free/50% Pass";
+  else if (currentUser.category && currentUser.category !== 'General') quotaTag = currentUser.category;
+
   box.innerHTML = `
     <div class="bg-gradient-to-br from-msrtc-red to-msrtc-darkred text-white p-6 rounded-3xl shadow-xl border-4 border-amber-300 relative overflow-hidden">
       <div class="flex justify-between items-center pb-3 border-b border-red-300/40">
@@ -1280,19 +1397,184 @@ function renderSmartIDPass() {
       <div class="my-4 flex items-center justify-between">
         <div>
           <span class="text-[10px] text-red-200 uppercase font-semibold">Pass Holder</span>
-          <p class="text-lg font-black">${esc(currentUser.name)}</p>
-          <p class="text-xs text-red-100 font-mono">${esc(currentUser.smartId)}</p>
-          <span class="inline-block mt-2 text-[10px] font-bold bg-amber-400 text-slate-900 px-2 py-0.5 rounded">
-            Verified Citizen Pass
+          <p class="text-lg font-black">${esc(currentUser.fullName || currentUser.name)}</p>
+          <p class="text-xs text-red-100 font-mono font-bold tracking-wider">${esc(currentUser.smartId)}</p>
+          <span class="inline-block mt-2 text-[10px] font-bold bg-amber-400 text-slate-900 px-2 py-0.5 rounded shadow-sm">
+            ${esc(quotaTag)}
           </span>
         </div>
-        <div class="bg-white p-2 rounded-xl text-slate-900 text-center shadow">
+        <div class="bg-white p-2.5 rounded-2xl text-slate-900 text-center shadow-lg">
           <i class="fa-solid fa-qrcode text-4xl"></i>
-          <span class="block text-[8px] font-mono mt-0.5">SCAN PASS</span>
+          <span class="block text-[8px] font-mono font-bold mt-1 tracking-tight">VERIFIED PASS</span>
         </div>
+      </div>
+
+      <div class="pt-3 border-t border-red-300/30 flex justify-between text-[11px] text-red-100">
+        <div>Gender: <span class="font-bold text-white">${esc(currentUser.gender)}</span></div>
+        <div>Age: <span class="font-bold text-white">${esc(currentUser.age)}</span></div>
+        <div>Status: <span class="font-bold text-amber-300">ACTIVE</span></div>
       </div>
     </div>
   `;
+}
+
+// =========================================================
+// 15. AUTHENTICATION CONTROLLER (REGISTER, LOGIN, LOGOUT)
+// =========================================================
+function openAuthModal(tab = 'login') {
+  const modal = document.getElementById('auth-modal');
+  if (!modal) return;
+  modal.classList.remove('hidden');
+  switchAuthTab(tab);
+  hideAuthMsg();
+}
+
+function closeAuthModal() {
+  const modal = document.getElementById('auth-modal');
+  if (modal) modal.classList.add('hidden');
+}
+
+function switchAuthTab(tab) {
+  const loginPane = document.getElementById('auth-pane-login');
+  const regPane = document.getElementById('auth-pane-register');
+  const loginBtn = document.getElementById('auth-tab-btn-login');
+  const regBtn = document.getElementById('auth-tab-btn-register');
+  const title = document.getElementById('auth-modal-title');
+  hideAuthMsg();
+
+  if (tab === 'register') {
+    loginPane?.classList.add('hidden');
+    regPane?.classList.remove('hidden');
+    regBtn?.classList.add('bg-white', 'text-slate-900', 'shadow-sm');
+    regBtn?.classList.remove('text-slate-500');
+    loginBtn?.classList.remove('bg-white', 'text-slate-900', 'shadow-sm');
+    loginBtn?.classList.add('text-slate-500');
+    if (title) title.textContent = "Register New Transit Account";
+  } else {
+    regPane?.classList.add('hidden');
+    loginPane?.classList.remove('hidden');
+    loginBtn?.classList.add('bg-white', 'text-slate-900', 'shadow-sm');
+    loginBtn?.classList.remove('text-slate-500');
+    regBtn?.classList.remove('bg-white', 'text-slate-900', 'shadow-sm');
+    regBtn?.classList.add('text-slate-500');
+    if (title) title.textContent = "Sign In to Transit Account";
+  }
+}
+
+function showAuthMsg(text, isError = true) {
+  const box = document.getElementById('auth-msg');
+  if (!box) return;
+  box.textContent = text;
+  box.className = `mb-4 p-3 rounded-xl text-xs font-semibold ${isError ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-emerald-50 text-emerald-800 border border-emerald-200'}`;
+  box.classList.remove('hidden');
+}
+
+function hideAuthMsg() {
+  const box = document.getElementById('auth-msg');
+  if (box) box.classList.add('hidden');
+}
+
+function quickFillDemoAuth() {
+  const emailInput = document.getElementById('login-email');
+  const passInput = document.getElementById('login-password');
+  if (emailInput) emailInput.value = 'pravin.msrtc@transit.gov.in';
+  if (passInput) passInput.value = 'Pravin@1234';
+}
+
+async function handleLoginSubmit(e) {
+  e.preventDefault();
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  const btn = document.getElementById('login-submit-btn');
+
+  if (btn) btn.disabled = true;
+  try {
+    const res = await MSRTCApi.login({ email, password });
+    if (res && res.token && res.user) {
+      authToken = res.token;
+      currentUser = res.user;
+      localStorage.setItem('msrtc_auth_token', authToken);
+      saveStoredUser(currentUser);
+      showAuthMsg(res.message || "Login successful! Redirecting...", false);
+      renderAuthCorner();
+      setTimeout(() => {
+        closeAuthModal();
+        loadProfileForm();
+        renderSmartIDPass();
+        if (btn) btn.disabled = false;
+      }, 500);
+    } else {
+      showAuthMsg(res.error || "Login failed. Please check credentials.", true);
+      if (btn) btn.disabled = false;
+    }
+  } catch (err) {
+    showAuthMsg(err.message || "Failed to log in. Please verify credentials.", true);
+    if (btn) btn.disabled = false;
+  }
+}
+
+async function handleRegisterSubmit(e) {
+  e.preventDefault();
+  const fullName = document.getElementById('reg-name').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  const phone = document.getElementById('reg-phone').value.trim();
+  const gender = document.getElementById('reg-gender').value;
+  const age = parseInt(document.getElementById('reg-age').value);
+  const category = document.getElementById('reg-category').value;
+  const password = document.getElementById('reg-password').value;
+  const confirm = document.getElementById('reg-confirm').value;
+  const btn = document.getElementById('reg-submit-btn');
+
+  if (password !== confirm) {
+    showAuthMsg("Passwords do not match. Please re-enter.", true);
+    return;
+  }
+  if (password.length < 6) {
+    showAuthMsg("Password must be at least 6 characters.", true);
+    return;
+  }
+
+  if (btn) btn.disabled = true;
+  try {
+    const res = await MSRTCApi.register({
+      fullName, email, phone, gender, age, category, password
+    });
+    if (res && res.token && res.user) {
+      authToken = res.token;
+      currentUser = res.user;
+      localStorage.setItem('msrtc_auth_token', authToken);
+      saveStoredUser(currentUser);
+      showAuthMsg(res.message || "Account registered successfully!", false);
+      renderAuthCorner();
+      setTimeout(() => {
+        closeAuthModal();
+        loadProfileForm();
+        renderSmartIDPass();
+        if (btn) btn.disabled = false;
+      }, 600);
+    } else {
+      showAuthMsg(res.error || "Registration failed.", true);
+      if (btn) btn.disabled = false;
+    }
+  } catch (err) {
+    showAuthMsg(err.message || "Registration failed.", true);
+    if (btn) btn.disabled = false;
+  }
+}
+
+async function handleLogout() {
+  if (authToken) {
+    try {
+      await MSRTCApi.logout(authToken);
+    } catch(e) {}
+  }
+  authToken = null;
+  currentUser = DEFAULT_USER;
+  localStorage.removeItem('msrtc_auth_token');
+  localStorage.removeItem('msrtc_active_user');
+  renderAuthCorner();
+  loadProfileForm();
+  renderSmartIDPass();
 }
 
 // =========================================================

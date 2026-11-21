@@ -37,6 +37,7 @@ from passenger_safety_service import SAFETY_SERVICE
 from dataset_service import DATASET_HUB
 from vendor_bidding_service import VENDOR_BIDDING_SERVICE
 from cargo_service import CARGO_SERVICE
+from auth_service import AUTH_SERVICE
 
 ROOT = os.path.realpath(os.path.join(os.path.dirname(__file__), ".."))
 DB_PATH = os.path.join(os.path.dirname(__file__), "msrtc.db")
@@ -667,10 +668,19 @@ class Handler(BaseHTTPRequestHandler):
                 self.send_json(200, CARGO_SERVICE.track_cargo(q))
             elif path == "/api/cargo/all":
                 self.send_json(200, CARGO_SERVICE.list_all_cargo())
+            elif path == "/api/auth/verify":
+                token = (qs.get("token") or [""])[0]
+                user = AUTH_SERVICE.verify(token)
+                if user:
+                    self.send_json(200, {"valid": True, "user": user})
+                else:
+                    self.send_json(401, {"valid": False, "error": "Invalid or expired session."})
             else:
                 self.serve_static(u.path)
         except ApiError as e:
             self.send_json(e.status, {"error": e.message, **e.extra})
+        except ValueError as e:
+            self.send_json(400, {"error": str(e)})
         except Exception as e:
             self.send_json(500, {"error": f"Internal server error: {str(e)}"})
 
@@ -726,10 +736,22 @@ class Handler(BaseHTTPRequestHandler):
                 self.send_json(200, CARGO_SERVICE.calculate_tariff(f_std, t_std, w_kg, cat, spd, pk, is_lug))
             elif path == "/api/cargo/book":
                 self.send_json(201, CARGO_SERVICE.book_cargo(body))
+            elif path == "/api/auth/register":
+                self.send_json(201, AUTH_SERVICE.register(body))
+            elif path == "/api/auth/login":
+                self.send_json(200, AUTH_SERVICE.login(body))
+            elif path == "/api/auth/logout":
+                token = body.get("token")
+                self.send_json(200, AUTH_SERVICE.logout(token))
+            elif path == "/api/auth/profile":
+                token = body.get("token")
+                self.send_json(200, AUTH_SERVICE.update_profile(token, body))
             else:
                 raise ApiError(404, "Endpoint not found.")
         except ApiError as e:
             self.send_json(e.status, {"error": e.message, **e.extra})
+        except ValueError as e:
+            self.send_json(400, {"error": str(e)})
         except Exception as e:
             self.send_json(500, {"error": f"Internal server error: {str(e)}"})
 

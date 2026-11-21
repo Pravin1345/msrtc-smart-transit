@@ -77,5 +77,10 @@ const MSRTCApi = {
   getCargoQuote: data => apiPost('/api/cargo/quote', data),
   bookCargo: data => apiPost('/api/cargo/book', data),
   trackCargo: query => apiGet('/api/cargo/track', { query }),
-  getAllCargo: () => apiGet('/api/cargo/all')
+  getAllCargo: () => apiGet('/api/cargo/all'),
+  register: data => apiPost('/api/auth/register', data),
+  login: data => apiPost('/api/auth/login', data),
+  logout: token => apiPost('/api/auth/logout', { token }),
+  verifySession: token => apiGet('/api/auth/verify', { token }),
+  updateProfile: (token, data) => apiPost('/api/auth/profile', { token, ...data })
 };
