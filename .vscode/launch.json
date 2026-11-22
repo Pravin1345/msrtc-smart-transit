@@ -5,6 +5,7 @@
       "name": "Run MSRTC Backend Server (Port 8000)",
       "type": "debugpy",
       "request": "launch",
+      "python": "C:/Python314/python.exe",
       "program": "${workspaceFolder}/backend/server.py",
       "args": ["8000"],
       "console": "integratedTerminal",

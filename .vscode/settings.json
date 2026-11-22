@@ -1,0 +1,5 @@
+{
+  "python.defaultInterpreterPath": "C:\\Python314\\python.exe",
+  "python.terminal.activateEnvironment": true,
+  "terminal.integrated.defaultProfile.windows": "PowerShell"
+}

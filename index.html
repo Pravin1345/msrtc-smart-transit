@@ -1,751 +1,752 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MSRTC Smart Transit • ML-Based Revenue Optimization ("HAPPY HOURS")</title>
-  
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            msrtc: {
-              red: '#C8102E',
-              darkred: '#9B0A20',
-              gold: '#F2A900',
-              cream: '#FFF9F5',
-              dark: '#1A1D20',
-              gray: '#4A5568'
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MSRTC Smart Transit • ML-Based Revenue Optimization ("HAPPY HOURS")</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        msrtc: {
+                            red: '#C8102E',
+                            darkred: '#9B0A20',
+                            gold: '#F2A900',
+                            cream: '#FFF9F5',
+                            dark: '#1A1D20',
+                            gray: '#4A5568'
+                        }
+                    }
+                }
             }
-          }
         }
-      }
-    }
-  </script>
+    </script>
 
-  <!-- Font Awesome Icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
-  <!-- External Stylesheet -->
-  <link rel="stylesheet" href="styles.css?v=20261120_2" />
+    <!-- External Stylesheet -->
+    <link rel="stylesheet" href="styles.css?v=20261120_2" />
 </head>
+
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col antialiased">
 
-  <!-- ================= TOP NOTIFICATION BAR ================= -->
-  <div class="bg-amber-500 text-slate-900 text-xs font-semibold px-4 py-1.5 flex justify-between items-center text-center">
-    <div class="flex items-center gap-2 mx-auto">
-      <span class="bg-slate-900 text-white text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full font-bold">⚡ Happy Hours Active</span>
-      <span>MSRTC Revenue Optimization System • ML Demand Forecasting • In-Bus Ads • Highway Vendor Tie-Ups • Passenger Safety</span>
-    </div>
-    <div class="hidden md:flex items-center gap-4 text-xs font-medium">
-      <span><i class="fa-solid fa-headset mr-1"></i> Helpline: 1800-22-1234</span>
-      <span><i class="fa-solid fa-shield-halved text-rose-800 mr-1"></i> Women SOS 1091</span>
-      <span><i class="fa-solid fa-globe mr-1"></i> English / मराठी</span>
-    </div>
-  </div>
-
-  <!-- ================= NAVIGATION BAR ================= -->
-  <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex justify-between items-center h-18 py-3">
-        <!-- Logo -->
-        <div class="flex items-center gap-3 cursor-pointer" onclick="navigateTo('home')">
-          <div class="w-11 h-11 rounded-xl bg-msrtc-red flex items-center justify-center text-white shadow-md shadow-red-200">
-            <i class="fa-solid fa-bus-simple text-2xl"></i>
-          </div>
-          <div>
-            <div class="flex items-center gap-2">
-              <span class="font-extrabold text-xl tracking-tight text-slate-900">MSRTC <span class="text-msrtc-red">Happy Hours</span></span>
-              <span class="text-[10px] font-bold bg-amber-100 text-amber-900 px-1.5 py-0.5 rounded border border-amber-300">Revenue AI</span>
-            </div>
-            <p class="text-[11px] text-slate-500 font-medium hidden sm:block">महाराष्ट्र राज्य मार्ग परिवहन महामंडळ • Smart Transit</p>
-          </div>
+    <!-- ================= TOP NOTIFICATION BAR ================= -->
+    <div class="bg-amber-500 text-slate-900 text-xs font-semibold px-4 py-1.5 flex justify-between items-center text-center">
+        <div class="flex items-center gap-2 mx-auto">
+            <span class="bg-slate-900 text-white text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full font-bold">⚡ Happy Hours Active</span>
+            <span>MSRTC Revenue Optimization System • ML Demand Forecasting • In-Bus Ads • Highway Vendor Tie-Ups • Passenger Safety</span>
         </div>
+        <div class="hidden md:flex items-center gap-4 text-xs font-medium">
+            <span><i class="fa-solid fa-headset mr-1"></i> Helpline: 1800-22-1234</span>
+            <span><i class="fa-solid fa-shield-halved text-rose-800 mr-1"></i> Women SOS 1091</span>
+            <span><i class="fa-solid fa-globe mr-1"></i> English / मराठी</span>
+        </div>
+    </div>
 
-        <!-- Center Nav Items -->
-        <nav class="hidden lg:flex items-center gap-1">
-          <button onclick="navigateTo('home')" class="nav-btn px-3 py-2 rounded-lg text-sm font-semibold transition text-slate-700 hover:text-msrtc-red hover:bg-red-50" data-page="home">
+    <!-- ================= NAVIGATION BAR ================= -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-18 py-3">
+                <!-- Logo -->
+                <div class="flex items-center gap-3 cursor-pointer" onclick="navigateTo('home')">
+                    <div class="w-11 h-11 rounded-xl bg-msrtc-red flex items-center justify-center text-white shadow-md shadow-red-200">
+                        <i class="fa-solid fa-bus-simple text-2xl"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="font-extrabold text-xl tracking-tight text-slate-900">MSRTC <span class="text-msrtc-red">Happy Hours</span></span>
+                            <span class="text-[10px] font-bold bg-amber-100 text-amber-900 px-1.5 py-0.5 rounded border border-amber-300">Revenue AI</span>
+                        </div>
+                        <p class="text-[11px] text-slate-500 font-medium hidden sm:block">महाराष्ट्र राज्य मार्ग परिवहन महामंडळ • Smart Transit</p>
+                    </div>
+                </div>
+
+                <!-- Center Nav Items -->
+                <nav class="hidden lg:flex items-center gap-1">
+                    <button onclick="navigateTo('home')" class="nav-btn px-3 py-2 rounded-lg text-sm font-semibold transition text-slate-700 hover:text-msrtc-red hover:bg-red-50" data-page="home">
             <i class="fa-solid fa-compass mr-1"></i> Explore
           </button>
-          <button onclick="navigateTo('book')" class="nav-btn px-3 py-2 rounded-lg text-sm font-semibold transition text-slate-700 hover:text-msrtc-red hover:bg-red-50" data-page="book">
+                    <button onclick="navigateTo('book')" class="nav-btn px-3 py-2 rounded-lg text-sm font-semibold transition text-slate-700 hover:text-msrtc-red hover:bg-red-50" data-page="book">
             <i class="fa-solid fa-ticket mr-1"></i> Book Bus
           </button>
-          <button onclick="navigateTo('ads')" class="nav-btn px-3 py-2 rounded-lg text-sm font-semibold transition text-slate-700 hover:text-msrtc-red hover:bg-red-50" data-page="ads">
+                    <button onclick="navigateTo('ads')" class="nav-btn px-3 py-2 rounded-lg text-sm font-semibold transition text-slate-700 hover:text-msrtc-red hover:bg-red-50" data-page="ads">
             <i class="fa-solid fa-bullhorn mr-1 text-amber-600"></i> In-Bus Ads
           </button>
-          <button onclick="navigateTo('vendors')" class="nav-btn px-3 py-2 rounded-lg text-sm font-semibold transition text-slate-700 hover:text-msrtc-red hover:bg-red-50" data-page="vendors">
+                    <button onclick="navigateTo('vendors')" class="nav-btn px-3 py-2 rounded-lg text-sm font-semibold transition text-slate-700 hover:text-msrtc-red hover:bg-red-50" data-page="vendors">
             <i class="fa-solid fa-utensils mr-1 text-emerald-600"></i> Rest-Stops
           </button>
-          <button onclick="navigateTo('bidding')" class="nav-btn px-3 py-2 rounded-lg text-sm font-semibold transition text-slate-700 hover:text-msrtc-red hover:bg-red-50" data-page="bidding">
+                    <button onclick="navigateTo('bidding')" class="nav-btn px-3 py-2 rounded-lg text-sm font-semibold transition text-slate-700 hover:text-msrtc-red hover:bg-red-50" data-page="bidding">
             <i class="fa-solid fa-gavel mr-1 text-amber-600"></i> Rest-Stop Bidding
           </button>
-          <button onclick="navigateTo('cargo')" class="nav-btn px-3 py-2 rounded-lg text-sm font-semibold transition text-slate-700 hover:text-msrtc-red hover:bg-red-50" data-page="cargo">
+                    <button onclick="navigateTo('cargo')" class="nav-btn px-3 py-2 rounded-lg text-sm font-semibold transition text-slate-700 hover:text-msrtc-red hover:bg-red-50" data-page="cargo">
             <i class="fa-solid fa-box-open mr-1 text-indigo-600"></i> Courier & Luggage
           </button>
-          <button onclick="navigateTo('revenue')" class="nav-btn px-3 py-2 rounded-lg text-sm font-semibold transition text-slate-700 hover:text-msrtc-red hover:bg-red-50" data-page="revenue">
-            <i class="fa-solid fa-chart-line mr-1 text-indigo-600"></i> Revenue & ML
-          </button>
-          <button onclick="navigateTo('history')" class="nav-btn px-3 py-2 rounded-lg text-sm font-semibold transition text-slate-700 hover:text-msrtc-red hover:bg-red-50" data-page="history">
+                    <button onclick="navigateTo('history')" class="nav-btn px-3 py-2 rounded-lg text-sm font-semibold transition text-slate-700 hover:text-msrtc-red hover:bg-red-50" data-page="history">
             <i class="fa-solid fa-clock-rotate-left mr-1"></i> My Trips
           </button>
-          <button onclick="navigateTo('smartid')" class="nav-btn px-3 py-2 rounded-lg text-sm font-semibold transition text-slate-700 hover:text-msrtc-red hover:bg-red-50" data-page="smartid">
+                    <button onclick="navigateTo('smartid')" class="nav-btn px-3 py-2 rounded-lg text-sm font-semibold transition text-slate-700 hover:text-msrtc-red hover:bg-red-50" data-page="smartid">
             <i class="fa-solid fa-id-card mr-1"></i> Smart ID
           </button>
-        </nav>
+                </nav>
 
-        <!-- Auth / User Corner -->
-        <div id="auth-section" class="flex items-center gap-3">
-          <!-- Populated dynamically by app.js -->
+                <!-- Auth / User Corner -->
+                <div id="auth-section" class="flex items-center gap-3">
+                    <!-- Populated dynamically by app.js -->
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
-  </header>
+    </header>
 
-  <!-- ================= MAIN CONTENT CONTAINER ================= -->
-  <main class="flex-grow">
-    
-    <!-- PAGE 1: HOME & EXPLORER -->
-    <section id="page-home" class="page-view block">
-      <!-- Hero Banner -->
-      <div class="gradient-hero text-white py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-        <div class="absolute right-0 bottom-0 opacity-10 pointer-events-none transform translate-x-10 translate-y-10">
-          <i class="fa-solid fa-bus text-[320px]"></i>
-        </div>
-        <div class="max-w-7xl mx-auto relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-          <div class="lg:col-span-7">
-            <span class="inline-flex items-center gap-2 bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider mb-3">
+    <!-- ================= MAIN CONTENT CONTAINER ================= -->
+    <main class="flex-grow">
+
+        <!-- PAGE 1: HOME & EXPLORER -->
+        <section id="page-home" class="page-view block">
+            <!-- Hero Banner -->
+            <div class="gradient-hero text-white py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+                <div class="absolute right-0 bottom-0 opacity-10 pointer-events-none transform translate-x-10 translate-y-10">
+                    <i class="fa-solid fa-bus text-[320px]"></i>
+                </div>
+                <div class="max-w-7xl mx-auto relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                    <div class="lg:col-span-7">
+                        <span class="inline-flex items-center gap-2 bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider mb-3">
               <i class="fa-solid fa-bolt text-amber-300"></i> ML-Powered Revenue Optimization System
             </span>
-            <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight leading-tight mb-4">
-              Happy Hours Transit <br class="hidden sm:inline" />Smart Mobility & Revenue Engine
-            </h1>
-            <p class="text-red-100 text-base sm:text-lg mb-6">
-              Empowering Maharashtra with Intelligent Passenger Demand Forecasting, Off-Peak "Happy Hours" Dynamic Fares, In-Bus Advertising, Highway Restaurant Tie-Ups, and Dedicated Passenger Safety.
-            </p>
-            <div class="flex flex-wrap gap-3">
-              <button onclick="navigateTo('book')" class="bg-amber-400 hover:bg-amber-500 text-slate-900 font-bold px-6 py-3 rounded-xl shadow-lg shadow-black/10 transition flex items-center gap-2">
+                        <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight leading-tight mb-4">
+                            Happy Hours Transit <br class="hidden sm:inline" />Smart Mobility & Revenue Engine
+                        </h1>
+                        <p class="text-red-100 text-base sm:text-lg mb-6">
+                            Empowering Maharashtra with Intelligent Passenger Demand Forecasting, Off-Peak "Happy Hours" Dynamic Fares, In-Bus Advertising, Highway Restaurant Tie-Ups, and Dedicated Passenger Safety.
+                        </p>
+                        <div class="flex flex-wrap gap-3">
+                            <button onclick="navigateTo('book')" class="bg-amber-400 hover:bg-amber-500 text-slate-900 font-bold px-6 py-3 rounded-xl shadow-lg shadow-black/10 transition flex items-center gap-2">
                 <i class="fa-solid fa-ticket"></i> Book Bus (Happy Hours Deals)
               </button>
-              <button onclick="navigateTo('revenue')" class="bg-white/10 hover:bg-white/20 border border-white/30 text-white font-semibold px-6 py-3 rounded-xl backdrop-blur-md transition flex items-center gap-2">
+                            <button onclick="navigateTo('revenue')" class="bg-white/10 hover:bg-white/20 border border-white/30 text-white font-semibold px-6 py-3 rounded-xl backdrop-blur-md transition flex items-center gap-2">
                 <i class="fa-solid fa-chart-pie"></i> Unified Revenue & ML Dashboard
               </button>
-              <button onclick="navigateTo('ads')" class="bg-slate-900/40 hover:bg-slate-900/60 border border-white/20 text-white font-semibold px-5 py-3 rounded-xl backdrop-blur-md transition flex items-center gap-2">
+                            <button onclick="navigateTo('ads')" class="bg-slate-900/40 hover:bg-slate-900/60 border border-white/20 text-white font-semibold px-5 py-3 rounded-xl backdrop-blur-md transition flex items-center gap-2">
                 <i class="fa-solid fa-qrcode text-amber-300"></i> Scan Bus Ad QR
               </button>
-            </div>
-          </div>
+                        </div>
+                    </div>
 
-          <!-- Hero Picture: Bus running on scenic road -->
-          <div class="lg:col-span-5 relative">
-            <div class="relative rounded-3xl overflow-hidden shadow-2xl border-4 border-white/20 group">
-              <img src="bus-on-road.jpg" alt="MSRTC bus on road" class="w-full h-64 sm:h-72 lg:h-80 object-cover transform group-hover:scale-105 transition-transform duration-500" />
-              <!-- Status badge -->
-              <div class="absolute bottom-3 left-3 right-3 bg-slate-900/85 backdrop-blur-md text-white p-3 rounded-2xl flex items-center justify-between border border-white/15 text-xs shadow-lg">
-                <div class="flex items-center gap-2">
-                  <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                  <span class="font-bold">Live AI Dynamic Fares</span>
-                </div>
-                <span class="text-[11px] text-amber-300 font-semibold flex items-center gap-1">
+                    <!-- Hero Picture: Bus running on scenic road -->
+                    <div class="lg:col-span-5 relative">
+                        <div class="relative rounded-3xl overflow-hidden shadow-2xl border-4 border-white/20 group">
+                            <img src="bus-on-road.jpg" alt="MSRTC bus on road" class="w-full h-64 sm:h-72 lg:h-80 object-cover transform group-hover:scale-105 transition-transform duration-500" />
+                            <!-- Status badge -->
+                            <div class="absolute bottom-3 left-3 right-3 bg-slate-900/85 backdrop-blur-md text-white p-3 rounded-2xl flex items-center justify-between border border-white/15 text-xs shadow-lg">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                                    <span class="font-bold">Live AI Dynamic Fares</span>
+                                </div>
+                                <span class="text-[11px] text-amber-300 font-semibold flex items-center gap-1">
                   <i class="fa-solid fa-bolt"></i> Happy Hours Off-Peak
                 </span>
-              </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
-        </div>
-      </div>
 
-      <!-- 7 Modules Overview Grid -->
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <div class="text-center max-w-3xl mx-auto mb-10">
-          <span class="text-xs font-bold text-msrtc-red uppercase tracking-wider bg-red-50 border border-red-200 px-3 py-1 rounded-full">Complete Project Architecture</span>
-          <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-2">7 Integrated Revenue & Mobility Modules</h2>
-          <p class="text-sm text-slate-600 mt-1">Full implementation of the Machine Learning, Optimization, Advertising dataset, and Commercial Tie-Ups.</p>
-        </div>
+            <!-- 7 Modules Overview Grid -->
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+                <div class="text-center max-w-3xl mx-auto mb-10">
+                    <span class="text-xs font-bold text-msrtc-red uppercase tracking-wider bg-red-50 border border-red-200 px-3 py-1 rounded-full">Complete Project Architecture</span>
+                    <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-2">7 Integrated Revenue & Mobility Modules</h2>
+                    <p class="text-sm text-slate-600 mt-1">Full implementation of the Machine Learning, Optimization, Advertising dataset, and Commercial Tie-Ups.</p>
+                </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <!-- Mod 1 -->
-          <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition">
-            <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-lg mb-4">
-              <i class="fa-solid fa-brain"></i>
-            </div>
-            <h3 class="font-bold text-slate-900 text-base mb-1">1. ML Demand Forecasting</h3>
-            <p class="text-xs text-slate-500 leading-relaxed mb-3">
-              Compares Linear Regression, Decision Tree, Random Forest & XGBoost to forecast passenger loads, expected occupancy, and off-peak vacancies.
-            </p>
-            <span class="text-[11px] font-semibold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-md">MAE & RMSE Evaluated</span>
-          </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Mod 1 -->
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition">
+                        <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-lg mb-4">
+                            <i class="fa-solid fa-brain"></i>
+                        </div>
+                        <h3 class="font-bold text-slate-900 text-base mb-1">1. ML Demand Forecasting</h3>
+                        <p class="text-xs text-slate-500 leading-relaxed mb-3">
+                            Compares Linear Regression, Decision Tree, Random Forest & XGBoost to forecast passenger loads, expected occupancy, and off-peak vacancies.
+                        </p>
+                        <span class="text-[11px] font-semibold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-md">MAE & RMSE Evaluated</span>
+                    </div>
 
-          <!-- Mod 2 & 3 -->
-          <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition">
-            <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold text-lg mb-4">
-              <i class="fa-solid fa-tags"></i>
-            </div>
-            <h3 class="font-bold text-slate-900 text-base mb-1">2 & 3. Happy Hours Optimizer</h3>
-            <p class="text-xs text-slate-500 leading-relaxed mb-3">
-              Constrained Revenue Optimizer: <code>Expected Revenue = Fare × Expected Bookings</code>. Evaluates 10%–50% discounts to maximize total revenue.
-            </p>
-            <span class="text-[11px] font-semibold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-md">Constraint Satisfied (Capacity, Floor)</span>
-          </div>
+                    <!-- Mod 2 & 3 -->
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition">
+                        <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold text-lg mb-4">
+                            <i class="fa-solid fa-tags"></i>
+                        </div>
+                        <h3 class="font-bold text-slate-900 text-base mb-1">2 & 3. Happy Hours Optimizer</h3>
+                        <p class="text-xs text-slate-500 leading-relaxed mb-3">
+                            Constrained Revenue Optimizer: <code>Expected Revenue = Fare × Expected Bookings</code>. Evaluates 10%–50% discounts to maximize total revenue.
+                        </p>
+                        <span class="text-[11px] font-semibold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-md">Constraint Satisfied (Capacity, Floor)</span>
+                    </div>
 
-          <!-- Mod 4 -->
-          <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition">
-            <div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center font-bold text-lg mb-4">
-              <i class="fa-solid fa-rectangle-ad"></i>
-            </div>
-            <h3 class="font-bold text-slate-900 text-base mb-1">4. In-Bus Advertising (Dataset)</h3>
-            <p class="text-xs text-slate-500 leading-relaxed mb-3">
-              Position-based pricing (Front/First 10/Middle/Rear). Trained on 1,000 advertisement records predicting revenue and tracking QR scans.
-            </p>
-            <span class="text-[11px] font-semibold text-purple-700 bg-purple-50 px-2.5 py-1 rounded-md">1,000 Records ML Model</span>
-          </div>
+                    <!-- Mod 4 -->
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition">
+                        <div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center font-bold text-lg mb-4">
+                            <i class="fa-solid fa-rectangle-ad"></i>
+                        </div>
+                        <h3 class="font-bold text-slate-900 text-base mb-1">4. In-Bus Advertising (Dataset)</h3>
+                        <p class="text-xs text-slate-500 leading-relaxed mb-3">
+                            Position-based pricing (Front/First 10/Middle/Rear). Trained on 1,000 advertisement records predicting revenue and tracking QR scans.
+                        </p>
+                        <span class="text-[11px] font-semibold text-purple-700 bg-purple-50 px-2.5 py-1 rounded-md">1,000 Records ML Model</span>
+                    </div>
 
-          <!-- Mod 5 -->
-          <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition">
-            <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-lg mb-4">
-              <i class="fa-solid fa-users"></i>
-            </div>
-            <h3 class="font-bold text-slate-900 text-base mb-1">5. Group & Multi-Day Bulk</h3>
-            <p class="text-xs text-slate-500 leading-relaxed mb-3">
-              Tiered discounts for wedding parties, college tours (10%–20%), multi-day reservations (>3 days), and flexible multi-seat allocation.
-            </p>
-            <span class="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md">Group & Charter Engine</span>
-          </div>
+                    <!-- Mod 5 -->
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition">
+                        <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-lg mb-4">
+                            <i class="fa-solid fa-users"></i>
+                        </div>
+                        <h3 class="font-bold text-slate-900 text-base mb-1">5. Group & Multi-Day Bulk</h3>
+                        <p class="text-xs text-slate-500 leading-relaxed mb-3">
+                            Tiered discounts for wedding parties, college tours (10%–20%), multi-day reservations (>3 days), and flexible multi-seat allocation.
+                        </p>
+                        <span class="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md">Group & Charter Engine</span>
+                    </div>
 
-          <!-- Mod 6 -->
-          <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition">
-            <div class="w-10 h-10 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center font-bold text-lg mb-4">
-              <i class="fa-solid fa-utensils"></i>
-            </div>
-            <h3 class="font-bold text-slate-900 text-base mb-1">6. Vendor & Rest-Stop Tie-Ups</h3>
-            <p class="text-xs text-slate-500 leading-relaxed mb-3">
-              Katraj Ghat Highway Food Plaza (Pune-Kolhapur NH48) & Onboard MSRTC Rail Neer pre-orders, earning 10%–15% commission + rest-stop bidding fees.
-            </p>
-            <span class="text-[11px] font-semibold text-orange-700 bg-orange-50 px-2.5 py-1 rounded-md">Katraj Ghat Rest-Stop Partner</span>
-          </div>
+                    <!-- Mod 6 -->
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition">
+                        <div class="w-10 h-10 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center font-bold text-lg mb-4">
+                            <i class="fa-solid fa-utensils"></i>
+                        </div>
+                        <h3 class="font-bold text-slate-900 text-base mb-1">6. Vendor & Rest-Stop Tie-Ups</h3>
+                        <p class="text-xs text-slate-500 leading-relaxed mb-3">
+                            Katraj Ghat Highway Food Plaza (Pune-Kolhapur NH48) & Onboard MSRTC Rail Neer pre-orders, earning 10%–15% commission + rest-stop bidding fees.
+                        </p>
+                        <span class="text-[11px] font-semibold text-orange-700 bg-orange-50 px-2.5 py-1 rounded-md">Katraj Ghat Rest-Stop Partner</span>
+                    </div>
 
-          <!-- Mod 7 -->
-          <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition">
-            <div class="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center font-bold text-lg mb-4">
-              <i class="fa-solid fa-shield-heart"></i>
-            </div>
-            <h3 class="font-bold text-slate-900 text-base mb-1">7. Passenger Priority & Safety</h3>
-            <p class="text-xs text-slate-500 leading-relaxed mb-3">
-              Priority seating for Senior Citizens (Row 1-2), Pregnant Women, and Solo Female Safe Matching with instant Control Room SOS dispatch.
-            </p>
-            <span class="text-[11px] font-semibold text-rose-700 bg-rose-50 px-2.5 py-1 rounded-md">SOS 1091 & Concessions</span>
-          </div>
-        </div>
+                    <!-- Mod 7 -->
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition">
+                        <div class="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center font-bold text-lg mb-4">
+                            <i class="fa-solid fa-shield-heart"></i>
+                        </div>
+                        <h3 class="font-bold text-slate-900 text-base mb-1">7. Passenger Priority & Safety</h3>
+                        <p class="text-xs text-slate-500 leading-relaxed mb-3">
+                            Priority seating for Senior Citizens (Row 1-2), Pregnant Women, and Solo Female Safe Matching with instant Control Room SOS dispatch.
+                        </p>
+                        <span class="text-[11px] font-semibold text-rose-700 bg-rose-50 px-2.5 py-1 rounded-md">SOS 1091 & Concessions</span>
+                    </div>
+                </div>
 
-        <!-- Unified Revenue Formula Callout -->
-        <div class="mt-10 bg-slate-900 text-white p-6 sm:p-8 rounded-3xl shadow-xl flex flex-col md:flex-row items-center justify-between gap-6 border border-slate-700">
-          <div>
-            <span class="text-xs uppercase tracking-widest text-amber-400 font-bold">Consolidated Financial Framework</span>
-            <h3 class="text-xl sm:text-2xl font-black mt-1">Total Revenue Formula</h3>
-            <p class="text-slate-300 text-sm mt-1 font-mono">
-              R<sub>total</sub> = R<sub>ticket</sub> + R<sub>advertisement</sub> + R<sub>vendor</sub> + R<sub>partnership</sub>
-            </p>
-          </div>
-          <button onclick="navigateTo('revenue')" class="bg-msrtc-red hover:bg-msrtc-darkred text-white font-bold px-6 py-3 rounded-xl shadow-lg transition whitespace-nowrap">
+                <!-- Unified Revenue Formula Callout -->
+                <div class="mt-10 bg-slate-900 text-white p-6 sm:p-8 rounded-3xl shadow-xl flex flex-col md:flex-row items-center justify-between gap-6 border border-slate-700">
+                    <div>
+                        <span class="text-xs uppercase tracking-widest text-amber-400 font-bold">Consolidated Financial Framework</span>
+                        <h3 class="text-xl sm:text-2xl font-black mt-1">Total Revenue Formula</h3>
+                        <p class="text-slate-300 text-sm mt-1 font-mono">
+                            R<sub>total</sub> = R<sub>ticket</sub> + R<sub>advertisement</sub> + R<sub>vendor</sub> + R<sub>partnership</sub>
+                        </p>
+                    </div>
+                    <button onclick="navigateTo('revenue')" class="bg-msrtc-red hover:bg-msrtc-darkred text-white font-bold px-6 py-3 rounded-xl shadow-lg transition whitespace-nowrap">
             View Live Revenue Breakdown <i class="fa-solid fa-arrow-right ml-1"></i>
           </button>
-        </div>
-      </div>
-    </section>
+                </div>
+            </div>
+        </section>
 
-    <!-- PAGE 2: BOOKING WIZARD -->
-    <section id="page-book" class="page-view hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900">Book Bus Tickets</h2>
-          <p class="text-xs sm:text-sm text-slate-500">Live dynamic pricing with off-peak "Happy Hours" discounts and safety allocation.</p>
-        </div>
-        <div class="flex items-center gap-2">
-          <button onclick="toggleGroupBookingModal()" class="bg-emerald-50 text-emerald-800 border border-emerald-300 text-xs font-bold px-3 py-2 rounded-xl hover:bg-emerald-100 transition flex items-center gap-1.5">
+        <!-- PAGE 2: BOOKING WIZARD -->
+        <section id="page-book" class="page-view hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900">Book Bus Tickets</h2>
+                    <p class="text-xs sm:text-sm text-slate-500">Live dynamic pricing with off-peak "Happy Hours" discounts and safety allocation.</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="toggleGroupBookingModal()" class="bg-emerald-50 text-emerald-800 border border-emerald-300 text-xs font-bold px-3 py-2 rounded-xl hover:bg-emerald-100 transition flex items-center gap-1.5">
             <i class="fa-solid fa-users"></i> Bulk / Group Discount Calc
           </button>
-        </div>
-      </div>
+                </div>
+            </div>
 
-      <!-- Step 1: Search Form -->
-      <div id="booking-step-1" class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm mb-6">
-        <form onsubmit="handleSearchSubmit(event)" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-          <div>
-            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Departure Stand</label>
-            <input type="text" id="from-location" list="transit-locations-list" class="w-full text-sm p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-msrtc-red focus:border-msrtc-red outline-none" placeholder="e.g. Kolhapur CBS" required value="Kolhapur CBS (Central Bus Stand)" />
-          </div>
-          <div>
-            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Destination Stand</label>
-            <input type="text" id="to-location" list="transit-locations-list" class="w-full text-sm p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-msrtc-red focus:border-msrtc-red outline-none" placeholder="e.g. Pune (Swargate)" required value="Pune (Swargate)" />
-          </div>
-          <div>
-            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Travel Date</label>
-            <input type="date" id="travel-date" class="w-full text-sm p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-msrtc-red focus:border-msrtc-red outline-none" required />
-          </div>
-          <div>
-            <button type="submit" class="w-full bg-msrtc-red hover:bg-msrtc-darkred text-white font-bold p-3 rounded-xl transition shadow-md shadow-red-200 flex items-center justify-center gap-2">
+            <!-- Step 1: Search Form -->
+            <div id="booking-step-1" class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm mb-6">
+                <form onsubmit="handleSearchSubmit(event)" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Departure Stand</label>
+                        <input type="text" id="from-location" list="transit-locations-list" class="w-full text-sm p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-msrtc-red focus:border-msrtc-red outline-none" placeholder="e.g. Kolhapur CBS" required value="Kolhapur CBS (Central Bus Stand)"
+                        />
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Destination Stand</label>
+                        <input type="text" id="to-location" list="transit-locations-list" class="w-full text-sm p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-msrtc-red focus:border-msrtc-red outline-none" placeholder="e.g. Pune (Swargate)" required value="Pune (Swargate)"
+                        />
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Travel Date</label>
+                        <input type="date" id="travel-date" class="w-full text-sm p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-msrtc-red focus:border-msrtc-red outline-none" required />
+                    </div>
+                    <div>
+                        <button type="submit" class="w-full bg-msrtc-red hover:bg-msrtc-darkred text-white font-bold p-3 rounded-xl transition shadow-md shadow-red-200 flex items-center justify-center gap-2">
               <i class="fa-solid fa-magnifying-glass"></i> Search Available Buses
             </button>
-          </div>
-        </form>
-        <datalist id="transit-locations-list"></datalist>
-      </div>
-
-      <!-- Search Results Container -->
-      <div id="search-results-box" class="space-y-4">
-        <!-- Injected dynamically -->
-      </div>
-
-      <!-- Step 2: Seat Map & Passenger Details Modal/View -->
-      <div id="seat-selection-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6 shadow-2xl border border-slate-200">
-          <div class="flex justify-between items-center pb-4 border-b border-slate-200">
-            <div>
-              <h3 id="modal-bus-title" class="text-lg font-extrabold text-slate-900">Select Seats & Add-Ons</h3>
-              <p id="modal-bus-sub" class="text-xs text-slate-500">Pick up to 6 seats. Priority seats color-coded for safety.</p>
+                    </div>
+                </form>
+                <datalist id="transit-locations-list"></datalist>
             </div>
-            <button onclick="closeSeatModal()" class="text-slate-400 hover:text-slate-600 text-xl font-bold p-1">
+
+            <!-- Search Results Container -->
+            <div id="search-results-box" class="space-y-4">
+                <!-- Injected dynamically -->
+            </div>
+
+            <!-- Step 2: Seat Map & Passenger Details Modal/View -->
+            <div id="seat-selection-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+                <div class="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6 shadow-2xl border border-slate-200">
+                    <div class="flex justify-between items-center pb-4 border-b border-slate-200">
+                        <div>
+                            <h3 id="modal-bus-title" class="text-lg font-extrabold text-slate-900">Select Seats & Add-Ons</h3>
+                            <p id="modal-bus-sub" class="text-xs text-slate-500">Pick up to 6 seats. Priority seats color-coded for safety.</p>
+                        </div>
+                        <button onclick="closeSeatModal()" class="text-slate-400 hover:text-slate-600 text-xl font-bold p-1">
               <i class="fa-solid fa-xmark"></i>
             </button>
-          </div>
+                    </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-12 gap-6 mt-6">
-            <!-- Seat Map Column -->
-            <div class="md:col-span-5 bg-slate-50 p-4 rounded-2xl border border-slate-200">
-              <div class="flex items-center justify-between text-xs text-slate-500 mb-3 font-semibold pb-2 border-b border-slate-200">
-                <span>Driver Cabin</span>
-                <i class="fa-solid fa-dharmachakra text-slate-400 text-base"></i>
-              </div>
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-6 mt-6">
+                        <!-- Seat Map Column -->
+                        <div class="md:col-span-5 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                            <div class="flex items-center justify-between text-xs text-slate-500 mb-3 font-semibold pb-2 border-b border-slate-200">
+                                <span>Driver Cabin</span>
+                                <i class="fa-solid fa-dharmachakra text-slate-400 text-base"></i>
+                            </div>
 
-              <!-- Seat Legend -->
-              <div class="grid grid-cols-2 gap-2 text-[10px] text-slate-600 mb-4 bg-white p-2.5 rounded-xl border border-slate-200">
-                <span class="flex items-center gap-1.5"><span class="w-3 h-3 bg-white border border-slate-300 rounded"></span> Available</span>
-                <span class="flex items-center gap-1.5"><span class="w-3 h-3 bg-msrtc-red rounded"></span> Selected</span>
-                <span class="flex items-center gap-1.5"><span class="w-3 h-3 bg-blue-100 border-2 border-blue-600 rounded"></span> Senior Priority</span>
-                <span class="flex items-center gap-1.5"><span class="w-3 h-3 bg-pink-100 border-2 border-pink-500 rounded"></span> Pregnant Ergonomic</span>
-                <span class="flex items-center gap-1.5"><span class="w-3 h-3 bg-purple-100 border-2 border-purple-600 rounded"></span> Ladies Safe Zone</span>
-                <span class="flex items-center gap-1.5"><span class="w-3 h-3 bg-slate-300 rounded"></span> Taken</span>
-              </div>
+                            <!-- Seat Legend -->
+                            <div class="grid grid-cols-2 gap-2 text-[10px] text-slate-600 mb-4 bg-white p-2.5 rounded-xl border border-slate-200">
+                                <span class="flex items-center gap-1.5"><span class="w-3 h-3 bg-white border border-slate-300 rounded"></span> Available</span>
+                                <span class="flex items-center gap-1.5"><span class="w-3 h-3 bg-msrtc-red rounded"></span> Selected</span>
+                                <span class="flex items-center gap-1.5"><span class="w-3 h-3 bg-blue-100 border-2 border-blue-600 rounded"></span> Senior Priority</span>
+                                <span class="flex items-center gap-1.5"><span class="w-3 h-3 bg-pink-100 border-2 border-pink-500 rounded"></span> Pregnant Ergonomic</span>
+                                <span class="flex items-center gap-1.5"><span class="w-3 h-3 bg-purple-100 border-2 border-purple-600 rounded"></span> Ladies Safe Zone</span>
+                                <span class="flex items-center gap-1.5"><span class="w-3 h-3 bg-slate-300 rounded"></span> Taken</span>
+                            </div>
 
-              <!-- 28 Seat Cabin Grid (7 rows x 4 cols: A,B - C,D) -->
-              <div id="bus-cabin-grid" class="space-y-2"></div>
-            </div>
+                            <!-- 28 Seat Cabin Grid (7 rows x 4 cols: A,B - C,D) -->
+                            <div id="bus-cabin-grid" class="space-y-2"></div>
+                        </div>
 
-            <!-- Passenger Details & Add-Ons Column -->
-            <div class="md:col-span-7 space-y-4">
-              <!-- Selected Seats Tag -->
-              <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 flex justify-between items-center text-xs">
-                <div>
-                  <span class="font-bold text-amber-900">Selected Seats:</span>
-                  <span id="selected-seats-badge" class="font-mono font-bold text-msrtc-red ml-1">None</span>
-                </div>
-                <div id="modal-fare-indicator" class="font-bold text-slate-800"></div>
-              </div>
+                        <!-- Passenger Details & Add-Ons Column -->
+                        <div class="md:col-span-7 space-y-4">
+                            <!-- Selected Seats Tag -->
+                            <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 flex justify-between items-center text-xs">
+                                <div>
+                                    <span class="font-bold text-amber-900">Selected Seats:</span>
+                                    <span id="selected-seats-badge" class="font-mono font-bold text-msrtc-red ml-1">None</span>
+                                </div>
+                                <div id="modal-fare-indicator" class="font-bold text-slate-800"></div>
+                            </div>
 
-              <!-- Passenger Inputs Container -->
-              <div id="passenger-inputs-container" class="space-y-3 max-h-52 overflow-y-auto pr-1"></div>
+                            <!-- Passenger Inputs Container -->
+                            <div id="passenger-inputs-container" class="space-y-3 max-h-52 overflow-y-auto pr-1"></div>
 
-              <!-- Module 6: Vendor Add-Ons (Katraj Ghat Meal, Water, Snacks) -->
-              <div class="bg-white p-4 rounded-xl border border-slate-200">
-                <div class="flex items-center justify-between mb-2">
-                  <span class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                            <!-- Module 6: Vendor Add-Ons (Katraj Ghat Meal, Water, Snacks) -->
+                            <div class="bg-white p-4 rounded-xl border border-slate-200">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
                     <i class="fa-solid fa-utensils text-orange-600"></i> Refreshment & Rest-Stop Pre-Orders
                   </span>
-                  <span class="text-[10px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded font-semibold">Katraj Ghat Partner</span>
-                </div>
-                <div id="vendor-addons-list" class="space-y-2 text-xs"></div>
-              </div>
+                                    <span class="text-[10px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded font-semibold">Katraj Ghat Partner</span>
+                                </div>
+                                <div id="vendor-addons-list" class="space-y-2 text-xs"></div>
+                            </div>
 
-              <!-- Payment & Booking Summary -->
-              <div class="bg-slate-900 text-white p-4 rounded-xl space-y-2 text-xs">
-                <div class="flex justify-between">
-                  <span class="text-slate-400">Base Ticket Fare:</span>
-                  <span id="summary-base-fare" class="font-semibold">₹0</span>
-                </div>
-                <div id="summary-hh-row" class="flex justify-between text-amber-300 hidden">
-                  <span>⚡ Happy Hours Discount:</span>
-                  <span id="summary-hh-discount">-₹0</span>
-                </div>
-                <div id="summary-vendor-row" class="flex justify-between text-emerald-300 hidden">
-                  <span>Vendor Refreshments:</span>
-                  <span id="summary-vendor-fare">+₹0</span>
-                </div>
-                <div class="flex justify-between">
-                  <span class="text-slate-400">GST (5%):</span>
-                  <span id="summary-gst" class="font-semibold">₹0</span>
-                </div>
-                <div class="border-t border-slate-700 pt-2 flex justify-between text-base font-extrabold text-amber-400">
-                  <span>Total Payable:</span>
-                  <span id="summary-grand-total">₹0</span>
-                </div>
+                            <!-- Payment & Booking Summary -->
+                            <div class="bg-slate-900 text-white p-4 rounded-xl space-y-2 text-xs">
+                                <div class="flex justify-between">
+                                    <span class="text-slate-400">Base Ticket Fare:</span>
+                                    <span id="summary-base-fare" class="font-semibold">₹0</span>
+                                </div>
+                                <div id="summary-hh-row" class="flex justify-between text-amber-300 hidden">
+                                    <span>⚡ Happy Hours Discount:</span>
+                                    <span id="summary-hh-discount">-₹0</span>
+                                </div>
+                                <div id="summary-vendor-row" class="flex justify-between text-emerald-300 hidden">
+                                    <span>Vendor Refreshments:</span>
+                                    <span id="summary-vendor-fare">+₹0</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-slate-400">GST (5%):</span>
+                                    <span id="summary-gst" class="font-semibold">₹0</span>
+                                </div>
+                                <div class="border-t border-slate-700 pt-2 flex justify-between text-base font-extrabold text-amber-400">
+                                    <span>Total Payable:</span>
+                                    <span id="summary-grand-total">₹0</span>
+                                </div>
 
-                <!-- Payment Method -->
-                <div class="pt-2">
-                  <label class="block text-[11px] text-slate-400 mb-1 font-semibold">Payment Mode</label>
-                  <div class="grid grid-cols-3 gap-2 text-center text-xs">
-                    <label class="cursor-pointer bg-slate-800 hover:bg-slate-700 p-2 rounded-lg border border-slate-700 flex items-center justify-center gap-1.5">
+                                <!-- Payment Method -->
+                                <div class="pt-2">
+                                    <label class="block text-[11px] text-slate-400 mb-1 font-semibold">Payment Mode</label>
+                                    <div class="grid grid-cols-3 gap-2 text-center text-xs">
+                                        <label class="cursor-pointer bg-slate-800 hover:bg-slate-700 p-2 rounded-lg border border-slate-700 flex items-center justify-center gap-1.5">
                       <input type="radio" name="payMethod" value="UPI" checked class="text-msrtc-red" /> UPI
                     </label>
-                    <label class="cursor-pointer bg-slate-800 hover:bg-slate-700 p-2 rounded-lg border border-slate-700 flex items-center justify-center gap-1.5">
+                                        <label class="cursor-pointer bg-slate-800 hover:bg-slate-700 p-2 rounded-lg border border-slate-700 flex items-center justify-center gap-1.5">
                       <input type="radio" name="payMethod" value="Card" class="text-msrtc-red" /> Card
                     </label>
-                    <label class="cursor-pointer bg-slate-800 hover:bg-slate-700 p-2 rounded-lg border border-slate-700 flex items-center justify-center gap-1.5">
+                                        <label class="cursor-pointer bg-slate-800 hover:bg-slate-700 p-2 rounded-lg border border-slate-700 flex items-center justify-center gap-1.5">
                       <input type="radio" name="payMethod" value="Cash" class="text-msrtc-red" /> Counter
                     </label>
-                  </div>
-                </div>
+                                    </div>
+                                </div>
 
-                <button onclick="confirmBooking()" id="confirm-booking-btn" class="w-full mt-3 bg-amber-400 hover:bg-amber-500 text-slate-900 font-extrabold p-3 rounded-xl transition flex items-center justify-center gap-2">
+                                <button onclick="confirmBooking()" id="confirm-booking-btn" class="w-full mt-3 bg-amber-400 hover:bg-amber-500 text-slate-900 font-extrabold p-3 rounded-xl transition flex items-center justify-center gap-2">
                   <i class="fa-solid fa-lock"></i> Confirm & Book Reservation
                 </button>
-              </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
-        </div>
-      </div>
-    </section>
+        </section>
 
-    <!-- PAGE 3: IN-BUS ADVERTISING & DEALS (Module 4) -->
-    <section id="page-ads" class="page-view hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div class="mb-8">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <span class="text-xs font-bold text-purple-700 bg-purple-50 border border-purple-200 px-3 py-1 rounded-full uppercase tracking-wider">Module 4 • Commercial Revenue</span>
-            <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-2">In-Bus Advertising & Retail Promotions</h2>
-            <p class="text-sm text-slate-500 mt-1">Harnessing MSRTC's 1,000 Campaign Dataset for Position-Based Ad Pricing, QR Scans, and Merchant Tie-Ups.</p>
-          </div>
-          <button onclick="showAdPredictorModal()" class="bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow transition flex items-center gap-2">
+        <!-- PAGE 3: IN-BUS ADVERTISING & DEALS (Module 4) -->
+        <section id="page-ads" class="page-view hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="mb-8">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <span class="text-xs font-bold text-purple-700 bg-purple-50 border border-purple-200 px-3 py-1 rounded-full uppercase tracking-wider">Module 4 • Commercial Revenue</span>
+                        <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-2">In-Bus Advertising & Retail Promotions</h2>
+                        <p class="text-sm text-slate-500 mt-1">Harnessing MSRTC's 1,000 Campaign Dataset for Position-Based Ad Pricing, QR Scans, and Merchant Tie-Ups.</p>
+                    </div>
+                    <button onclick="showAdPredictorModal()" class="bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow transition flex items-center gap-2">
             <i class="fa-solid fa-calculator"></i> ML Ad Revenue Predictor
           </button>
-        </div>
-      </div>
+                </div>
+            </div>
 
-      <!-- Position-Based Pricing Blueprint Grid -->
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-        <div class="bg-white p-5 rounded-2xl border-2 border-amber-300 shadow-sm relative overflow-hidden">
-          <span class="absolute top-2 right-2 bg-amber-100 text-amber-900 text-[10px] font-extrabold px-2 py-0.5 rounded-full">Premium Tier</span>
-          <p class="text-xs text-slate-400 font-bold uppercase tracking-wider">Bus Position</p>
-          <h3 class="text-lg font-extrabold text-slate-900 mt-0.5">Front Windscreen</h3>
-          <p class="text-xs text-slate-500 mt-1">High oncoming traffic & driver bulkhead visibility.</p>
-          <div class="mt-4 pt-3 border-t border-slate-100 flex justify-between items-center text-xs">
-            <span class="text-slate-500">Rate:</span>
-            <span class="font-extrabold text-slate-900">₹180 - ₹240 / day</span>
-          </div>
-        </div>
+            <!-- Position-Based Pricing Blueprint Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                <div class="bg-white p-5 rounded-2xl border-2 border-amber-300 shadow-sm relative overflow-hidden">
+                    <span class="absolute top-2 right-2 bg-amber-100 text-amber-900 text-[10px] font-extrabold px-2 py-0.5 rounded-full">Premium Tier</span>
+                    <p class="text-xs text-slate-400 font-bold uppercase tracking-wider">Bus Position</p>
+                    <h3 class="text-lg font-extrabold text-slate-900 mt-0.5">Front Windscreen</h3>
+                    <p class="text-xs text-slate-500 mt-1">High oncoming traffic & driver bulkhead visibility.</p>
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex justify-between items-center text-xs">
+                        <span class="text-slate-500">Rate:</span>
+                        <span class="font-extrabold text-slate-900">₹180 - ₹240 / day</span>
+                    </div>
+                </div>
 
-        <div class="bg-white p-5 rounded-2xl border border-blue-200 shadow-sm relative overflow-hidden">
-          <span class="absolute top-2 right-2 bg-blue-100 text-blue-900 text-[10px] font-extrabold px-2 py-0.5 rounded-full">High Tier</span>
-          <p class="text-xs text-slate-400 font-bold uppercase tracking-wider">Bus Position</p>
-          <h3 class="text-lg font-extrabold text-slate-900 mt-0.5">First 10 Seats Area</h3>
-          <p class="text-xs text-slate-500 mt-1">Direct passenger boarding eye-contact zone.</p>
-          <div class="mt-4 pt-3 border-t border-slate-100 flex justify-between items-center text-xs">
-            <span class="text-slate-500">Rate:</span>
-            <span class="font-extrabold text-slate-900">₹150 - ₹180 / day</span>
-          </div>
-        </div>
+                <div class="bg-white p-5 rounded-2xl border border-blue-200 shadow-sm relative overflow-hidden">
+                    <span class="absolute top-2 right-2 bg-blue-100 text-blue-900 text-[10px] font-extrabold px-2 py-0.5 rounded-full">High Tier</span>
+                    <p class="text-xs text-slate-400 font-bold uppercase tracking-wider">Bus Position</p>
+                    <h3 class="text-lg font-extrabold text-slate-900 mt-0.5">First 10 Seats Area</h3>
+                    <p class="text-xs text-slate-500 mt-1">Direct passenger boarding eye-contact zone.</p>
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex justify-between items-center text-xs">
+                        <span class="text-slate-500">Rate:</span>
+                        <span class="font-extrabold text-slate-900">₹150 - ₹180 / day</span>
+                    </div>
+                </div>
 
-        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden">
-          <span class="absolute top-2 right-2 bg-slate-100 text-slate-800 text-[10px] font-extrabold px-2 py-0.5 rounded-full">Medium Tier</span>
-          <p class="text-xs text-slate-400 font-bold uppercase tracking-wider">Bus Position</p>
-          <h3 class="text-lg font-extrabold text-slate-900 mt-0.5">Middle Section</h3>
-          <p class="text-xs text-slate-500 mt-1">Overhead luggage racks & back-of-seat panels.</p>
-          <div class="mt-4 pt-3 border-t border-slate-100 flex justify-between items-center text-xs">
-            <span class="text-slate-500">Rate:</span>
-            <span class="font-extrabold text-slate-900">₹100 - ₹135 / day</span>
-          </div>
-        </div>
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden">
+                    <span class="absolute top-2 right-2 bg-slate-100 text-slate-800 text-[10px] font-extrabold px-2 py-0.5 rounded-full">Medium Tier</span>
+                    <p class="text-xs text-slate-400 font-bold uppercase tracking-wider">Bus Position</p>
+                    <h3 class="text-lg font-extrabold text-slate-900 mt-0.5">Middle Section</h3>
+                    <p class="text-xs text-slate-500 mt-1">Overhead luggage racks & back-of-seat panels.</p>
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex justify-between items-center text-xs">
+                        <span class="text-slate-500">Rate:</span>
+                        <span class="font-extrabold text-slate-900">₹100 - ₹135 / day</span>
+                    </div>
+                </div>
 
-        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden">
-          <span class="absolute top-2 right-2 bg-slate-100 text-slate-800 text-[10px] font-extrabold px-2 py-0.5 rounded-full">Standard Tier</span>
-          <p class="text-xs text-slate-400 font-bold uppercase tracking-wider">Bus Position</p>
-          <h3 class="text-lg font-extrabold text-slate-900 mt-0.5">Rear Window</h3>
-          <p class="text-xs text-slate-500 mt-1">Following vehicle traffic & passenger exit view.</p>
-          <div class="mt-4 pt-3 border-t border-slate-100 flex justify-between items-center text-xs">
-            <span class="text-slate-500">Rate:</span>
-            <span class="font-extrabold text-slate-900">₹70 - ₹95 / day</span>
-          </div>
-        </div>
-      </div>
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden">
+                    <span class="absolute top-2 right-2 bg-slate-100 text-slate-800 text-[10px] font-extrabold px-2 py-0.5 rounded-full">Standard Tier</span>
+                    <p class="text-xs text-slate-400 font-bold uppercase tracking-wider">Bus Position</p>
+                    <h3 class="text-lg font-extrabold text-slate-900 mt-0.5">Rear Window</h3>
+                    <p class="text-xs text-slate-500 mt-1">Following vehicle traffic & passenger exit view.</p>
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex justify-between items-center text-xs">
+                        <span class="text-slate-500">Rate:</span>
+                        <span class="font-extrabold text-slate-900">₹70 - ₹95 / day</span>
+                    </div>
+                </div>
+            </div>
 
-      <!-- Active In-Bus Ads & QR Scan Simulator -->
-      <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm mb-8">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-          <div>
-            <h3 class="text-lg font-extrabold text-slate-900">Active Bus Advertisements & Retail Offers</h3>
-            <p class="text-xs text-slate-500">Click "Simulate Passenger QR Scan" to verify scan tracking and unlock retail partner discount vouchers.</p>
-          </div>
-          <div id="ad-scan-counter-badge" class="bg-purple-50 text-purple-800 border border-purple-200 text-xs font-bold px-3 py-1.5 rounded-xl">
-            Live QR Scans: <span id="ad-live-scans-val" class="font-mono">2,570,524</span>
-          </div>
-        </div>
+            <!-- Active In-Bus Ads & QR Scan Simulator -->
+            <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm mb-8">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                    <div>
+                        <h3 class="text-lg font-extrabold text-slate-900">Active Bus Advertisements & Retail Offers</h3>
+                        <p class="text-xs text-slate-500">Click "Simulate Passenger QR Scan" to verify scan tracking and unlock retail partner discount vouchers.</p>
+                    </div>
+                    <div id="ad-scan-counter-badge" class="bg-purple-50 text-purple-800 border border-purple-200 text-xs font-bold px-3 py-1.5 rounded-xl">
+                        Live QR Scans: <span id="ad-live-scans-val" class="font-mono">2,570,524</span>
+                    </div>
+                </div>
 
-        <div id="active-ads-grid" class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <!-- Injected dynamically -->
-        </div>
-      </div>
-    </section>
+                <div id="active-ads-grid" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- Injected dynamically -->
+                </div>
+            </div>
+        </section>
 
-    <!-- PAGE 4: HIGHWAY VENDORS & REST-STOPS (Module 6) -->
-    <section id="page-vendors" class="page-view hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div class="mb-8">
-        <span class="text-xs font-bold text-orange-700 bg-orange-50 border border-orange-200 px-3 py-1 rounded-full uppercase tracking-wider">Module 6 • Rest-Stop Commercial Partnerships</span>
-        <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-2">Highway Rest-Stops & Refreshment Hubs</h2>
-        <p class="text-sm text-slate-500 mt-1">Official partnership with Highway Rest-Stops (e.g. Katraj Ghat on Pune-Kolhapur route) and Onboard Food Vendors.</p>
-      </div>
+        <!-- PAGE 4: HIGHWAY VENDORS & REST-STOPS (Module 6) -->
+        <section id="page-vendors" class="page-view hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="mb-8">
+                <span class="text-xs font-bold text-orange-700 bg-orange-50 border border-orange-200 px-3 py-1 rounded-full uppercase tracking-wider">Module 6 • Rest-Stop Commercial Partnerships</span>
+                <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-2">Highway Rest-Stops & Refreshment Hubs</h2>
+                <p class="text-sm text-slate-500 mt-1">Official partnership with Highway Rest-Stops (e.g. Katraj Ghat on Pune-Kolhapur route) and Onboard Food Vendors.</p>
+            </div>
 
-      <!-- Featured Rest-Stop Banner: Katraj Ghat -->
-      <div class="bg-gradient-to-r from-orange-950 via-slate-900 to-amber-950 text-white p-6 sm:p-8 rounded-3xl shadow-xl mb-8 border border-orange-800/40 relative overflow-hidden">
-        <div class="max-w-2xl">
-          <span class="bg-orange-500/20 text-orange-300 border border-orange-500/40 text-[11px] font-bold px-3 py-1 rounded-full uppercase">Official Rest-Stop Partner</span>
-          <h3 class="text-2xl sm:text-3xl font-extrabold mt-3">Katraj Ghat Highway Food Plaza</h3>
-          <p class="text-xs sm:text-sm text-slate-300 mt-2">
-            Located on NH48 along the high-density Kolhapur - Pune Corridor near Katraj Ghat. Offering hygienic restrooms, EV charging, 24x7 tea stalls, and Maharashtrian Pure Veg Thali.
-          </p>
-          <div class="flex flex-wrap gap-4 mt-6 text-xs text-amber-200 font-semibold">
-            <span><i class="fa-solid fa-star text-amber-400"></i> 4.6 / 5 Customer Rating</span>
-            <span><i class="fa-solid fa-handshake"></i> 12% Revenue Share to MSRTC</span>
-            <span><i class="fa-solid fa-building-columns"></i> ₹35,000 Monthly Contract License</span>
-          </div>
-        </div>
-      </div>
+            <!-- Featured Rest-Stop Banner: Katraj Ghat -->
+            <div class="bg-gradient-to-r from-orange-950 via-slate-900 to-amber-950 text-white p-6 sm:p-8 rounded-3xl shadow-xl mb-8 border border-orange-800/40 relative overflow-hidden">
+                <div class="max-w-2xl">
+                    <span class="bg-orange-500/20 text-orange-300 border border-orange-500/40 text-[11px] font-bold px-3 py-1 rounded-full uppercase">Official Rest-Stop Partner</span>
+                    <h3 class="text-2xl sm:text-3xl font-extrabold mt-3">Katraj Ghat Highway Food Plaza</h3>
+                    <p class="text-xs sm:text-sm text-slate-300 mt-2">
+                        Located on NH48 along the high-density Kolhapur - Pune Corridor near Katraj Ghat. Offering hygienic restrooms, EV charging, 24x7 tea stalls, and Maharashtrian Pure Veg Thali.
+                    </p>
+                    <div class="flex flex-wrap gap-4 mt-6 text-xs text-amber-200 font-semibold">
+                        <span><i class="fa-solid fa-star text-amber-400"></i> 4.6 / 5 Customer Rating</span>
+                        <span><i class="fa-solid fa-handshake"></i> 12% Revenue Share to MSRTC</span>
+                        <span><i class="fa-solid fa-building-columns"></i> ₹35,000 Monthly Contract License</span>
+                    </div>
+                </div>
+            </div>
 
-      <!-- Rest-Stop Locations & Menu Cards -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <!-- Partner Locations -->
-        <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
-          <h3 class="text-lg font-extrabold text-slate-900 mb-4">MSRTC Transit Corridor Rest-Stops</h3>
-          <div id="rest-stops-list" class="space-y-4"></div>
-        </div>
+            <!-- Rest-Stop Locations & Menu Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Partner Locations -->
+                <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+                    <h3 class="text-lg font-extrabold text-slate-900 mb-4">MSRTC Transit Corridor Rest-Stops</h3>
+                    <div id="rest-stops-list" class="space-y-4"></div>
+                </div>
 
-        <!-- Pre-order Refreshment Menu -->
-        <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
-          <h3 class="text-lg font-extrabold text-slate-900 mb-4">Passenger Pre-Order Menu</h3>
-          <p class="text-xs text-slate-500 mb-4">Add these during bus booking or buy vouchers directly.</p>
-          <div id="vendor-menu-grid" class="space-y-3"></div>
-        </div>
-      </div>
-    </section>
+                <!-- Pre-order Refreshment Menu -->
+                <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+                    <h3 class="text-lg font-extrabold text-slate-900 mb-4">Passenger Pre-Order Menu</h3>
+                    <p class="text-xs text-slate-500 mb-4">Add these during bus booking or buy vouchers directly.</p>
+                    <div id="vendor-menu-grid" class="space-y-3"></div>
+                </div>
+            </div>
+        </section>
 
-    <!-- PAGE: REST-STOP TENDER BIDDING & RESTAURANT REGISTRATION (Module 6 Enhancement) -->
-    <section id="page-bidding" class="page-view hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <span class="text-xs font-bold text-amber-700 bg-amber-50 border border-amber-200 px-3 py-1 rounded-full uppercase tracking-wider">Module 6 • Commercial Tenders</span>
-          <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-2">Rest-Stop Stall Bidding &amp; Restaurant Registration</h2>
-          <p class="text-sm text-slate-500 mt-1">Participate in transparent digital auction bidding for Highway Rest-Stops (Katraj Ghat NH48, Karad, Satara) or register your food establishment as an official partner.</p>
-        </div>
-        <div class="flex gap-2">
-          <button onclick="switchBiddingSubTab('bids')" id="tab-btn-bids" class="px-4 py-2 text-xs font-bold rounded-xl bg-slate-900 text-white shadow-sm transition">
+        <!-- PAGE: REST-STOP TENDER BIDDING & RESTAURANT REGISTRATION (Module 6 Enhancement) -->
+        <section id="page-bidding" class="page-view hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <span class="text-xs font-bold text-amber-700 bg-amber-50 border border-amber-200 px-3 py-1 rounded-full uppercase tracking-wider">Module 6 • Commercial Tenders</span>
+                    <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-2">Rest-Stop Stall Bidding &amp; Restaurant Registration</h2>
+                    <p class="text-sm text-slate-500 mt-1">Participate in transparent digital auction bidding for Highway Rest-Stops (Katraj Ghat NH48, Karad, Satara) or register your food establishment as an official partner.</p>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="switchBiddingSubTab('bids')" id="tab-btn-bids" class="px-4 py-2 text-xs font-bold rounded-xl bg-slate-900 text-white shadow-sm transition">
             <i class="fa-solid fa-gavel mr-1"></i> Active Stall Auctions
           </button>
-          <button onclick="switchBiddingSubTab('register')" id="tab-btn-reg" class="px-4 py-2 text-xs font-bold rounded-xl bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 transition">
+                    <button onclick="switchBiddingSubTab('register')" id="tab-btn-reg" class="px-4 py-2 text-xs font-bold rounded-xl bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 transition">
             <i class="fa-solid fa-store mr-1"></i> Register Restaurant
           </button>
-          <button onclick="switchBiddingSubTab('directory')" id="tab-btn-dir" class="px-4 py-2 text-xs font-bold rounded-xl bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 transition">
+                    <button onclick="switchBiddingSubTab('directory')" id="tab-btn-dir" class="px-4 py-2 text-xs font-bold rounded-xl bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 transition">
             <i class="fa-solid fa-circle-check mr-1 text-emerald-600"></i> Partner Directory
           </button>
-        </div>
-      </div>
-
-      <!-- View A: Active Stall Bidding Grid -->
-      <div id="bidding-view-bids" class="space-y-6">
-        <div class="bg-gradient-to-r from-amber-500 to-amber-600 text-slate-900 p-4 sm:p-5 rounded-2xl shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3 font-semibold text-xs">
-          <div class="flex items-center gap-2">
-            <span class="w-2.5 h-2.5 rounded-full bg-slate-900 animate-pulse"></span>
-            <span>Live Tenders Open: Highest bids update instantly with transparent logs and guaranteed contract rights.</span>
-          </div>
-          <span class="bg-slate-900 text-amber-300 px-3 py-1 rounded-full text-[11px] font-bold">12% Revenue Share to MSRTC</span>
-        </div>
-
-        <div id="stalls-bidding-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <!-- Populated dynamically by app.js -->
-        </div>
-      </div>
-
-      <!-- View B: Restaurant & Vendor Registration Form -->
-      <div id="bidding-view-register" class="hidden max-w-3xl mx-auto bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm">
-        <div class="text-center mb-6">
-          <div class="w-12 h-12 bg-amber-100 text-amber-700 rounded-2xl flex items-center justify-center mx-auto text-xl mb-2">
-            <i class="fa-solid fa-utensils"></i>
-          </div>
-          <h3 class="text-xl font-extrabold text-slate-900">MSRTC Highway Rest-Stop Partner Onboarding</h3>
-          <p class="text-xs text-slate-500 mt-1">Get verified to receive daily passengers from 100+ scheduled state transport buses along key Maharashtra transit routes.</p>
-        </div>
-
-        <form onsubmit="handleVendorRegistrationSubmit(event)" class="space-y-4 text-xs">
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label class="block font-bold text-slate-700 uppercase mb-1">Restaurant / Vendor Name *</label>
-              <input type="text" id="reg-rest-name" required placeholder="e.g. Sahyadri Pure Veg Food Plaza" class="w-full text-sm p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none">
+                </div>
             </div>
-            <div>
-              <label class="block font-bold text-slate-700 uppercase mb-1">Owner / Manager Full Name *</label>
-              <input type="text" id="reg-owner-name" required placeholder="e.g. Anand G. Patil" class="w-full text-sm p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none">
-            </div>
-          </div>
 
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label class="block font-bold text-slate-700 uppercase mb-1">Contact Phone Number *</label>
-              <input type="tel" id="reg-phone" required placeholder="+91 98220 12345" class="w-full text-sm p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none">
-            </div>
-            <div>
-              <label class="block font-bold text-slate-700 uppercase mb-1">Official Email Address</label>
-              <input type="email" id="reg-email" placeholder="contact@restaurant.com" class="w-full text-sm p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none">
-            </div>
-          </div>
+            <!-- View A: Active Stall Bidding Grid -->
+            <div id="bidding-view-bids" class="space-y-6">
+                <div class="bg-gradient-to-r from-amber-500 to-amber-600 text-slate-900 p-4 sm:p-5 rounded-2xl shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3 font-semibold text-xs">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-slate-900 animate-pulse"></span>
+                        <span>Live Tenders Open: Highest bids update instantly with transparent logs and guaranteed contract rights.</span>
+                    </div>
+                    <span class="bg-slate-900 text-amber-300 px-3 py-1 rounded-full text-[11px] font-bold">12% Revenue Share to MSRTC</span>
+                </div>
 
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label class="block font-bold text-slate-700 uppercase mb-1">FSSAI Food License Number *</label>
-              <input type="text" id="reg-fssai" required placeholder="14-digit FSSAI (e.g. 11524021000492)" class="w-full text-sm p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none">
+                <div id="stalls-bidding-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Populated dynamically by app.js -->
+                </div>
             </div>
-            <div>
-              <label class="block font-bold text-slate-700 uppercase mb-1">Highway Transit Corridor *</label>
-              <select id="reg-corridor" class="w-full text-sm p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none">
+
+            <!-- View B: Restaurant & Vendor Registration Form -->
+            <div id="bidding-view-register" class="hidden max-w-3xl mx-auto bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm">
+                <div class="text-center mb-6">
+                    <div class="w-12 h-12 bg-amber-100 text-amber-700 rounded-2xl flex items-center justify-center mx-auto text-xl mb-2">
+                        <i class="fa-solid fa-utensils"></i>
+                    </div>
+                    <h3 class="text-xl font-extrabold text-slate-900">MSRTC Highway Rest-Stop Partner Onboarding</h3>
+                    <p class="text-xs text-slate-500 mt-1">Get verified to receive daily passengers from 100+ scheduled state transport buses along key Maharashtra transit routes.</p>
+                </div>
+
+                <form onsubmit="handleVendorRegistrationSubmit(event)" class="space-y-4 text-xs">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block font-bold text-slate-700 uppercase mb-1">Restaurant / Vendor Name *</label>
+                            <input type="text" id="reg-rest-name" required placeholder="e.g. Sahyadri Pure Veg Food Plaza" class="w-full text-sm p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block font-bold text-slate-700 uppercase mb-1">Owner / Manager Full Name *</label>
+                            <input type="text" id="reg-owner-name" required placeholder="e.g. Anand G. Patil" class="w-full text-sm p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block font-bold text-slate-700 uppercase mb-1">Contact Phone Number *</label>
+                            <input type="tel" id="reg-phone" required placeholder="+91 98220 12345" class="w-full text-sm p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block font-bold text-slate-700 uppercase mb-1">Official Email Address</label>
+                            <input type="email" id="reg-email" placeholder="contact@restaurant.com" class="w-full text-sm p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block font-bold text-slate-700 uppercase mb-1">FSSAI Food License Number *</label>
+                            <input type="text" id="reg-fssai" required placeholder="14-digit FSSAI (e.g. 11524021000492)" class="w-full text-sm p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block font-bold text-slate-700 uppercase mb-1">Highway Transit Corridor *</label>
+                            <select id="reg-corridor" class="w-full text-sm p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none">
                 <option value="Pune - Kolhapur NH48 Corridor">Pune - Kolhapur NH48 Corridor (Katraj Ghat / Satara / Karad)</option>
                 <option value="Pune - Solapur NH65 Corridor">Pune - Solapur NH65 Corridor (Indapur / Mohol)</option>
                 <option value="Mumbai - Goa NH66 Corridor">Mumbai - Goa NH66 Corridor (Chiplun / Kankavli)</option>
                 <option value="Pune - Nashik NH60 Corridor">Pune - Nashik NH60 Corridor (Alephata / Sangamner)</option>
                 <option value="Kolhapur - Konkan Ghats">Kolhapur - Konkan Ghats (Gaganbawda / Radhanagari)</option>
               </select>
-            </div>
-          </div>
+                        </div>
+                    </div>
 
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label class="block font-bold text-slate-700 uppercase mb-1">Preferred Rest-Stop Location *</label>
-              <input type="text" id="reg-location" required placeholder="e.g. Katraj Ghat Bypass Food Plaza (Km 18)" class="w-full text-sm p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none">
-            </div>
-            <div>
-              <label class="block font-bold text-slate-700 uppercase mb-1">Cuisine / Outlet Specialty</label>
-              <select id="reg-cuisine" class="w-full text-sm p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block font-bold text-slate-700 uppercase mb-1">Preferred Rest-Stop Location *</label>
+                            <input type="text" id="reg-location" required placeholder="e.g. Katraj Ghat Bypass Food Plaza (Km 18)" class="w-full text-sm p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block font-bold text-slate-700 uppercase mb-1">Cuisine / Outlet Specialty</label>
+                            <select id="reg-cuisine" class="w-full text-sm p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none">
                 <option value="Maharashtrian Pure Veg Thali & Snacks">Maharashtrian Pure Veg Thali &amp; Snacks</option>
                 <option value="24x7 Tea, Misal Pav & Fast Food">24x7 Tea, Misal Pav &amp; Fast Food</option>
                 <option value="Family Dining & Multi-Cuisine">Family Dining &amp; Multi-Cuisine</option>
                 <option value="Packaged Refreshments, Sweets & Bakery">Packaged Refreshments, Sweets &amp; Bakery</option>
               </select>
-            </div>
-          </div>
+                        </div>
+                    </div>
 
-          <div class="grid grid-cols-3 gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200">
-            <div>
-              <label class="block font-bold text-slate-700 uppercase mb-1">Seating Capacity</label>
-              <input type="number" id="reg-capacity" min="20" max="500" value="75" class="w-full text-sm p-2.5 border border-slate-300 rounded-xl">
-            </div>
-            <div class="flex items-center gap-2 pt-6">
-              <input type="checkbox" id="reg-restrooms" checked class="w-4 h-4 text-amber-600 rounded">
-              <label for="reg-restrooms" class="font-bold text-slate-700">Clean Restrooms</label>
-            </div>
-            <div class="flex items-center gap-2 pt-6">
-              <input type="checkbox" id="reg-ev" class="w-4 h-4 text-amber-600 rounded">
-              <label for="reg-ev" class="font-bold text-slate-700">EV Fast Charger</label>
-            </div>
-          </div>
+                    <div class="grid grid-cols-3 gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                        <div>
+                            <label class="block font-bold text-slate-700 uppercase mb-1">Seating Capacity</label>
+                            <input type="number" id="reg-capacity" min="20" max="500" value="75" class="w-full text-sm p-2.5 border border-slate-300 rounded-xl">
+                        </div>
+                        <div class="flex items-center gap-2 pt-6">
+                            <input type="checkbox" id="reg-restrooms" checked class="w-4 h-4 text-amber-600 rounded">
+                            <label for="reg-restrooms" class="font-bold text-slate-700">Clean Restrooms</label>
+                        </div>
+                        <div class="flex items-center gap-2 pt-6">
+                            <input type="checkbox" id="reg-ev" class="w-4 h-4 text-amber-600 rounded">
+                            <label for="reg-ev" class="font-bold text-slate-700">EV Fast Charger</label>
+                        </div>
+                    </div>
 
-          <div class="pt-2">
-            <button type="submit" id="reg-vendor-btn" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-900 font-extrabold p-3.5 rounded-xl transition shadow-md shadow-amber-200 flex items-center justify-center gap-2">
+                    <div class="pt-2">
+                        <button type="submit" id="reg-vendor-btn" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-900 font-extrabold p-3.5 rounded-xl transition shadow-md shadow-amber-200 flex items-center justify-center gap-2">
               <i class="fa-solid fa-stamp"></i> Submit Official Partner Registration
             </button>
-          </div>
-        </form>
-      </div>
-
-      <!-- View C: Partner Directory -->
-      <div id="bidding-view-directory" class="hidden space-y-4">
-        <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
-          <div class="flex justify-between items-center mb-4">
-            <div>
-              <h3 class="text-base font-extrabold text-slate-900">Verified Highway Rest-Stop Establishments</h3>
-              <p class="text-xs text-slate-500">MSRTC certified partners offering passenger food safety and pre-order services.</p>
+                    </div>
+                </form>
             </div>
-            <button onclick="loadRegisteredVendorsList()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-3 py-1.5 rounded-lg transition">
+
+            <!-- View C: Partner Directory -->
+            <div id="bidding-view-directory" class="hidden space-y-4">
+                <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+                    <div class="flex justify-between items-center mb-4">
+                        <div>
+                            <h3 class="text-base font-extrabold text-slate-900">Verified Highway Rest-Stop Establishments</h3>
+                            <p class="text-xs text-slate-500">MSRTC certified partners offering passenger food safety and pre-order services.</p>
+                        </div>
+                        <button onclick="loadRegisteredVendorsList()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-3 py-1.5 rounded-lg transition">
               <i class="fa-solid fa-rotate-right mr-1"></i> Refresh
             </button>
-          </div>
-          <div id="registered-vendors-container" class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <!-- Injected dynamically -->
-          </div>
-        </div>
-      </div>
-    </section>
+                    </div>
+                    <div id="registered-vendors-container" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <!-- Injected dynamically -->
+                    </div>
+                </div>
+            </div>
+        </section>
 
-    <!-- PAGE: COURIER & LUGGAGE BOOKING (MSRTC Vahatuk & Cargo) -->
-    <section id="page-cargo" class="page-view hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <span class="text-xs font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 px-3 py-1 rounded-full uppercase tracking-wider">MSRTC Vahatuk • मालवाहतूक व पार्सल</span>
-          <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-2">Courier, Cargo &amp; Luggage Booking</h2>
-          <p class="text-sm text-slate-500 mt-1">Reliable, rapid state-wide cargo transit using MSRTC bus fleet networks with live digital consignment tracking.</p>
-        </div>
-        <div class="flex gap-2">
-          <button onclick="switchCargoSubTab('book')" id="tab-btn-cargobook" class="px-4 py-2 text-xs font-bold rounded-xl bg-slate-900 text-white shadow-sm transition">
+        <!-- PAGE: COURIER & LUGGAGE BOOKING (MSRTC Vahatuk & Cargo) -->
+        <section id="page-cargo" class="page-view hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <span class="text-xs font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 px-3 py-1 rounded-full uppercase tracking-wider">MSRTC Vahatuk • मालवाहतूक व पार्सल</span>
+                    <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-2">Courier, Cargo &amp; Luggage Booking</h2>
+                    <p class="text-sm text-slate-500 mt-1">Reliable, rapid state-wide cargo transit using MSRTC bus fleet networks with live digital consignment tracking.</p>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="switchCargoSubTab('book')" id="tab-btn-cargobook" class="px-4 py-2 text-xs font-bold rounded-xl bg-slate-900 text-white shadow-sm transition">
             <i class="fa-solid fa-box-open mr-1"></i> Book Courier / Parcel
           </button>
-          <button onclick="switchCargoSubTab('luggage')" id="tab-btn-cargoluggage" class="px-4 py-2 text-xs font-bold rounded-xl bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 transition">
+                    <button onclick="switchCargoSubTab('luggage')" id="tab-btn-cargoluggage" class="px-4 py-2 text-xs font-bold rounded-xl bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 transition">
             <i class="fa-solid fa-suitcase-rolling mr-1"></i> Extra Luggage Pass
           </button>
-          <button onclick="switchCargoSubTab('track')" id="tab-btn-cargotrack" class="px-4 py-2 text-xs font-bold rounded-xl bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 transition">
+                    <button onclick="switchCargoSubTab('track')" id="tab-btn-cargotrack" class="px-4 py-2 text-xs font-bold rounded-xl bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 transition">
             <i class="fa-solid fa-location-crosshairs mr-1 text-indigo-600"></i> Track Consignment
           </button>
-        </div>
-      </div>
-
-      <!-- Sub-Tab 1: Book Courier / Parcel -->
-      <div id="cargo-view-book" class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        <!-- Left: Booking Form (7 Cols) -->
-        <div class="lg:col-span-7 bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-4">
-          <h3 class="text-lg font-extrabold text-slate-900 border-b border-slate-100 pb-3 flex items-center gap-2">
-            <i class="fa-solid fa-truck-ramp-box text-indigo-600"></i> Parcel Consignment Details
-          </h3>
-
-          <form onsubmit="handleCargoBookingSubmit(event)" class="space-y-4 text-xs">
-            <!-- Route -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label class="block font-bold text-slate-700 uppercase mb-1">Origin Bus Stand *</label>
-                <input type="text" id="cargo-from" list="transit-locations-list" required value="Kolhapur CBS (Central Bus Stand)" class="w-full text-sm p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-600 outline-none" onchange="calculateLiveCargoTariff()">
-              </div>
-              <div>
-                <label class="block font-bold text-slate-700 uppercase mb-1">Destination Bus Stand *</label>
-                <input type="text" id="cargo-to" list="transit-locations-list" required value="Pune (Swargate)" class="w-full text-sm p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-600 outline-none" onchange="calculateLiveCargoTariff()">
-              </div>
+                </div>
             </div>
 
-            <!-- Sender Info -->
-            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
-              <span class="font-extrabold text-slate-800 uppercase tracking-wider text-[11px] block">Sender (प्रेषक)</span>
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <input type="text" id="cargo-s-name" required placeholder="Sender Full Name *" class="w-full text-sm p-2.5 border border-slate-300 rounded-xl bg-white" value="Pravin Dongare">
-                </div>
-                <div>
-                  <input type="tel" id="cargo-s-phone" required placeholder="Sender Phone Number *" class="w-full text-sm p-2.5 border border-slate-300 rounded-xl bg-white" value="+91 98220 12345">
-                </div>
-              </div>
-            </div>
+            <!-- Sub-Tab 1: Book Courier / Parcel -->
+            <div id="cargo-view-book" class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <!-- Left: Booking Form (7 Cols) -->
+                <div class="lg:col-span-7 bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+                    <h3 class="text-lg font-extrabold text-slate-900 border-b border-slate-100 pb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-truck-ramp-box text-indigo-600"></i> Parcel Consignment Details
+                    </h3>
 
-            <!-- Receiver Info -->
-            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
-              <span class="font-extrabold text-slate-800 uppercase tracking-wider text-[11px] block">Receiver (प्राप्तकर्ता)</span>
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <input type="text" id="cargo-r-name" required placeholder="Receiver Full Name *" class="w-full text-sm p-2.5 border border-slate-300 rounded-xl bg-white" value="Amit Deshmukh">
-                </div>
-                <div>
-                  <input type="tel" id="cargo-r-phone" required placeholder="Receiver Phone Number *" class="w-full text-sm p-2.5 border border-slate-300 rounded-xl bg-white" value="+91 94220 99887">
-                </div>
-              </div>
-            </div>
+                    <form onsubmit="handleCargoBookingSubmit(event)" class="space-y-4 text-xs">
+                        <!-- Route -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block font-bold text-slate-700 uppercase mb-1">Origin Bus Stand *</label>
+                                <input type="text" id="cargo-from" list="transit-locations-list" required value="Kolhapur CBS (Central Bus Stand)" class="w-full text-sm p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-600 outline-none" onchange="calculateLiveCargoTariff()">
+                            </div>
+                            <div>
+                                <label class="block font-bold text-slate-700 uppercase mb-1">Destination Bus Stand *</label>
+                                <input type="text" id="cargo-to" list="transit-locations-list" required value="Pune (Swargate)" class="w-full text-sm p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-600 outline-none" onchange="calculateLiveCargoTariff()">
+                            </div>
+                        </div>
 
-            <!-- Parcel Category & Weight -->
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div>
-                <label class="block font-bold text-slate-700 uppercase mb-1">Cargo Type</label>
-                <select id="cargo-category" class="w-full text-sm p-2.5 border border-slate-300 rounded-xl" onchange="calculateLiveCargoTariff()">
+                        <!-- Sender Info -->
+                        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
+                            <span class="font-extrabold text-slate-800 uppercase tracking-wider text-[11px] block">Sender (प्रेषक)</span>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <input type="text" id="cargo-s-name" required placeholder="Sender Full Name *" class="w-full text-sm p-2.5 border border-slate-300 rounded-xl bg-white" value="Pravin Dongare">
+                                </div>
+                                <div>
+                                    <input type="tel" id="cargo-s-phone" required placeholder="Sender Phone Number *" class="w-full text-sm p-2.5 border border-slate-300 rounded-xl bg-white" value="+91 98220 12345">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Receiver Info -->
+                        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
+                            <span class="font-extrabold text-slate-800 uppercase tracking-wider text-[11px] block">Receiver (प्राप्तकर्ता)</span>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <input type="text" id="cargo-r-name" required placeholder="Receiver Full Name *" class="w-full text-sm p-2.5 border border-slate-300 rounded-xl bg-white" value="Amit Deshmukh">
+                                </div>
+                                <div>
+                                    <input type="tel" id="cargo-r-phone" required placeholder="Receiver Phone Number *" class="w-full text-sm p-2.5 border border-slate-300 rounded-xl bg-white" value="+91 94220 99887">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Parcel Category & Weight -->
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            <div>
+                                <label class="block font-bold text-slate-700 uppercase mb-1">Cargo Type</label>
+                                <select id="cargo-category" class="w-full text-sm p-2.5 border border-slate-300 rounded-xl" onchange="calculateLiveCargoTariff()">
                   <option value="General Commercial">General Commercial Goods</option>
                   <option value="Documents & Letters">Documents &amp; Letters (Express)</option>
                   <option value="Textile & Garments">Textile &amp; Kolhapuri Chappals</option>
@@ -753,408 +754,408 @@
                   <option value="Agricultural & Kolhapuri Jaggery">Agricultural / Kolhapuri Jaggery</option>
                   <option value="Medicines & Healthcare">Medicines &amp; Pharma</option>
                 </select>
-              </div>
-              <div>
-                <label class="block font-bold text-slate-700 uppercase mb-1">Weight (in kg) *</label>
-                <input type="number" id="cargo-weight" min="0.5" max="250" step="0.5" value="8" class="w-full text-sm p-2.5 border border-slate-300 rounded-xl" oninput="calculateLiveCargoTariff()">
-              </div>
-              <div>
-                <label class="block font-bold text-slate-700 uppercase mb-1">No. of Parcels</label>
-                <input type="number" id="cargo-packages" min="1" max="20" value="1" class="w-full text-sm p-2.5 border border-slate-300 rounded-xl" oninput="calculateLiveCargoTariff()">
-              </div>
-            </div>
+                            </div>
+                            <div>
+                                <label class="block font-bold text-slate-700 uppercase mb-1">Weight (in kg) *</label>
+                                <input type="number" id="cargo-weight" min="0.5" max="250" step="0.5" value="8" class="w-full text-sm p-2.5 border border-slate-300 rounded-xl" oninput="calculateLiveCargoTariff()">
+                            </div>
+                            <div>
+                                <label class="block font-bold text-slate-700 uppercase mb-1">No. of Parcels</label>
+                                <input type="number" id="cargo-packages" min="1" max="20" value="1" class="w-full text-sm p-2.5 border border-slate-300 rounded-xl" oninput="calculateLiveCargoTariff()">
+                            </div>
+                        </div>
 
-            <!-- Transit Speed Tier -->
-            <div>
-              <label class="block font-bold text-slate-700 uppercase mb-1">Transit Speed</label>
-              <div class="grid grid-cols-2 gap-3">
-                <label class="cursor-pointer bg-slate-50 border border-slate-200 p-3 rounded-xl flex items-center gap-2 hover:bg-slate-100">
+                        <!-- Transit Speed Tier -->
+                        <div>
+                            <label class="block font-bold text-slate-700 uppercase mb-1">Transit Speed</label>
+                            <div class="grid grid-cols-2 gap-3">
+                                <label class="cursor-pointer bg-slate-50 border border-slate-200 p-3 rounded-xl flex items-center gap-2 hover:bg-slate-100">
                   <input type="radio" name="cargoSpeed" value="STANDARD" checked onchange="calculateLiveCargoTariff()">
                   <div>
                     <span class="font-bold text-slate-900 block">Standard Transit</span>
                     <span class="text-[10px] text-slate-500">Regular bus luggage boot (Next Day)</span>
                   </div>
                 </label>
-                <label class="cursor-pointer bg-indigo-50 border border-indigo-200 p-3 rounded-xl flex items-center gap-2 hover:bg-indigo-100">
+                                <label class="cursor-pointer bg-indigo-50 border border-indigo-200 p-3 rounded-xl flex items-center gap-2 hover:bg-indigo-100">
                   <input type="radio" name="cargoSpeed" value="EXPRESS" onchange="calculateLiveCargoTariff()">
                   <div>
                     <span class="font-bold text-indigo-900 block">⚡ Express Superfast</span>
                     <span class="text-[10px] text-indigo-600">Immediate priority Shivshahi bus (Same Day)</span>
                   </div>
                 </label>
-              </div>
-            </div>
+                            </div>
+                        </div>
 
-            <button type="submit" id="book-cargo-btn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold p-3.5 rounded-xl transition shadow-md shadow-indigo-200 flex items-center justify-center gap-2">
+                        <button type="submit" id="book-cargo-btn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold p-3.5 rounded-xl transition shadow-md shadow-indigo-200 flex items-center justify-center gap-2">
               <i class="fa-solid fa-file-invoice"></i> Confirm &amp; Generate MSRTC Waybill
             </button>
-          </form>
-        </div>
+                    </form>
+                </div>
 
-        <!-- Right: Real-Time Tariff & Security Breakdown (5 Cols) -->
-        <div class="lg:col-span-5 space-y-4">
-          <div class="bg-slate-900 text-white p-6 rounded-3xl shadow-xl space-y-4">
-            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-              <h4 class="font-extrabold text-sm uppercase tracking-wider text-amber-400">Live Tariff Breakdown</h4>
-              <span class="text-[10px] bg-slate-800 px-2 py-0.5 rounded text-slate-400">Official MSRTC Cargo Rates</span>
-            </div>
+                <!-- Right: Real-Time Tariff & Security Breakdown (5 Cols) -->
+                <div class="lg:col-span-5 space-y-4">
+                    <div class="bg-slate-900 text-white p-6 rounded-3xl shadow-xl space-y-4">
+                        <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                            <h4 class="font-extrabold text-sm uppercase tracking-wider text-amber-400">Live Tariff Breakdown</h4>
+                            <span class="text-[10px] bg-slate-800 px-2 py-0.5 rounded text-slate-400">Official MSRTC Cargo Rates</span>
+                        </div>
 
-            <div class="space-y-2 text-xs">
-              <div class="flex justify-between">
-                <span class="text-slate-400">Route Distance:</span>
-                <span id="cargo-calc-dist" class="font-mono font-bold text-slate-200">233.0 km</span>
-              </div>
-              <div class="flex justify-between">
-                <span class="text-slate-400">Chargeable Weight:</span>
-                <span id="cargo-calc-weight" class="font-mono font-bold text-slate-200">8.0 kg</span>
-              </div>
-              <div class="flex justify-between">
-                <span class="text-slate-400">Base Freight:</span>
-                <span id="cargo-calc-base" class="font-semibold">₹140</span>
-              </div>
-              <div class="flex justify-between">
-                <span class="text-slate-400">Distance Fuel Charge:</span>
-                <span id="cargo-calc-distcharge" class="font-semibold">₹35</span>
-              </div>
-              <div class="flex justify-between">
-                <span class="text-slate-400">Category &amp; Handling Surcharge:</span>
-                <span id="cargo-calc-surcharge" class="font-semibold">₹20</span>
-              </div>
-              <div class="flex justify-between">
-                <span class="text-slate-400">GST (5%):</span>
-                <span id="cargo-calc-gst" class="font-semibold">₹10</span>
-              </div>
-              <div class="border-t border-slate-700 pt-3 flex justify-between text-lg font-black text-amber-400">
-                <span>Total Freight:</span>
-                <span id="cargo-calc-total">₹205</span>
-              </div>
-            </div>
+                        <div class="space-y-2 text-xs">
+                            <div class="flex justify-between">
+                                <span class="text-slate-400">Route Distance:</span>
+                                <span id="cargo-calc-dist" class="font-mono font-bold text-slate-200">233.0 km</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-slate-400">Chargeable Weight:</span>
+                                <span id="cargo-calc-weight" class="font-mono font-bold text-slate-200">8.0 kg</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-slate-400">Base Freight:</span>
+                                <span id="cargo-calc-base" class="font-semibold">₹140</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-slate-400">Distance Fuel Charge:</span>
+                                <span id="cargo-calc-distcharge" class="font-semibold">₹35</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-slate-400">Category &amp; Handling Surcharge:</span>
+                                <span id="cargo-calc-surcharge" class="font-semibold">₹20</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-slate-400">GST (5%):</span>
+                                <span id="cargo-calc-gst" class="font-semibold">₹10</span>
+                            </div>
+                            <div class="border-t border-slate-700 pt-3 flex justify-between text-lg font-black text-amber-400">
+                                <span>Total Freight:</span>
+                                <span id="cargo-calc-total">₹205</span>
+                            </div>
+                        </div>
 
-            <div class="bg-slate-800/80 p-3.5 rounded-2xl border border-slate-700 text-[11px] text-slate-300 space-y-1.5">
-              <div class="flex items-center gap-1.5 font-bold text-amber-300">
-                <i class="fa-solid fa-shield-halved"></i> MSRTC Cargo Protection Guarantee
-              </div>
-              <p>Insured against damage or loss up to ₹5,000. Verified SMS OTP handover at destination bus depot.</p>
-            </div>
-          </div>
+                        <div class="bg-slate-800/80 p-3.5 rounded-2xl border border-slate-700 text-[11px] text-slate-300 space-y-1.5">
+                            <div class="flex items-center gap-1.5 font-bold text-amber-300">
+                                <i class="fa-solid fa-shield-halved"></i> MSRTC Cargo Protection Guarantee
+                            </div>
+                            <p>Insured against damage or loss up to ₹5,000. Verified SMS OTP handover at destination bus depot.</p>
+                        </div>
+                    </div>
 
-          <!-- Quick Tracking Snippet -->
-          <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm flex items-center justify-between gap-4">
-            <div>
-              <p class="font-bold text-slate-900 text-xs">Have an existing Parcel AWB?</p>
-              <p class="text-[11px] text-slate-500">Track delivery status across transit hubs.</p>
-            </div>
-            <button onclick="switchCargoSubTab('track')" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold px-3 py-2 rounded-xl border border-indigo-200 transition">
+                    <!-- Quick Tracking Snippet -->
+                    <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm flex items-center justify-between gap-4">
+                        <div>
+                            <p class="font-bold text-slate-900 text-xs">Have an existing Parcel AWB?</p>
+                            <p class="text-[11px] text-slate-500">Track delivery status across transit hubs.</p>
+                        </div>
+                        <button onclick="switchCargoSubTab('track')" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold px-3 py-2 rounded-xl border border-indigo-200 transition">
               Track Now <i class="fa-solid fa-arrow-right ml-1"></i>
             </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Sub-Tab 2: Extra Passenger Luggage Calculator -->
-      <div id="cargo-view-luggage" class="hidden max-w-2xl mx-auto bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6">
-        <div>
-          <span class="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full uppercase">Passenger Baggage Rules</span>
-          <h3 class="text-xl font-extrabold text-slate-900 mt-2">Extra Passenger Luggage Allowance Pass</h3>
-          <p class="text-xs text-slate-500 mt-1">Every passenger ticket includes <strong>15 kg of complimentary free luggage</strong>. Additional weight or bulky items (such as agricultural sacks, trunks, bicycles) can be prepaid with zero penalty.</p>
-        </div>
-
-        <div class="space-y-4 text-xs">
-          <div>
-            <label class="block font-bold text-slate-700 uppercase mb-1">Total Luggage Weight (kg)</label>
-            <input type="number" id="luggage-weight-input" min="1" max="100" value="25" class="w-full text-base p-3 border border-slate-300 rounded-xl" oninput="calculatePassengerLuggageLive()">
-          </div>
-
-          <div class="bg-amber-50 border border-amber-200 p-4 rounded-2xl space-y-2">
-            <div class="flex justify-between font-semibold text-slate-700">
-              <span>Free Complimentary Allowance:</span>
-              <span class="text-emerald-700 font-bold">15.0 kg (Free)</span>
+                    </div>
+                </div>
             </div>
-            <div class="flex justify-between font-semibold text-slate-700">
-              <span>Chargeable Excess Baggage:</span>
-              <span id="luggage-excess-kg" class="text-amber-900 font-bold font-mono">10.0 kg</span>
-            </div>
-            <div class="flex justify-between font-semibold text-slate-700">
-              <span>Rate per Extra Kilogram:</span>
-              <span>₹10.00 / kg</span>
-            </div>
-            <div class="border-t border-amber-300 pt-2 flex justify-between text-base font-extrabold text-msrtc-red">
-              <span>Excess Baggage Pass Total:</span>
-              <span id="luggage-excess-total">₹105 (incl. GST)</span>
-            </div>
-          </div>
 
-          <button onclick="bookExcessLuggagePass()" class="w-full bg-msrtc-red hover:bg-msrtc-darkred text-white font-extrabold p-3.5 rounded-xl transition shadow-md shadow-red-200 flex items-center justify-center gap-2">
+            <!-- Sub-Tab 2: Extra Passenger Luggage Calculator -->
+            <div id="cargo-view-luggage" class="hidden max-w-2xl mx-auto bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6">
+                <div>
+                    <span class="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full uppercase">Passenger Baggage Rules</span>
+                    <h3 class="text-xl font-extrabold text-slate-900 mt-2">Extra Passenger Luggage Allowance Pass</h3>
+                    <p class="text-xs text-slate-500 mt-1">Every passenger ticket includes <strong>15 kg of complimentary free luggage</strong>. Additional weight or bulky items (such as agricultural sacks, trunks, bicycles) can be prepaid with zero penalty.</p>
+                </div>
+
+                <div class="space-y-4 text-xs">
+                    <div>
+                        <label class="block font-bold text-slate-700 uppercase mb-1">Total Luggage Weight (kg)</label>
+                        <input type="number" id="luggage-weight-input" min="1" max="100" value="25" class="w-full text-base p-3 border border-slate-300 rounded-xl" oninput="calculatePassengerLuggageLive()">
+                    </div>
+
+                    <div class="bg-amber-50 border border-amber-200 p-4 rounded-2xl space-y-2">
+                        <div class="flex justify-between font-semibold text-slate-700">
+                            <span>Free Complimentary Allowance:</span>
+                            <span class="text-emerald-700 font-bold">15.0 kg (Free)</span>
+                        </div>
+                        <div class="flex justify-between font-semibold text-slate-700">
+                            <span>Chargeable Excess Baggage:</span>
+                            <span id="luggage-excess-kg" class="text-amber-900 font-bold font-mono">10.0 kg</span>
+                        </div>
+                        <div class="flex justify-between font-semibold text-slate-700">
+                            <span>Rate per Extra Kilogram:</span>
+                            <span>₹10.00 / kg</span>
+                        </div>
+                        <div class="border-t border-amber-300 pt-2 flex justify-between text-base font-extrabold text-msrtc-red">
+                            <span>Excess Baggage Pass Total:</span>
+                            <span id="luggage-excess-total">₹105 (incl. GST)</span>
+                        </div>
+                    </div>
+
+                    <button onclick="bookExcessLuggagePass()" class="w-full bg-msrtc-red hover:bg-msrtc-darkred text-white font-extrabold p-3.5 rounded-xl transition shadow-md shadow-red-200 flex items-center justify-center gap-2">
             <i class="fa-solid fa-receipt"></i> Generate Digital Excess Luggage Pass
           </button>
-        </div>
-      </div>
+                </div>
+            </div>
 
-      <!-- Sub-Tab 3: Live Consignment Tracker -->
-      <div id="cargo-view-track" class="hidden space-y-6">
-        <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm max-w-3xl mx-auto">
-          <h3 class="text-lg font-extrabold text-slate-900 mb-2">Live Parcel Consignment Tracker</h3>
-          <p class="text-xs text-slate-500 mb-4">Enter your Consignment Tracking ID (e.g. <code>MSRTC-CRG-2026-10492</code>) or registered phone number.</p>
+            <!-- Sub-Tab 3: Live Consignment Tracker -->
+            <div id="cargo-view-track" class="hidden space-y-6">
+                <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm max-w-3xl mx-auto">
+                    <h3 class="text-lg font-extrabold text-slate-900 mb-2">Live Parcel Consignment Tracker</h3>
+                    <p class="text-xs text-slate-500 mb-4">Enter your Consignment Tracking ID (e.g. <code>MSRTC-CRG-2026-10492</code>) or registered phone number.</p>
 
-          <div class="flex gap-2">
-            <input type="text" id="cargo-track-input" placeholder="Enter Consignment Number (e.g. MSRTC-CRG-2026-10492)" value="MSRTC-CRG-2026-10492" class="flex-grow text-sm p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-600 outline-none">
-            <button onclick="trackConsignmentLive()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-6 py-3 rounded-xl transition text-xs whitespace-nowrap flex items-center gap-1.5">
+                    <div class="flex gap-2">
+                        <input type="text" id="cargo-track-input" placeholder="Enter Consignment Number (e.g. MSRTC-CRG-2026-10492)" value="MSRTC-CRG-2026-10492" class="flex-grow text-sm p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-600 outline-none">
+                        <button onclick="trackConsignmentLive()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-6 py-3 rounded-xl transition text-xs whitespace-nowrap flex items-center gap-1.5">
               <i class="fa-solid fa-magnifying-glass"></i> Track Status
             </button>
-          </div>
-        </div>
+                    </div>
+                </div>
 
-        <!-- Tracking Results Timeline Container -->
-        <div id="cargo-tracking-result-box" class="max-w-3xl mx-auto space-y-4">
-          <!-- Injected dynamically by app.js -->
-        </div>
-      </div>
-    </section>
+                <!-- Tracking Results Timeline Container -->
+                <div id="cargo-tracking-result-box" class="max-w-3xl mx-auto space-y-4">
+                    <!-- Injected dynamically by app.js -->
+                </div>
+            </div>
+        </section>
 
-    <!-- PAGE 5: REVENUE & ML DASHBOARD (Unified Analytics) -->
-    <section id="page-revenue" class="page-view hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div class="mb-6">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <span class="text-xs font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 px-3 py-1 rounded-full uppercase tracking-wider">Admin Analytics & Financial Engine</span>
-            <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-2">Unified Revenue & Machine Learning Dashboard</h2>
-            <p class="text-sm text-slate-500 mt-1">Real-time breakdown of R<sub>total</sub> = R<sub>ticket</sub> + R<sub>advertisement</sub> + R<sub>vendor</sub> + R<sub>partnership</sub>.</p>
-          </div>
-          <div class="flex items-center gap-2">
-            <button onclick="loadUnifiedDashboard()" class="bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition flex items-center gap-2">
+        <!-- PAGE 5: REVENUE & ML DASHBOARD (Unified Analytics) -->
+        <section id="page-revenue" class="page-view hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="mb-6">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <span class="text-xs font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 px-3 py-1 rounded-full uppercase tracking-wider">Admin Analytics & Financial Engine</span>
+                        <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-2">Unified Revenue & Machine Learning Dashboard</h2>
+                        <p class="text-sm text-slate-500 mt-1">Real-time breakdown of R<sub>total</sub> = R<sub>ticket</sub> + R<sub>advertisement</sub> + R<sub>vendor</sub> + R<sub>partnership</sub>.</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="loadUnifiedDashboard()" class="bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition flex items-center gap-2">
               <i class="fa-solid fa-rotate-right"></i> Refresh Live Data
             </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- KPI Summary Cards -->
-      <div id="revenue-kpis-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8"></div>
-
-      <!-- ML Models Comparison Section (Module 1) -->
-      <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm mb-8">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
-          <div>
-            <span class="text-xs font-bold text-blue-700 bg-blue-50 border border-blue-200 px-2.5 py-0.5 rounded-full uppercase">Module 1 • Machine Learning</span>
-            <h3 class="text-lg font-extrabold text-slate-900 mt-1">Passenger Demand Forecasting Model Comparison</h3>
-            <p class="text-xs text-slate-500">Benchmarking Linear Regression, Decision Tree, Random Forest, and XGBoost on MAE, RMSE, and R².</p>
-          </div>
-          <div id="best-model-badge" class="bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-bold px-3 py-1.5 rounded-xl"></div>
-        </div>
-
-        <div class="overflow-x-auto">
-          <table class="w-full text-xs text-left">
-            <thead>
-              <tr class="text-slate-400 border-b border-slate-100 font-semibold uppercase text-[10px]">
-                <th class="pb-2">Algorithm / Model</th>
-                <th class="pb-2 text-right">MAE (Seats)</th>
-                <th class="pb-2 text-right">RMSE (Seats)</th>
-                <th class="pb-2 text-right">R² Score</th>
-                <th class="pb-2 text-right">Model Accuracy</th>
-                <th class="pb-2 text-center">Status</th>
-              </tr>
-            </thead>
-            <tbody id="ml-models-table-body"></tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- Happy Hours Simulator & Scenario Generator (Modules 2 & 3) -->
-      <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm mb-8">
-        <div class="mb-4">
-          <span class="text-xs font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded-full uppercase">Modules 2 & 3 • Optimization Logic</span>
-          <h3 class="text-lg font-extrabold text-slate-900 mt-1">Happy Hours Dynamic Fare Optimizer Simulator</h3>
-          <p class="text-xs text-slate-500">Test different base fares and baseline demands to verify Expected Revenue = Fare × Expected Bookings and constraints.</p>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
-          <div class="md:col-span-4 space-y-4 bg-slate-50 p-4 rounded-2xl border border-slate-200">
-            <div>
-              <div class="flex justify-between text-xs font-bold text-slate-700 mb-1">
-                <span>Standard Base Fare:</span>
-                <span id="sim-fare-val" class="text-msrtc-red font-mono">₹350</span>
-              </div>
-              <input type="range" id="sim-fare-slider" min="50" max="600" step="10" value="350" oninput="updateHappyHoursSimulator()" class="w-full accent-msrtc-red" />
+                    </div>
+                </div>
             </div>
 
-            <div>
-              <div class="flex justify-between text-xs font-bold text-slate-700 mb-1">
-                <span>Baseline Demand (Low Occupancy):</span>
-                <span id="sim-demand-val" class="text-blue-600 font-mono">9 Seats (32%)</span>
-              </div>
-              <input type="range" id="sim-demand-slider" min="2" max="25" step="1" value="9" oninput="updateHappyHoursSimulator()" class="w-full accent-blue-600" />
+            <!-- KPI Summary Cards -->
+            <div id="revenue-kpis-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8"></div>
+
+            <!-- ML Models Comparison Section (Module 1) -->
+            <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm mb-8">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+                    <div>
+                        <span class="text-xs font-bold text-blue-700 bg-blue-50 border border-blue-200 px-2.5 py-0.5 rounded-full uppercase">Module 1 • Machine Learning</span>
+                        <h3 class="text-lg font-extrabold text-slate-900 mt-1">Passenger Demand Forecasting Model Comparison</h3>
+                        <p class="text-xs text-slate-500">Benchmarking Linear Regression, Decision Tree, Random Forest, and XGBoost on MAE, RMSE, and R².</p>
+                    </div>
+                    <div id="best-model-badge" class="bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-bold px-3 py-1.5 rounded-xl"></div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-xs text-left">
+                        <thead>
+                            <tr class="text-slate-400 border-b border-slate-100 font-semibold uppercase text-[10px]">
+                                <th class="pb-2">Algorithm / Model</th>
+                                <th class="pb-2 text-right">MAE (Seats)</th>
+                                <th class="pb-2 text-right">RMSE (Seats)</th>
+                                <th class="pb-2 text-right">R² Score</th>
+                                <th class="pb-2 text-right">Model Accuracy</th>
+                                <th class="pb-2 text-center">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ml-models-table-body"></tbody>
+                    </table>
+                </div>
             </div>
 
-            <div id="sim-optimizer-result-card" class="bg-amber-100/70 p-3 rounded-xl border border-amber-300 text-xs"></div>
-          </div>
+            <!-- Happy Hours Simulator & Scenario Generator (Modules 2 & 3) -->
+            <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm mb-8">
+                <div class="mb-4">
+                    <span class="text-xs font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded-full uppercase">Modules 2 & 3 • Optimization Logic</span>
+                    <h3 class="text-lg font-extrabold text-slate-900 mt-1">Happy Hours Dynamic Fare Optimizer Simulator</h3>
+                    <p class="text-xs text-slate-500">Test different base fares and baseline demands to verify Expected Revenue = Fare × Expected Bookings and constraints.</p>
+                </div>
 
-          <div class="md:col-span-8 overflow-x-auto">
-            <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Evaluated Promotional Scenarios</h4>
-            <table class="w-full text-xs text-left">
-              <thead>
-                <tr class="text-slate-400 border-b border-slate-100 font-semibold text-[10px] uppercase">
-                  <th class="pb-2">Discount</th>
-                  <th class="pb-2 text-right">Promo Fare</th>
-                  <th class="pb-2 text-right">Exp. Bookings</th>
-                  <th class="pb-2 text-right">Occupancy</th>
-                  <th class="pb-2 text-right">Exp. Revenue</th>
-                  <th class="pb-2 text-center">Constraint Status</th>
-                </tr>
-              </thead>
-              <tbody id="sim-scenarios-body"></tbody>
-            </table>
-          </div>
-        </div>
-      </div>
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+                    <div class="md:col-span-4 space-y-4 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                        <div>
+                            <div class="flex justify-between text-xs font-bold text-slate-700 mb-1">
+                                <span>Standard Base Fare:</span>
+                                <span id="sim-fare-val" class="text-msrtc-red font-mono">₹350</span>
+                            </div>
+                            <input type="range" id="sim-fare-slider" min="50" max="600" step="10" value="350" oninput="updateHappyHoursSimulator()" class="w-full accent-msrtc-red" />
+                        </div>
 
-      <!-- Advertisement Analytics (Module 4 Dataset Breakdown) -->
-      <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm mb-8">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
-          <div>
-            <span class="text-xs font-bold text-purple-700 bg-purple-50 border border-purple-200 px-2.5 py-0.5 rounded-full uppercase">Module 4 • Dataset Insights</span>
-            <h3 class="text-lg font-extrabold text-slate-900 mt-1">Bus Advertisement Dataset Analytics (1,000 Records)</h3>
-            <p class="text-xs text-slate-500">Breakdown by Bus Position, Campaign Types, QR Scans, and Corridors.</p>
-          </div>
-          <div id="ad-dataset-total-rev-badge" class="font-extrabold text-purple-900 bg-purple-100 px-3 py-1.5 rounded-xl text-xs"></div>
-        </div>
+                        <div>
+                            <div class="flex justify-between text-xs font-bold text-slate-700 mb-1">
+                                <span>Baseline Demand (Low Occupancy):</span>
+                                <span id="sim-demand-val" class="text-blue-600 font-mono">9 Seats (32%)</span>
+                            </div>
+                            <input type="range" id="sim-demand-slider" min="2" max="25" step="1" value="9" oninput="updateHappyHoursSimulator()" class="w-full accent-blue-600" />
+                        </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div class="border border-slate-100 p-4 rounded-2xl bg-slate-50">
-            <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3">Revenue By Bus Position</h4>
-            <div id="ad-pos-breakdown-list" class="space-y-2 text-xs"></div>
-          </div>
+                        <div id="sim-optimizer-result-card" class="bg-amber-100/70 p-3 rounded-xl border border-amber-300 text-xs"></div>
+                    </div>
 
-          <div class="border border-slate-100 p-4 rounded-2xl bg-slate-50">
-            <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3">Revenue By Campaign Type</h4>
-            <div id="ad-type-breakdown-list" class="space-y-2 text-xs"></div>
-          </div>
+                    <div class="md:col-span-8 overflow-x-auto">
+                        <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Evaluated Promotional Scenarios</h4>
+                        <table class="w-full text-xs text-left">
+                            <thead>
+                                <tr class="text-slate-400 border-b border-slate-100 font-semibold text-[10px] uppercase">
+                                    <th class="pb-2">Discount</th>
+                                    <th class="pb-2 text-right">Promo Fare</th>
+                                    <th class="pb-2 text-right">Exp. Bookings</th>
+                                    <th class="pb-2 text-right">Occupancy</th>
+                                    <th class="pb-2 text-right">Exp. Revenue</th>
+                                    <th class="pb-2 text-center">Constraint Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="sim-scenarios-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
 
-          <div class="border border-slate-100 p-4 rounded-2xl bg-slate-50">
-            <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3">Top Advertising Routes</h4>
-            <div id="ad-routes-breakdown-list" class="space-y-2 text-xs"></div>
-          </div>
-        </div>
-      </div>
+            <!-- Advertisement Analytics (Module 4 Dataset Breakdown) -->
+            <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm mb-8">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+                    <div>
+                        <span class="text-xs font-bold text-purple-700 bg-purple-50 border border-purple-200 px-2.5 py-0.5 rounded-full uppercase">Module 4 • Dataset Insights</span>
+                        <h3 class="text-lg font-extrabold text-slate-900 mt-1">Bus Advertisement Dataset Analytics (1,000 Records)</h3>
+                        <p class="text-xs text-slate-500">Breakdown by Bus Position, Campaign Types, QR Scans, and Corridors.</p>
+                    </div>
+                    <div id="ad-dataset-total-rev-badge" class="font-extrabold text-purple-900 bg-purple-100 px-3 py-1.5 rounded-xl text-xs"></div>
+                </div>
 
-      <!-- Ticket Sales Breakdown -->
-      <div id="revenue-tables-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
-    </section>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="border border-slate-100 p-4 rounded-2xl bg-slate-50">
+                        <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3">Revenue By Bus Position</h4>
+                        <div id="ad-pos-breakdown-list" class="space-y-2 text-xs"></div>
+                    </div>
 
-    <!-- PAGE 6: HISTORICAL JOURNEY VAULT & ERS -->
-    <section id="page-history" class="page-view hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-        <div>
-          <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900">My Bookings Vault</h2>
-          <p class="text-xs sm:text-sm text-slate-500">Verified Electronic Reservation Slips (ERS), cancellations, and emergency SOS alerts.</p>
-        </div>
-        <div class="flex gap-2 text-xs font-semibold">
-          <button onclick="filterTrips('ALL')" class="trip-filter-btn px-3 py-1.5 rounded-lg bg-slate-200 text-slate-800" data-filter="ALL">All Trips</button>
-          <button onclick="filterTrips('UPCOMING')" class="trip-filter-btn px-3 py-1.5 rounded-lg text-slate-600 hover:bg-slate-200" data-filter="UPCOMING">Upcoming</button>
-          <button onclick="filterTrips('COMPLETED')" class="trip-filter-btn px-3 py-1.5 rounded-lg text-slate-600 hover:bg-slate-200" data-filter="COMPLETED">Completed</button>
-          <button onclick="filterTrips('CANCELLED')" class="trip-filter-btn px-3 py-1.5 rounded-lg text-slate-600 hover:bg-slate-200" data-filter="CANCELLED">Cancelled</button>
-        </div>
-      </div>
+                    <div class="border border-slate-100 p-4 rounded-2xl bg-slate-50">
+                        <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3">Revenue By Campaign Type</h4>
+                        <div id="ad-type-breakdown-list" class="space-y-2 text-xs"></div>
+                    </div>
 
-      <div id="bookings-list-container" class="space-y-4"></div>
-    </section>
+                    <div class="border border-slate-100 p-4 rounded-2xl bg-slate-50">
+                        <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3">Top Advertising Routes</h4>
+                        <div id="ad-routes-breakdown-list" class="space-y-2 text-xs"></div>
+                    </div>
+                </div>
+            </div>
 
-    <!-- PAGE 7: DIGITAL SMART ID PASS -->
-    <section id="page-smartid" class="page-view hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div class="max-w-md mx-auto">
-        <h2 class="text-2xl font-extrabold text-slate-900 text-center mb-1">MSRTC Digital Smart ID Pass</h2>
-        <p class="text-xs text-slate-500 text-center mb-6">Verified citizen transit pass with conductor QR code.</p>
-        <div id="smartid-card-container"></div>
-      </div>
-    </section>
+            <!-- Ticket Sales Breakdown -->
+            <div id="revenue-tables-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+        </section>
 
-    <!-- PAGE 8: USER PROFILE -->
-    <section id="page-profile" class="page-view hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      
-      <!-- Unauthenticated State: Shown before login/register -->
-      <div id="profile-unauth-card" class="max-w-xl mx-auto bg-white p-8 rounded-3xl border border-slate-200 shadow-sm text-center">
-        <div class="w-16 h-16 bg-red-50 text-msrtc-red rounded-full flex items-center justify-center mx-auto text-2xl mb-4 border border-red-200">
-          <i class="fa-solid fa-user-lock"></i>
-        </div>
-        <span class="text-[10px] font-extrabold uppercase tracking-widest text-msrtc-red bg-red-50 border border-red-200 px-3 py-1 rounded-full">
+        <!-- PAGE 6: HISTORICAL JOURNEY VAULT & ERS -->
+        <section id="page-history" class="page-view hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                <div>
+                    <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900">My Bookings Vault</h2>
+                    <p class="text-xs sm:text-sm text-slate-500">Verified Electronic Reservation Slips (ERS), cancellations, and emergency SOS alerts.</p>
+                </div>
+                <div class="flex gap-2 text-xs font-semibold">
+                    <button onclick="filterTrips('ALL')" class="trip-filter-btn px-3 py-1.5 rounded-lg bg-slate-200 text-slate-800" data-filter="ALL">All Trips</button>
+                    <button onclick="filterTrips('UPCOMING')" class="trip-filter-btn px-3 py-1.5 rounded-lg text-slate-600 hover:bg-slate-200" data-filter="UPCOMING">Upcoming</button>
+                    <button onclick="filterTrips('COMPLETED')" class="trip-filter-btn px-3 py-1.5 rounded-lg text-slate-600 hover:bg-slate-200" data-filter="COMPLETED">Completed</button>
+                    <button onclick="filterTrips('CANCELLED')" class="trip-filter-btn px-3 py-1.5 rounded-lg text-slate-600 hover:bg-slate-200" data-filter="CANCELLED">Cancelled</button>
+                </div>
+            </div>
+
+            <div id="bookings-list-container" class="space-y-4"></div>
+        </section>
+
+        <!-- PAGE 7: DIGITAL SMART ID PASS -->
+        <section id="page-smartid" class="page-view hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="max-w-md mx-auto">
+                <h2 class="text-2xl font-extrabold text-slate-900 text-center mb-1">MSRTC Digital Smart ID Pass</h2>
+                <p class="text-xs text-slate-500 text-center mb-6">Verified citizen transit pass with conductor QR code.</p>
+                <div id="smartid-card-container"></div>
+            </div>
+        </section>
+
+        <!-- PAGE 8: USER PROFILE -->
+        <section id="page-profile" class="page-view hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+            <!-- Unauthenticated State: Shown before login/register -->
+            <div id="profile-unauth-card" class="max-w-xl mx-auto bg-white p-8 rounded-3xl border border-slate-200 shadow-sm text-center">
+                <div class="w-16 h-16 bg-red-50 text-msrtc-red rounded-full flex items-center justify-center mx-auto text-2xl mb-4 border border-red-200">
+                    <i class="fa-solid fa-user-lock"></i>
+                </div>
+                <span class="text-[10px] font-extrabold uppercase tracking-widest text-msrtc-red bg-red-50 border border-red-200 px-3 py-1 rounded-full">
           Authentication Required
         </span>
-        <h2 class="text-2xl font-extrabold text-slate-900 mt-3 mb-2">Register or Sign In Before Profile Access</h2>
-        <p class="text-xs text-slate-500 max-w-md mx-auto mb-6">
-          To manage personal information, update your MSRTC Smart ID, and claim Maharashtra government welfare travel concessions (Mahila Samman, Senior Citizen, Student, Divyangjan), please sign in or create an account first.
-        </p>
-        <div class="flex flex-col sm:flex-row gap-3 justify-center max-w-md mx-auto">
-          <button onclick="openAuthModal('login')" class="flex-1 bg-msrtc-red hover:bg-msrtc-darkred text-white font-bold py-3 px-4 rounded-xl text-xs shadow-md transition flex items-center justify-center gap-2">
+                <h2 class="text-2xl font-extrabold text-slate-900 mt-3 mb-2">Register or Sign In Before Profile Access</h2>
+                <p class="text-xs text-slate-500 max-w-md mx-auto mb-6">
+                    To manage personal information, update your MSRTC Smart ID, and claim Maharashtra government welfare travel concessions (Mahila Samman, Senior Citizen, Student, Divyangjan), please sign in or create an account first.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-3 justify-center max-w-md mx-auto">
+                    <button onclick="openAuthModal('login')" class="flex-1 bg-msrtc-red hover:bg-msrtc-darkred text-white font-bold py-3 px-4 rounded-xl text-xs shadow-md transition flex items-center justify-center gap-2">
             <i class="fa-solid fa-right-to-bracket"></i> Sign In to Account
           </button>
-          <button onclick="openAuthModal('register')" class="flex-1 bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 px-4 rounded-xl text-xs shadow-md transition flex items-center justify-center gap-2">
+                    <button onclick="openAuthModal('register')" class="flex-1 bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 px-4 rounded-xl text-xs shadow-md transition flex items-center justify-center gap-2">
             <i class="fa-solid fa-user-plus text-amber-300"></i> Register New User
           </button>
-        </div>
-        <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-center gap-2 text-[11px] text-slate-400">
-          <i class="fa-solid fa-shield-halved text-emerald-600"></i>
-          <span>Secure SQLite-backed authentication with hashed session tokens</span>
-        </div>
-      </div>
+                </div>
+                <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-center gap-2 text-[11px] text-slate-400">
+                    <i class="fa-solid fa-shield-halved text-emerald-600"></i>
+                    <span>Secure SQLite-backed authentication with hashed session tokens</span>
+                </div>
+            </div>
 
-      <!-- Authenticated State: Shown when user is logged in -->
-      <div id="profile-auth-card" class="hidden max-w-xl mx-auto bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm">
-        <div class="flex justify-between items-start pb-4 border-b border-slate-100 mb-6">
-          <div>
-            <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full inline-flex items-center gap-1">
+            <!-- Authenticated State: Shown when user is logged in -->
+            <div id="profile-auth-card" class="hidden max-w-xl mx-auto bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm">
+                <div class="flex justify-between items-start pb-4 border-b border-slate-100 mb-6">
+                    <div>
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full inline-flex items-center gap-1">
               <i class="fa-solid fa-circle-check"></i> Authenticated Passenger
             </span>
-            <h2 class="text-2xl font-extrabold text-slate-900 mt-1 mb-0.5">Self Profile Settings</h2>
-            <p class="text-xs text-slate-500">Manage personal information and welfare concession status.</p>
-          </div>
-          <button onclick="handleLogout()" class="text-xs text-red-600 hover:text-red-700 font-bold bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg transition border border-red-200 flex items-center gap-1">
+                        <h2 class="text-2xl font-extrabold text-slate-900 mt-1 mb-0.5">Self Profile Settings</h2>
+                        <p class="text-xs text-slate-500">Manage personal information and welfare concession status.</p>
+                    </div>
+                    <button onclick="handleLogout()" class="text-xs text-red-600 hover:text-red-700 font-bold bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg transition border border-red-200 flex items-center gap-1">
             <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout
           </button>
-        </div>
+                </div>
 
-        <div id="profile-msg" class="hidden mb-4 p-3 rounded-xl text-xs"></div>
+                <div id="profile-msg" class="hidden mb-4 p-3 rounded-xl text-xs"></div>
 
-        <div class="mb-5 p-4 bg-slate-50 border border-slate-200 rounded-2xl flex items-center justify-between">
-          <div>
-            <p class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">MSRTC Smart ID</p>
-            <p id="prof-smart-id-badge" class="font-mono font-extrabold text-slate-900 text-sm">MH-MSRTC-00000</p>
-          </div>
-          <div>
-            <span id="prof-category-badge" class="text-xs font-bold px-2.5 py-1 bg-amber-100 text-amber-900 border border-amber-300 rounded-lg">
+                <div class="mb-5 p-4 bg-slate-50 border border-slate-200 rounded-2xl flex items-center justify-between">
+                    <div>
+                        <p class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">MSRTC Smart ID</p>
+                        <p id="prof-smart-id-badge" class="font-mono font-extrabold text-slate-900 text-sm">MH-MSRTC-00000</p>
+                    </div>
+                    <div>
+                        <span id="prof-category-badge" class="text-xs font-bold px-2.5 py-1 bg-amber-100 text-amber-900 border border-amber-300 rounded-lg">
               General
             </span>
-          </div>
-        </div>
+                    </div>
+                </div>
 
-        <form onsubmit="handleProfileUpdate(event)" class="space-y-4 text-xs">
-          <div>
-            <label class="block font-bold text-slate-700 uppercase mb-1">Full Name</label>
-            <input type="text" id="prof-name" class="w-full text-sm p-3 border border-slate-300 rounded-xl" required />
-          </div>
-          <div>
-            <label class="block font-bold text-slate-700 uppercase mb-1">Email / Username (Registered)</label>
-            <input type="email" id="prof-email" class="w-full text-sm p-3 border border-slate-200 bg-slate-100 text-slate-600 rounded-xl cursor-not-allowed" readonly />
-          </div>
-          <div>
-            <label class="block font-bold text-slate-700 uppercase mb-1">Phone Number</label>
-            <input type="tel" id="prof-phone" class="w-full text-sm p-3 border border-slate-300 rounded-xl" required />
-          </div>
-          <div class="grid grid-cols-2 gap-4">
-            <div>
-              <label class="block font-bold text-slate-700 uppercase mb-1">Gender</label>
-              <select id="prof-gender" class="w-full text-sm p-3 border border-slate-300 rounded-xl">
+                <form onsubmit="handleProfileUpdate(event)" class="space-y-4 text-xs">
+                    <div>
+                        <label class="block font-bold text-slate-700 uppercase mb-1">Full Name</label>
+                        <input type="text" id="prof-name" class="w-full text-sm p-3 border border-slate-300 rounded-xl" required />
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 uppercase mb-1">Email / Username (Registered)</label>
+                        <input type="email" id="prof-email" class="w-full text-sm p-3 border border-slate-200 bg-slate-100 text-slate-600 rounded-xl cursor-not-allowed" readonly />
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 uppercase mb-1">Phone Number</label>
+                        <input type="tel" id="prof-phone" class="w-full text-sm p-3 border border-slate-300 rounded-xl" required />
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block font-bold text-slate-700 uppercase mb-1">Gender</label>
+                            <select id="prof-gender" class="w-full text-sm p-3 border border-slate-300 rounded-xl">
                 <option value="Male">Male</option>
                 <option value="Female">Female (50% Mahila Samman)</option>
                 <option value="Other">Other</option>
               </select>
-            </div>
-            <div>
-              <label class="block font-bold text-slate-700 uppercase mb-1">Age</label>
-              <input type="number" id="prof-age" min="5" max="110" class="w-full text-sm p-3 border border-slate-300 rounded-xl" value="28" />
-            </div>
-          </div>
-          <div>
-            <label class="block font-bold text-slate-700 uppercase mb-1">Concessional Welfare Category</label>
-            <select id="prof-category" class="w-full text-sm p-3 border border-slate-300 rounded-xl">
+                        </div>
+                        <div>
+                            <label class="block font-bold text-slate-700 uppercase mb-1">Age</label>
+                            <input type="number" id="prof-age" min="5" max="110" class="w-full text-sm p-3 border border-slate-300 rounded-xl" value="28" />
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 uppercase mb-1">Concessional Welfare Category</label>
+                        <select id="prof-category" class="w-full text-sm p-3 border border-slate-300 rounded-xl">
               <option value="General">General (Standard Fare)</option>
               <option value="Mahila Samman (Female 50% Off)">Mahila Samman (Female 50% Off)</option>
               <option value="Senior Citizen (60+ Free/50% Off)">Senior Citizen (60+ Free/50% Off)</option>
@@ -1162,298 +1163,298 @@
               <option value="Divyangjan">Divyangjan (Specially Abled Concession)</option>
               <option value="Defence Personnel">Defence Personnel</option>
             </select>
-          </div>
-          <div>
-            <button type="submit" id="prof-submit-btn" class="w-full bg-msrtc-red hover:bg-msrtc-darkred text-white font-bold p-3 rounded-xl transition shadow-md flex items-center justify-center gap-2">
+                    </div>
+                    <div>
+                        <button type="submit" id="prof-submit-btn" class="w-full bg-msrtc-red hover:bg-msrtc-darkred text-white font-bold p-3 rounded-xl transition shadow-md flex items-center justify-center gap-2">
               <i class="fa-solid fa-floppy-disk"></i> Save Profile Changes
             </button>
-          </div>
-        </form>
-      </div>
-    </section>
+                    </div>
+                </form>
+            </div>
+        </section>
 
-  </main>
+    </main>
 
-  <!-- ================= TICKET MODAL (ELECTRONIC RESERVATION SLIP - ERS) ================= -->
-  <div id="ticket-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl max-w-xl w-full max-h-[90vh] overflow-y-auto p-6 shadow-2xl border border-slate-200">
-      <div id="ticket-modal-content"></div>
-      <div class="flex gap-3 mt-6 no-print">
-        <button onclick="window.print()" class="flex-1 bg-slate-900 text-white font-bold py-2.5 rounded-xl hover:bg-slate-800 transition flex items-center justify-center gap-2 text-xs">
+    <!-- ================= TICKET MODAL (ELECTRONIC RESERVATION SLIP - ERS) ================= -->
+    <div id="ticket-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-xl w-full max-h-[90vh] overflow-y-auto p-6 shadow-2xl border border-slate-200">
+            <div id="ticket-modal-content"></div>
+            <div class="flex gap-3 mt-6 no-print">
+                <button onclick="window.print()" class="flex-1 bg-slate-900 text-white font-bold py-2.5 rounded-xl hover:bg-slate-800 transition flex items-center justify-center gap-2 text-xs">
           <i class="fa-solid fa-print"></i> Print / Save PDF
         </button>
-        <button onclick="closeTicketModal()" class="flex-1 bg-slate-100 text-slate-700 font-bold py-2.5 rounded-xl hover:bg-slate-200 transition text-xs">
+                <button onclick="closeTicketModal()" class="flex-1 bg-slate-100 text-slate-700 font-bold py-2.5 rounded-xl hover:bg-slate-200 transition text-xs">
           Close Slip
         </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ================= AD PREDICTOR MODAL ================= -->
-  <div id="ad-predict-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-200">
-      <div class="flex justify-between items-center pb-3 border-b border-slate-100 mb-4">
-        <div>
-          <h3 class="text-base font-extrabold text-slate-900">ML Ad Revenue & QR Predictor</h3>
-          <p class="text-xs text-slate-500">Trained on MSRTC 1,000 Campaign Dataset</p>
+            </div>
         </div>
-        <button onclick="closeAdPredictorModal()" class="text-slate-400 hover:text-slate-600 font-bold text-lg">
+    </div>
+
+    <!-- ================= AD PREDICTOR MODAL ================= -->
+    <div id="ad-predict-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-200">
+            <div class="flex justify-between items-center pb-3 border-b border-slate-100 mb-4">
+                <div>
+                    <h3 class="text-base font-extrabold text-slate-900">ML Ad Revenue & QR Predictor</h3>
+                    <p class="text-xs text-slate-500">Trained on MSRTC 1,000 Campaign Dataset</p>
+                </div>
+                <button onclick="closeAdPredictorModal()" class="text-slate-400 hover:text-slate-600 font-bold text-lg">
           <i class="fa-solid fa-xmark"></i>
         </button>
-      </div>
+            </div>
 
-      <div class="space-y-4 text-xs">
-        <div>
-          <label class="block font-bold text-slate-700 mb-1">Bus Ad Position</label>
-          <select id="ad-pred-pos" class="w-full p-2.5 border border-slate-300 rounded-xl">
+            <div class="space-y-4 text-xs">
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">Bus Ad Position</label>
+                    <select id="ad-pred-pos" class="w-full p-2.5 border border-slate-300 rounded-xl">
             <option value="Front">Front of Bus (Premium Tier)</option>
             <option value="First 10 Seats Area">First 10 Seats (High Tier)</option>
             <option value="Middle">Middle Section (Medium Tier)</option>
             <option value="Rear">Rear Section (Standard Tier)</option>
           </select>
-        </div>
-        <div>
-          <label class="block font-bold text-slate-700 mb-1">Campaign Type</label>
-          <select id="ad-pred-type" class="w-full p-2.5 border border-slate-300 rounded-xl">
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">Campaign Type</label>
+                    <select id="ad-pred-type" class="w-full p-2.5 border border-slate-300 rounded-xl">
             <option value="Banner">Printed Vinyl Banner</option>
             <option value="QR">Interactive QR Code Sticker</option>
             <option value="Digital">Digital Display Screen</option>
           </select>
-        </div>
-        <div>
-          <label class="block font-bold text-slate-700 mb-1">Duration (Days)</label>
-          <input type="number" id="ad-pred-days" min="7" max="180" value="30" class="w-full p-2.5 border border-slate-300 rounded-xl" />
-        </div>
-        <button onclick="calculateAdPrediction()" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2.5 rounded-xl transition">
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">Duration (Days)</label>
+                    <input type="number" id="ad-pred-days" min="7" max="180" value="30" class="w-full p-2.5 border border-slate-300 rounded-xl" />
+                </div>
+                <button onclick="calculateAdPrediction()" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2.5 rounded-xl transition">
           Run ML Prediction
         </button>
 
-        <div id="ad-prediction-output" class="hidden bg-purple-50 p-4 rounded-xl border border-purple-200 space-y-1.5"></div>
-      </div>
+                <div id="ad-prediction-output" class="hidden bg-purple-50 p-4 rounded-xl border border-purple-200 space-y-1.5"></div>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <!-- ================= QR COUPON MODAL ================= -->
-  <div id="qr-coupon-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-200 text-center">
-      <div class="w-12 h-12 bg-purple-100 text-purple-700 rounded-full flex items-center justify-center mx-auto text-xl mb-3">
-        <i class="fa-solid fa-qrcode"></i>
-      </div>
-      <h3 class="text-base font-extrabold text-slate-900" id="coupon-brand-name">Retail Partner Offer</h3>
-      <div class="my-3 py-3 px-4 bg-amber-50 border-2 border-dashed border-amber-400 rounded-xl">
-        <span class="text-xs text-slate-500 uppercase font-semibold">Your Discount Code:</span>
-        <div id="coupon-code-text" class="text-xl font-mono font-black text-msrtc-red tracking-wider mt-0.5"></div>
-        <div id="coupon-deal-text" class="text-xs font-bold text-slate-800 mt-1"></div>
-      </div>
-      <p id="coupon-message" class="text-[11px] text-slate-500 mb-4"></p>
-      <button onclick="closeCouponModal()" class="w-full bg-slate-900 text-white font-bold py-2.5 rounded-xl text-xs">
+    <!-- ================= QR COUPON MODAL ================= -->
+    <div id="qr-coupon-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-200 text-center">
+            <div class="w-12 h-12 bg-purple-100 text-purple-700 rounded-full flex items-center justify-center mx-auto text-xl mb-3">
+                <i class="fa-solid fa-qrcode"></i>
+            </div>
+            <h3 class="text-base font-extrabold text-slate-900" id="coupon-brand-name">Retail Partner Offer</h3>
+            <div class="my-3 py-3 px-4 bg-amber-50 border-2 border-dashed border-amber-400 rounded-xl">
+                <span class="text-xs text-slate-500 uppercase font-semibold">Your Discount Code:</span>
+                <div id="coupon-code-text" class="text-xl font-mono font-black text-msrtc-red tracking-wider mt-0.5"></div>
+                <div id="coupon-deal-text" class="text-xs font-bold text-slate-800 mt-1"></div>
+            </div>
+            <p id="coupon-message" class="text-[11px] text-slate-500 mb-4"></p>
+            <button onclick="closeCouponModal()" class="w-full bg-slate-900 text-white font-bold py-2.5 rounded-xl text-xs">
         Done & Keep Coupon
       </button>
+        </div>
     </div>
-  </div>
 
-  <!-- ================= SOS ALERT MODAL ================= -->
-  <div id="sos-modal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border-2 border-rose-600 text-center">
-      <div class="w-14 h-14 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto text-2xl mb-3 animate-pulse">
-        <i class="fa-solid fa-triangle-exclamation"></i>
-      </div>
-      <h3 class="text-lg font-extrabold text-slate-900">Passenger Safety SOS Triggered</h3>
-      <p class="text-xs text-slate-500 mt-1">Live coordinates dispatched to MSRTC Transit Command & Women Safety Helpline.</p>
-      <div id="sos-details-box" class="bg-rose-50 text-rose-950 p-4 rounded-xl border border-rose-200 text-xs text-left my-4 space-y-1.5 font-mono"></div>
-      <button onclick="closeSOSModal()" class="w-full bg-slate-900 text-white font-bold py-2.5 rounded-xl text-xs">
+    <!-- ================= SOS ALERT MODAL ================= -->
+    <div id="sos-modal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border-2 border-rose-600 text-center">
+            <div class="w-14 h-14 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto text-2xl mb-3 animate-pulse">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <h3 class="text-lg font-extrabold text-slate-900">Passenger Safety SOS Triggered</h3>
+            <p class="text-xs text-slate-500 mt-1">Live coordinates dispatched to MSRTC Transit Command & Women Safety Helpline.</p>
+            <div id="sos-details-box" class="bg-rose-50 text-rose-950 p-4 rounded-xl border border-rose-200 text-xs text-left my-4 space-y-1.5 font-mono"></div>
+            <button onclick="closeSOSModal()" class="w-full bg-slate-900 text-white font-bold py-2.5 rounded-xl text-xs">
         Acknowledge & Close
       </button>
-    </div>
-  </div>
-
-  <!-- ================= GROUP BOOKING MODAL ================= -->
-  <div id="group-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200">
-      <div class="flex justify-between items-center pb-3 border-b border-slate-100 mb-4">
-        <div>
-          <h3 class="text-base font-extrabold text-slate-900">Group & Bulk Booking Calculator</h3>
-          <p class="text-xs text-slate-500">Tiered discounts for wedding parties, tours & multi-day trips.</p>
         </div>
-        <button onclick="toggleGroupBookingModal()" class="text-slate-400 hover:text-slate-600 font-bold text-lg">
+    </div>
+
+    <!-- ================= GROUP BOOKING MODAL ================= -->
+    <div id="group-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200">
+            <div class="flex justify-between items-center pb-3 border-b border-slate-100 mb-4">
+                <div>
+                    <h3 class="text-base font-extrabold text-slate-900">Group & Bulk Booking Calculator</h3>
+                    <p class="text-xs text-slate-500">Tiered discounts for wedding parties, tours & multi-day trips.</p>
+                </div>
+                <button onclick="toggleGroupBookingModal()" class="text-slate-400 hover:text-slate-600 font-bold text-lg">
           <i class="fa-solid fa-xmark"></i>
         </button>
-      </div>
+            </div>
 
-      <div class="space-y-3 text-xs">
-        <div>
-          <label class="block font-bold text-slate-700 mb-1">Number of Passengers (Seats)</label>
-          <input type="number" id="grp-pax" min="5" max="28" value="12" class="w-full p-2.5 border border-slate-300 rounded-xl" oninput="calcGroupQuoteLive()" />
-        </div>
-        <div>
-          <label class="block font-bold text-slate-700 mb-1">Trip Duration (Days)</label>
-          <input type="number" id="grp-days" min="1" max="15" value="1" class="w-full p-2.5 border border-slate-300 rounded-xl" oninput="calcGroupQuoteLive()" />
-          <p class="text-[10px] text-emerald-600 mt-1">*3+ days get extra 5% loyalty discount.</p>
-        </div>
-        <div>
-          <label class="block font-bold text-slate-700 mb-1">Estimated Per-Seat Base Fare (₹)</label>
-          <input type="number" id="grp-fare" min="50" max="1000" value="350" class="w-full p-2.5 border border-slate-300 rounded-xl" oninput="calcGroupQuoteLive()" />
-        </div>
+            <div class="space-y-3 text-xs">
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">Number of Passengers (Seats)</label>
+                    <input type="number" id="grp-pax" min="5" max="28" value="12" class="w-full p-2.5 border border-slate-300 rounded-xl" oninput="calcGroupQuoteLive()" />
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">Trip Duration (Days)</label>
+                    <input type="number" id="grp-days" min="1" max="15" value="1" class="w-full p-2.5 border border-slate-300 rounded-xl" oninput="calcGroupQuoteLive()" />
+                    <p class="text-[10px] text-emerald-600 mt-1">*3+ days get extra 5% loyalty discount.</p>
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">Estimated Per-Seat Base Fare (₹)</label>
+                    <input type="number" id="grp-fare" min="50" max="1000" value="350" class="w-full p-2.5 border border-slate-300 rounded-xl" oninput="calcGroupQuoteLive()" />
+                </div>
 
-        <div id="grp-quote-output" class="bg-emerald-50 p-4 rounded-xl border border-emerald-200 space-y-1.5 font-sans mt-3"></div>
-      </div>
+                <div id="grp-quote-output" class="bg-emerald-50 p-4 rounded-xl border border-emerald-200 space-y-1.5 font-sans mt-3"></div>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <!-- ================= CARGO / WAYBILL MODAL ================= -->
-  <div id="cargo-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl max-w-xl w-full max-h-[90vh] overflow-y-auto p-6 shadow-2xl border border-slate-200">
-      <div id="cargo-modal-content"></div>
-      <div class="flex gap-3 mt-6 no-print">
-        <button onclick="window.print()" class="flex-1 bg-indigo-600 text-white font-bold py-2.5 rounded-xl hover:bg-indigo-700 transition flex items-center justify-center gap-2 text-xs">
+    <!-- ================= CARGO / WAYBILL MODAL ================= -->
+    <div id="cargo-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-xl w-full max-h-[90vh] overflow-y-auto p-6 shadow-2xl border border-slate-200">
+            <div id="cargo-modal-content"></div>
+            <div class="flex gap-3 mt-6 no-print">
+                <button onclick="window.print()" class="flex-1 bg-indigo-600 text-white font-bold py-2.5 rounded-xl hover:bg-indigo-700 transition flex items-center justify-center gap-2 text-xs">
           <i class="fa-solid fa-print"></i> Print Waybill (AWB)
         </button>
-        <button onclick="closeCargoModal()" class="flex-1 bg-slate-100 text-slate-700 font-bold py-2.5 rounded-xl hover:bg-slate-200 transition text-xs">
+                <button onclick="closeCargoModal()" class="flex-1 bg-slate-100 text-slate-700 font-bold py-2.5 rounded-xl hover:bg-slate-200 transition text-xs">
           Close Consignment Note
         </button>
-      </div>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <!-- ================= VENDOR CERTIFICATE MODAL ================= -->
-  <div id="vendor-cert-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border-2 border-amber-400 text-center">
-      <div class="w-16 h-16 bg-amber-100 text-amber-700 rounded-full flex items-center justify-center mx-auto text-3xl mb-3">
-        <i class="fa-solid fa-certificate"></i>
-      </div>
-      <span class="text-[10px] font-extrabold uppercase tracking-widest text-msrtc-red bg-red-50 border border-red-200 px-2.5 py-0.5 rounded-full">
+    <!-- ================= VENDOR CERTIFICATE MODAL ================= -->
+    <div id="vendor-cert-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border-2 border-amber-400 text-center">
+            <div class="w-16 h-16 bg-amber-100 text-amber-700 rounded-full flex items-center justify-center mx-auto text-3xl mb-3">
+                <i class="fa-solid fa-certificate"></i>
+            </div>
+            <span class="text-[10px] font-extrabold uppercase tracking-widest text-msrtc-red bg-red-50 border border-red-200 px-2.5 py-0.5 rounded-full">
         MSRTC Highway Rest-Stop Partner
       </span>
-      <h3 class="text-lg font-black text-slate-900 mt-2" id="cert-restaurant-name">Sahyadri Pure Veg</h3>
-      <p class="text-xs text-slate-500 mt-1">Official Food Partner Accreditation Certificate</p>
-      
-      <div class="my-4 p-4 bg-slate-50 border border-slate-200 rounded-2xl text-xs text-left space-y-2">
-        <div class="flex justify-between">
-          <span class="text-slate-500">Partner ID:</span>
-          <span id="cert-partner-id" class="font-mono font-bold text-slate-900">VEND-1049</span>
-        </div>
-        <div class="flex justify-between">
-          <span class="text-slate-500">Certificate No:</span>
-          <span id="cert-no" class="font-mono font-bold text-slate-900">MSRTC-FSSAI-2026-99</span>
-        </div>
-        <div class="flex justify-between">
-          <span class="text-slate-500">Corridor:</span>
-          <span id="cert-corridor" class="font-semibold text-slate-800">NH48 Katraj Ghat</span>
-        </div>
-        <div class="flex justify-between">
-          <span class="text-slate-500">Status:</span>
-          <span class="text-emerald-700 font-extrabold flex items-center gap-1"><i class="fa-solid fa-circle-check"></i> VERIFIED &amp; ACTIVE</span>
-        </div>
-      </div>
+            <h3 class="text-lg font-black text-slate-900 mt-2" id="cert-restaurant-name">Sahyadri Pure Veg</h3>
+            <p class="text-xs text-slate-500 mt-1">Official Food Partner Accreditation Certificate</p>
 
-      <p class="text-[11px] text-slate-400 mb-4">Your restaurant is now eligible to receive passenger meal pre-orders and bus halts.</p>
-      <button onclick="closeVendorCertModal()" class="w-full bg-slate-900 text-white font-bold py-2.5 rounded-xl text-xs">
+            <div class="my-4 p-4 bg-slate-50 border border-slate-200 rounded-2xl text-xs text-left space-y-2">
+                <div class="flex justify-between">
+                    <span class="text-slate-500">Partner ID:</span>
+                    <span id="cert-partner-id" class="font-mono font-bold text-slate-900">VEND-1049</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-500">Certificate No:</span>
+                    <span id="cert-no" class="font-mono font-bold text-slate-900">MSRTC-FSSAI-2026-99</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-500">Corridor:</span>
+                    <span id="cert-corridor" class="font-semibold text-slate-800">NH48 Katraj Ghat</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-500">Status:</span>
+                    <span class="text-emerald-700 font-extrabold flex items-center gap-1"><i class="fa-solid fa-circle-check"></i> VERIFIED &amp; ACTIVE</span>
+                </div>
+            </div>
+
+            <p class="text-[11px] text-slate-400 mb-4">Your restaurant is now eligible to receive passenger meal pre-orders and bus halts.</p>
+            <button onclick="closeVendorCertModal()" class="w-full bg-slate-900 text-white font-bold py-2.5 rounded-xl text-xs">
         Close Certificate
       </button>
+        </div>
     </div>
-  </div>
 
-  <!-- ================= AUTHENTICATION MODAL (REGISTER & LOGIN) ================= -->
-  <div id="auth-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl max-w-md w-full max-h-[92vh] overflow-y-auto p-6 sm:p-7 shadow-2xl border border-slate-200 relative">
-      <!-- Close Button -->
-      <button onclick="closeAuthModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center transition">
+    <!-- ================= AUTHENTICATION MODAL (REGISTER & LOGIN) ================= -->
+    <div id="auth-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full max-h-[92vh] overflow-y-auto p-6 sm:p-7 shadow-2xl border border-slate-200 relative">
+            <!-- Close Button -->
+            <button onclick="closeAuthModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center transition">
         <i class="fa-solid fa-xmark text-sm"></i>
       </button>
 
-      <!-- Modal Header -->
-      <div class="text-center mb-5">
-        <div class="w-12 h-12 bg-red-50 text-msrtc-red rounded-2xl flex items-center justify-center mx-auto text-xl mb-2 border border-red-200 shadow-sm">
-          <i class="fa-solid fa-bus"></i>
-        </div>
-        <span class="text-[10px] font-extrabold uppercase tracking-widest text-slate-500 bg-slate-100 px-2.5 py-0.5 rounded-full">
+            <!-- Modal Header -->
+            <div class="text-center mb-5">
+                <div class="w-12 h-12 bg-red-50 text-msrtc-red rounded-2xl flex items-center justify-center mx-auto text-xl mb-2 border border-red-200 shadow-sm">
+                    <i class="fa-solid fa-bus"></i>
+                </div>
+                <span class="text-[10px] font-extrabold uppercase tracking-widest text-slate-500 bg-slate-100 px-2.5 py-0.5 rounded-full">
           Government of Maharashtra • MSRTC
         </span>
-        <h3 id="auth-modal-title" class="text-xl font-extrabold text-slate-900 mt-2">Sign In to Transit Account</h3>
-        <p class="text-xs text-slate-500 mt-0.5">Required before managing profile & concession smart pass</p>
-      </div>
+                <h3 id="auth-modal-title" class="text-xl font-extrabold text-slate-900 mt-2">Sign In to Transit Account</h3>
+                <p class="text-xs text-slate-500 mt-0.5">Required before managing profile & concession smart pass</p>
+            </div>
 
-      <!-- Tab Buttons -->
-      <div class="flex p-1 bg-slate-100 rounded-xl mb-4 text-xs font-bold">
-        <button id="auth-tab-btn-login" onclick="switchAuthTab('login')" class="flex-1 py-2 rounded-lg transition bg-white text-slate-900 shadow-sm">
+            <!-- Tab Buttons -->
+            <div class="flex p-1 bg-slate-100 rounded-xl mb-4 text-xs font-bold">
+                <button id="auth-tab-btn-login" onclick="switchAuthTab('login')" class="flex-1 py-2 rounded-lg transition bg-white text-slate-900 shadow-sm">
           <i class="fa-solid fa-right-to-bracket mr-1"></i> Sign In
         </button>
-        <button id="auth-tab-btn-register" onclick="switchAuthTab('register')" class="flex-1 py-2 rounded-lg transition text-slate-500 hover:text-slate-800">
+                <button id="auth-tab-btn-register" onclick="switchAuthTab('register')" class="flex-1 py-2 rounded-lg transition text-slate-500 hover:text-slate-800">
           <i class="fa-solid fa-user-plus mr-1"></i> Register
         </button>
-      </div>
+            </div>
 
-      <!-- Alert Message Box -->
-      <div id="auth-msg" class="hidden mb-4 p-3 rounded-xl text-xs font-semibold"></div>
+            <!-- Alert Message Box -->
+            <div id="auth-msg" class="hidden mb-4 p-3 rounded-xl text-xs font-semibold"></div>
 
-      <!-- PANE 1: LOGIN -->
-      <div id="auth-pane-login" class="space-y-4">
-        <!-- Quick Demo Fill -->
-        <div class="p-3 bg-amber-50 border border-amber-200 rounded-xl flex items-center justify-between">
-          <div class="text-[11px] text-amber-900">
-            <span class="font-bold">Demo Account:</span> pravin.msrtc@transit.gov.in
-          </div>
-          <button type="button" onclick="quickFillDemoAuth()" class="bg-amber-400 hover:bg-amber-500 text-slate-900 font-extrabold px-2.5 py-1 rounded-lg text-[10px] transition shadow-sm">
+            <!-- PANE 1: LOGIN -->
+            <div id="auth-pane-login" class="space-y-4">
+                <!-- Quick Demo Fill -->
+                <div class="p-3 bg-amber-50 border border-amber-200 rounded-xl flex items-center justify-between">
+                    <div class="text-[11px] text-amber-900">
+                        <span class="font-bold">Demo Account:</span> pravin.msrtc@transit.gov.in
+                    </div>
+                    <button type="button" onclick="quickFillDemoAuth()" class="bg-amber-400 hover:bg-amber-500 text-slate-900 font-extrabold px-2.5 py-1 rounded-lg text-[10px] transition shadow-sm">
             ⚡ Quick Fill
           </button>
-        </div>
+                </div>
 
-        <form onsubmit="handleLoginSubmit(event)" class="space-y-3.5 text-xs">
-          <div>
-            <label class="block font-bold text-slate-700 uppercase mb-1">Email / Username</label>
-            <input type="email" id="login-email" class="w-full text-sm p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:outline-none" placeholder="name@example.com" required />
-          </div>
-          <div>
-            <label class="block font-bold text-slate-700 uppercase mb-1">Password</label>
-            <input type="password" id="login-password" class="w-full text-sm p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:outline-none" placeholder="Enter account password" required />
-          </div>
-          <button type="submit" id="login-submit-btn" class="w-full bg-msrtc-red hover:bg-msrtc-darkred text-white font-extrabold py-3 rounded-xl transition shadow-md flex items-center justify-center gap-2">
+                <form onsubmit="handleLoginSubmit(event)" class="space-y-3.5 text-xs">
+                    <div>
+                        <label class="block font-bold text-slate-700 uppercase mb-1">Email / Username</label>
+                        <input type="email" id="login-email" class="w-full text-sm p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:outline-none" placeholder="name@example.com" required />
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 uppercase mb-1">Password</label>
+                        <input type="password" id="login-password" class="w-full text-sm p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:outline-none" placeholder="Enter account password" required />
+                    </div>
+                    <button type="submit" id="login-submit-btn" class="w-full bg-msrtc-red hover:bg-msrtc-darkred text-white font-extrabold py-3 rounded-xl transition shadow-md flex items-center justify-center gap-2">
             <i class="fa-solid fa-right-to-bracket"></i> Sign In to Account
           </button>
-        </form>
+                </form>
 
-        <p class="text-center text-xs text-slate-500 pt-2">
-          Don't have an MSRTC account?
-          <button type="button" onclick="switchAuthTab('register')" class="text-msrtc-red font-bold hover:underline ml-1">
+                <p class="text-center text-xs text-slate-500 pt-2">
+                    Don't have an MSRTC account?
+                    <button type="button" onclick="switchAuthTab('register')" class="text-msrtc-red font-bold hover:underline ml-1">
             Register here
           </button>
-        </p>
-      </div>
+                </p>
+            </div>
 
-      <!-- PANE 2: REGISTER -->
-      <div id="auth-pane-register" class="hidden space-y-3.5">
-        <form onsubmit="handleRegisterSubmit(event)" class="space-y-3 text-xs">
-          <div>
-            <label class="block font-bold text-slate-700 uppercase mb-0.5">Full Name</label>
-            <input type="text" id="reg-name" class="w-full text-sm p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:outline-none" placeholder="e.g. Pravin Patil" required />
-          </div>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-            <div>
-              <label class="block font-bold text-slate-700 uppercase mb-0.5">Email Address</label>
-              <input type="email" id="reg-email" class="w-full text-sm p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:outline-none" placeholder="name@domain.com" required />
-            </div>
-            <div>
-              <label class="block font-bold text-slate-700 uppercase mb-0.5">Mobile Number</label>
-              <input type="tel" id="reg-phone" class="w-full text-sm p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:outline-none" placeholder="+91 98230 12345" required />
-            </div>
-          </div>
-          <div class="grid grid-cols-2 gap-2.5">
-            <div>
-              <label class="block font-bold text-slate-700 uppercase mb-0.5">Gender</label>
-              <select id="reg-gender" class="w-full text-sm p-2.5 border border-slate-300 rounded-xl">
+            <!-- PANE 2: REGISTER -->
+            <div id="auth-pane-register" class="hidden space-y-3.5">
+                <form onsubmit="handleRegisterSubmit(event)" class="space-y-3 text-xs">
+                    <div>
+                        <label class="block font-bold text-slate-700 uppercase mb-0.5">Full Name</label>
+                        <input type="text" id="reg-name" class="w-full text-sm p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:outline-none" placeholder="e.g. Pravin Patil" required />
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                        <div>
+                            <label class="block font-bold text-slate-700 uppercase mb-0.5">Email Address</label>
+                            <input type="email" id="reg-email" class="w-full text-sm p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:outline-none" placeholder="name@domain.com" required />
+                        </div>
+                        <div>
+                            <label class="block font-bold text-slate-700 uppercase mb-0.5">Mobile Number</label>
+                            <input type="tel" id="reg-phone" class="w-full text-sm p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:outline-none" placeholder="+91 98230 12345" required />
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2.5">
+                        <div>
+                            <label class="block font-bold text-slate-700 uppercase mb-0.5">Gender</label>
+                            <select id="reg-gender" class="w-full text-sm p-2.5 border border-slate-300 rounded-xl">
                 <option value="Male">Male</option>
                 <option value="Female">Female (50% Mahila Samman)</option>
                 <option value="Other">Other</option>
               </select>
-            </div>
-            <div>
-              <label class="block font-bold text-slate-700 uppercase mb-0.5">Age</label>
-              <input type="number" id="reg-age" min="5" max="110" class="w-full text-sm p-2.5 border border-slate-300 rounded-xl" value="28" required />
-            </div>
-          </div>
-          <div>
-            <label class="block font-bold text-slate-700 uppercase mb-0.5">Concessional Category</label>
-            <select id="reg-category" class="w-full text-sm p-2.5 border border-slate-300 rounded-xl">
+                        </div>
+                        <div>
+                            <label class="block font-bold text-slate-700 uppercase mb-0.5">Age</label>
+                            <input type="number" id="reg-age" min="5" max="110" class="w-full text-sm p-2.5 border border-slate-300 rounded-xl" value="28" required />
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 uppercase mb-0.5">Concessional Category</label>
+                        <select id="reg-category" class="w-full text-sm p-2.5 border border-slate-300 rounded-xl">
               <option value="General">General (Standard Fare)</option>
               <option value="Mahila Samman (Female 50% Off)">Mahila Samman (Female 50% Off)</option>
               <option value="Senior Citizen (60+ Free/50% Off)">Senior Citizen (60+ Free/50% Off)</option>
@@ -1461,35 +1462,36 @@
               <option value="Divyangjan">Divyangjan (Specially Abled Concession)</option>
               <option value="Defence Personnel">Defence Personnel</option>
             </select>
-          </div>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-            <div>
-              <label class="block font-bold text-slate-700 uppercase mb-0.5">Password</label>
-              <input type="password" id="reg-password" minlength="6" class="w-full text-sm p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:outline-none" placeholder="Min 6 characters" required />
-            </div>
-            <div>
-              <label class="block font-bold text-slate-700 uppercase mb-0.5">Confirm Password</label>
-              <input type="password" id="reg-confirm" minlength="6" class="w-full text-sm p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:outline-none" placeholder="Re-enter password" required />
-            </div>
-          </div>
-          <button type="submit" id="reg-submit-btn" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-extrabold py-3 rounded-xl transition shadow-md flex items-center justify-center gap-2 mt-2">
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                        <div>
+                            <label class="block font-bold text-slate-700 uppercase mb-0.5">Password</label>
+                            <input type="password" id="reg-password" minlength="6" class="w-full text-sm p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:outline-none" placeholder="Min 6 characters" required />
+                        </div>
+                        <div>
+                            <label class="block font-bold text-slate-700 uppercase mb-0.5">Confirm Password</label>
+                            <input type="password" id="reg-confirm" minlength="6" class="w-full text-sm p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:outline-none" placeholder="Re-enter password" required />
+                        </div>
+                    </div>
+                    <button type="submit" id="reg-submit-btn" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-extrabold py-3 rounded-xl transition shadow-md flex items-center justify-center gap-2 mt-2">
             <i class="fa-solid fa-id-card text-amber-300"></i> Register &amp; Issue Smart ID
           </button>
-        </form>
+                </form>
 
-        <p class="text-center text-xs text-slate-500 pt-1">
-          Already registered?
-          <button type="button" onclick="switchAuthTab('login')" class="text-msrtc-red font-bold hover:underline ml-1">
+                <p class="text-center text-xs text-slate-500 pt-1">
+                    Already registered?
+                    <button type="button" onclick="switchAuthTab('login')" class="text-msrtc-red font-bold hover:underline ml-1">
             Sign in here
           </button>
-        </p>
-      </div>
+                </p>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <!-- ================= SCRIPTS ================= -->
-  <script src="data.js?v=20261120_2"></script>
-  <script src="api.js?v=20261120_2"></script>
-  <script src="app.js?v=20261120_2"></script>
+    <!-- ================= SCRIPTS ================= -->
+    <script src="data.js?v=20261120_2"></script>
+    <script src="api.js?v=20261120_2"></script>
+    <script src="app.js?v=20261120_2"></script>
 </body>
+
 </html>
