@@ -85,7 +85,13 @@ def _generate_smart_id():
 
 
 def _validate_email(email):
-    return bool(re.match(r'^[^@]+@[^@]+\.[^@]+$', email))
+    if not email:
+        return False
+    # Standard email format (name@domain.ext)
+    if '@' in email:
+        return bool(re.match(r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$', email))
+    # If passenger entered a username or phone number (at least 3 characters)
+    return bool(re.match(r'^[a-zA-Z0-9_.+-]{3,50}$', email))
 
 
 def _validate_phone(phone):
@@ -113,7 +119,7 @@ def _user_public(row):
 def register_user(data):
     """Register a new MSRTC transit passenger account."""
     full_name = (data.get("fullName") or data.get("name") or "").strip()
-    email = (data.get("email") or "").strip().lower()
+    raw_email = (data.get("email") or "").strip().lower()
     phone = (data.get("phone") or "").strip()
     password = data.get("password") or ""
     gender = data.get("gender", "Male")
@@ -123,8 +129,12 @@ def register_user(data):
     # Validations
     if not full_name or len(full_name) < 2:
         raise ValueError("Full name is required (minimum 2 characters).")
-    if not _validate_email(email):
-        raise ValueError("Please enter a valid email address.")
+    if not _validate_email(raw_email):
+        raise ValueError("Please enter a valid email address (e.g. name@domain.com) or username.")
+    
+    # If username entered without @domain, format cleanly with @msrtc.in
+    email = raw_email if '@' in raw_email else f"{raw_email}@msrtc.in"
+
     if not _validate_phone(phone):
         raise ValueError("Please enter a valid 10-digit phone number.")
     if len(password) < 6:
@@ -140,9 +150,9 @@ def register_user(data):
         raise ValueError("Please enter a valid age between 5 and 110.")
 
     with _get_conn() as conn:
-        # Check duplicate email
-        if conn.execute("SELECT id FROM users WHERE email=?", (email,)).fetchone():
-            raise ValueError("This email is already registered. Please log in instead.")
+        # Check duplicate email or username
+        if conn.execute("SELECT id FROM users WHERE email=? OR email=?", (email, raw_email)).fetchone():
+            raise ValueError("This email or username is already registered. Please log in instead.")
 
         uid = f"usr_{random.randint(100000, 999999)}"
         smart_id = _generate_smart_id()
@@ -173,17 +183,31 @@ def register_user(data):
 
 
 def login_user(data):
-    """Authenticate a registered user and issue a session token."""
-    email = (data.get("email") or "").strip().lower()
+    """Authenticate a registered user via email, username, Smart ID, or phone."""
+    raw_ident = (data.get("email") or data.get("username") or "").strip()
+    email = raw_ident.lower()
     password = data.get("password") or ""
 
-    if not email or not password:
-        raise ValueError("Email and password are required.")
+    if not raw_ident or not password:
+        raise ValueError("Email/Username and password are required.")
+
+    # Digits only for phone comparison
+    clean_digits = re.sub(r'[\s\-\+]', '', raw_ident)
+    phone_10 = clean_digits[-10:] if len(clean_digits) >= 10 else clean_digits
 
     with _get_conn() as conn:
-        row = conn.execute("SELECT * FROM users WHERE email=?", (email,)).fetchone()
+        row = conn.execute("""
+        SELECT * FROM users 
+        WHERE email = ? 
+           OR email = ? 
+           OR smart_id = ? 
+           OR phone = ? 
+           OR REPLACE(REPLACE(phone, ' ', ''), '+91', '') = ?
+           OR full_name = ? COLLATE NOCASE
+        """, (email, f"{email}@msrtc.in", raw_ident.upper(), raw_ident, phone_10, raw_ident)).fetchone()
+
         if not row:
-            raise ValueError("No account found with this email. Please register first.")
+            raise ValueError("No account found with this email, username, or Smart ID. Please register first.")
 
         expected_hash = _hash_password(password, row["salt"])
         if expected_hash != row["password_hash"]:

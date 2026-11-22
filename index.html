@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>MSRTC Smart Transit • ML-Based Revenue Optimization ("HAPPY HOURS")</title>
+    <title>Smart Transit • ML-Based Revenue Optimization ("HAPPY HOURS")</title>
 
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -93,6 +93,9 @@
           </button>
                     <button onclick="navigateTo('smartid')" class="nav-btn px-3 py-2 rounded-lg text-sm font-semibold transition text-slate-700 hover:text-msrtc-red hover:bg-red-50" data-page="smartid">
             <i class="fa-solid fa-id-card mr-1"></i> Smart ID
+          </button>
+                    <button onclick="navigateTo('women-safety')" class="nav-btn px-3 py-2 rounded-lg text-sm font-semibold transition text-rose-700 hover:text-rose-900 hover:bg-rose-50" data-page="women-safety">
+            <i class="fa-solid fa-shield-heart mr-1 text-rose-600"></i> Single Women Shield
           </button>
                 </nav>
 
@@ -1173,6 +1176,242 @@
             </div>
         </section>
 
+        <!-- PAGE 9: SINGLE WOMEN TRANSIT SAFETY SHIELD (MODULE 7) -->
+        <section id="page-women-safety" class="page-view hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <!-- Hero Banner -->
+            <div class="bg-gradient-to-r from-rose-600 via-pink-600 to-red-600 rounded-3xl p-6 sm:p-10 text-white shadow-xl relative overflow-hidden mb-8">
+                <div class="absolute right-0 bottom-0 opacity-10 pointer-events-none transform translate-x-10 translate-y-10">
+                    <i class="fa-solid fa-shield-heart text-[260px]"></i>
+                </div>
+                <div class="max-w-3xl relative z-10">
+                    <span class="inline-flex items-center gap-1.5 bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-3">
+                        <i class="fa-solid fa-person-dress text-pink-200"></i> Maharashtra Mahila Samman &amp; Safety Initiative
+                    </span>
+                    <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight leading-tight mb-2">
+                        Single Women Safe Transit Shield <br /><span class="text-pink-200 text-2xl sm:text-3xl font-bold">(एकल महिला प्रवासी सुरक्षा कवच)</span>
+                    </h2>
+                    <p class="text-pink-100 text-xs sm:text-sm mb-6 leading-relaxed">
+                        Dedicated safety protocols for women traveling solo across Maharashtra: automated female co-seating protection, Night Guardian safe drop halts, live family journey WhatsApp tracking, and instant 1091 Women SOS dispatch.
+                    </p>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+                        <div class="bg-white/10 backdrop-blur-md p-3 rounded-2xl border border-white/20">
+                            <span class="block text-xl font-black text-amber-300">50% OFF</span>
+                            <span class="text-[10px] text-pink-100 uppercase font-semibold">Mahila Samman</span>
+                        </div>
+                        <div class="bg-white/10 backdrop-blur-md p-3 rounded-2xl border border-white/20">
+                            <span class="block text-xl font-black text-amber-300">100% Locked</span>
+                            <span class="text-[10px] text-pink-100 uppercase font-semibold">Female Co-Seating</span>
+                        </div>
+                        <div class="bg-white/10 backdrop-blur-md p-3 rounded-2xl border border-white/20">
+                            <span class="block text-xl font-black text-amber-300">7 PM – 6 AM</span>
+                            <span class="text-[10px] text-pink-100 uppercase font-semibold">Night Safe Drop</span>
+                        </div>
+                        <div class="bg-white/10 backdrop-blur-md p-3 rounded-2xl border border-white/20">
+                            <span class="block text-xl font-black text-amber-300">SOS 1091</span>
+                            <span class="text-[10px] text-pink-100 uppercase font-semibold">24x7 Command</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Feature Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                
+                <!-- Left 7 Cols: Night Safe Drop Service & Family Tracker -->
+                <div class="lg:col-span-7 space-y-6">
+                    
+                    <!-- Tool 1: Night Safe Drop Halt Request -->
+                    <div class="bg-white p-6 sm:p-7 rounded-3xl border border-slate-200 shadow-sm">
+                        <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-xl bg-pink-50 text-rose-600 flex items-center justify-center text-lg border border-pink-200">
+                                    <i class="fa-solid fa-moon"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-base font-extrabold text-slate-900">Night Guardian Safe Drop Request</h3>
+                                    <p class="text-xs text-slate-500">Authorized unscheduled halts at well-lit points between 7 PM and 6 AM</p>
+                                </div>
+                            </div>
+                            <span class="text-[10px] bg-rose-50 text-rose-700 font-extrabold px-2.5 py-1 rounded-full border border-rose-200">
+                                Realtime Crew Dispatch
+                            </span>
+                        </div>
+
+                        <form onsubmit="handleSafeDropSubmit(event)" class="space-y-3.5 text-xs">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block font-bold text-slate-700 uppercase mb-1">Passenger Name</label>
+                                    <input type="text" id="ws-passenger-name" class="w-full p-2.5 border border-slate-300 rounded-xl" placeholder="Full Name" required />
+                                </div>
+                                <div>
+                                    <label class="block font-bold text-slate-700 uppercase mb-1">Passenger Mobile No</label>
+                                    <input type="tel" id="ws-passenger-phone" class="w-full p-2.5 border border-slate-300 rounded-xl" placeholder="+91 98230 12345" required />
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block font-bold text-slate-700 uppercase mb-1">Bus Number / PNR</label>
+                                    <input type="text" id="ws-bus-number" class="w-full p-2.5 border border-slate-300 rounded-xl font-mono" placeholder="MH-09-EM-8834" value="MH-09-EM-8834" required />
+                                </div>
+                                <div>
+                                    <label class="block font-bold text-slate-700 uppercase mb-1">Preferred Safe Drop Landmark</label>
+                                    <select id="ws-drop-landmark" class="w-full p-2.5 border border-slate-300 rounded-xl font-semibold text-slate-800">
+                                        <option value="Wakad Bridge Safe Drop Junction (Illuminated Auto Bay)">Wakad Bridge Safe Drop Junction (Illuminated Auto Bay)</option>
+                                        <option value="Katraj Ghat Police Chowki & Lighted Bay">Katraj Ghat Police Chowki & Lighted Bay</option>
+                                        <option value="Shirwal ST Stand Illuminated Exit (CCTV Monitored)">Shirwal ST Stand Illuminated Exit (CCTV Monitored)</option>
+                                        <option value="Karad Toll Plaza & Highway Patrol Post">Karad Toll Plaza & Highway Patrol Post</option>
+                                        <option value="Lonavala Express Highway Police Station">Lonavala Express Highway Police Station</option>
+                                        <option value="Panvel Kalamboli Circle Safe Transit Point">Panvel Kalamboli Circle Safe Transit Point</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block font-bold text-slate-700 uppercase mb-1">Emergency Assistance Notes (Optional)</label>
+                                <input type="text" id="ws-notes" class="w-full p-2.5 border border-slate-300 rounded-xl" placeholder="e.g. Traveling alone with luggage; request driver halt near lighted auto stand." />
+                            </div>
+                            <button type="submit" id="ws-safe-drop-btn" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-extrabold py-3 rounded-xl transition shadow-md flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-shield-halved"></i> Request Night Safe Drop from Conductor
+                            </button>
+                        </form>
+
+                        <!-- Safe Drop Confirmation Card -->
+                        <div id="ws-safe-drop-result" class="hidden mt-4 p-4 bg-emerald-50 border border-emerald-200 rounded-2xl text-xs space-y-2"></div>
+                    </div>
+
+                    <!-- Tool 2: Family Live Journey WhatsApp Share Link -->
+                    <div class="bg-white p-6 sm:p-7 rounded-3xl border border-slate-200 shadow-sm">
+                        <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg border border-emerald-200">
+                                    <i class="fa-solid fa-share-nodes"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-base font-extrabold text-slate-900">Family Live Journey WhatsApp Tracker</h3>
+                                    <p class="text-xs text-slate-500">Share live GPS corridor, conductor contacts, and ETA with family</p>
+                                </div>
+                            </div>
+                            <span class="text-[10px] bg-emerald-50 text-emerald-700 font-extrabold px-2.5 py-1 rounded-full border border-emerald-200">
+                                1-Click Share
+                            </span>
+                        </div>
+
+                        <form onsubmit="handleShareTripSubmit(event)" class="space-y-3.5 text-xs">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block font-bold text-slate-700 uppercase mb-1">Emergency Contact Person</label>
+                                    <input type="text" id="ws-contact-name" class="w-full p-2.5 border border-slate-300 rounded-xl" placeholder="e.g. Mother / Father / Spouse / Sister" required />
+                                </div>
+                                <div>
+                                    <label class="block font-bold text-slate-700 uppercase mb-1">Emergency Contact Mobile</label>
+                                    <input type="tel" id="ws-contact-phone" class="w-full p-2.5 border border-slate-300 rounded-xl" placeholder="+91 98230 00000" required />
+                                </div>
+                            </div>
+                            <button type="submit" id="ws-share-btn" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-extrabold py-3 rounded-xl transition shadow-md flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-location-arrow text-emerald-400"></i> Generate Live Family Tracker Link
+                            </button>
+                        </form>
+
+                        <!-- Share Link Output Box -->
+                        <div id="ws-share-result" class="hidden mt-4 p-4 bg-slate-50 border border-slate-200 rounded-2xl text-xs space-y-3"></div>
+                    </div>
+
+                </div>
+
+                <!-- Right 5 Cols: Co-Seating Protection Visualizer & Direct SOS -->
+                <div class="lg:col-span-5 space-y-6">
+                    
+                    <!-- Co-Seating Shield Card -->
+                    <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+                        <div class="flex items-center gap-2.5 mb-3">
+                            <span class="w-8 h-8 rounded-full bg-purple-100 text-purple-700 flex items-center justify-center font-bold text-sm">
+                                🌸
+                            </span>
+                            <div>
+                                <h3 class="text-sm font-extrabold text-slate-900">Safe Adjacent Co-Seating Shield</h3>
+                                <p class="text-[11px] text-slate-500">Automated Gender Matching Algorithm</p>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-600 mb-4 leading-relaxed">
+                            Under MSRTC smart transit rules, whenever a single woman traveler books a seat, the adjacent seat (e.g. window &amp; aisle pair) is automatically guarded:
+                        </p>
+
+                        <!-- Visual Seat Pair Mockup -->
+                        <div class="p-4 bg-purple-50/60 border border-purple-200 rounded-2xl mb-4 space-y-2.5 text-xs">
+                            <div class="flex items-center justify-between">
+                                <span class="font-bold text-purple-900">Seat Pair Example: Row 3</span>
+                                <span class="text-[10px] bg-purple-200 text-purple-900 px-2 py-0.5 rounded font-extrabold">Active Shield</span>
+                            </div>
+                            <div class="flex gap-3 justify-center py-2">
+                                <div class="w-20 h-16 bg-rose-600 text-white rounded-xl flex flex-col items-center justify-center text-[10px] font-bold shadow-md">
+                                    <i class="fa-solid fa-person-dress text-lg"></i>
+                                    <span>Seat 3A</span>
+                                    <span class="text-[8px] opacity-90">Single Woman</span>
+                                </div>
+                                <div class="w-20 h-16 bg-pink-100 border-2 border-dashed border-pink-400 text-pink-900 rounded-xl flex flex-col items-center justify-center text-[10px] font-bold">
+                                    <i class="fa-solid fa-lock text-sm text-pink-600 mb-0.5"></i>
+                                    <span>Seat 3B</span>
+                                    <span class="text-[8px] text-pink-700">Female Co-Pax Only</span>
+                                </div>
+                            </div>
+                            <p class="text-[11px] text-purple-800 text-center">
+                                <i class="fa-solid fa-check-circle mr-1 text-emerald-600"></i> Male passenger booking blocked on adjacent seat.
+                            </p>
+                        </div>
+
+                        <div class="space-y-2 text-[11px] text-slate-600">
+                            <div class="flex items-center gap-2">
+                                <i class="fa-solid fa-shield-check text-rose-600"></i>
+                                <span>Dedicated Ladies Reserve: Seats 3A, 3B, 4A, 4B</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <i class="fa-solid fa-percent text-rose-600"></i>
+                                <span>50% Mahila Samman Concession applied automatically</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <i class="fa-solid fa-headset text-rose-600"></i>
+                                <span>Conductor alerted on passenger cabin manifest</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Direct Emergency SOS Card -->
+                    <div class="bg-gradient-to-br from-rose-900 to-slate-900 text-white p-6 rounded-3xl shadow-xl border-2 border-rose-500">
+                        <div class="flex items-center justify-between pb-3 border-b border-rose-700/50 mb-4">
+                            <div>
+                                <span class="text-[10px] font-bold uppercase tracking-wider text-rose-300">24x7 Transit Safety</span>
+                                <h3 class="text-base font-extrabold">Instant Women SOS Dispatch</h3>
+                            </div>
+                            <i class="fa-solid fa-triangle-exclamation text-2xl text-rose-400 animate-pulse"></i>
+                        </div>
+                        <p class="text-xs text-rose-100 mb-4">
+                            Triggers simultaneous emergency dispatch to MSRTC Transit Command, Maharashtra Highway Police, and the Women Safety Cell (1091).
+                        </p>
+
+                        <button onclick="triggerWomenEmergencySOS()" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-black py-3.5 rounded-2xl text-xs uppercase tracking-wider transition shadow-lg shadow-rose-900/50 flex items-center justify-center gap-2 mb-4">
+                            <i class="fa-solid fa-bell text-base"></i> Trigger 1-Click Emergency SOS
+                        </button>
+
+                        <div class="pt-3 border-t border-rose-800/40 space-y-2 text-xs">
+                            <div class="flex justify-between items-center bg-white/10 p-2 rounded-xl">
+                                <span>Women Safety Helpline:</span>
+                                <a href="tel:1091" class="font-bold text-amber-300 hover:underline font-mono text-sm">1091</a>
+                            </div>
+                            <div class="flex justify-between items-center bg-white/10 p-2 rounded-xl">
+                                <span>MSRTC Central Command:</span>
+                                <a href="tel:1800221234" class="font-bold text-amber-300 hover:underline font-mono text-sm">1800-22-1234</a>
+                            </div>
+                            <div class="flex justify-between items-center bg-white/10 p-2 rounded-xl">
+                                <span>Police Emergency:</span>
+                                <a href="tel:112" class="font-bold text-amber-300 hover:underline font-mono text-sm">112</a>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </section>
+
     </main>
 
     <!-- ================= TICKET MODAL (ELECTRONIC RESERVATION SLIP - ERS) ================= -->
@@ -1401,8 +1640,8 @@
 
                 <form onsubmit="handleLoginSubmit(event)" class="space-y-3.5 text-xs">
                     <div>
-                        <label class="block font-bold text-slate-700 uppercase mb-1">Email / Username</label>
-                        <input type="email" id="login-email" class="w-full text-sm p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:outline-none" placeholder="name@example.com" required />
+                        <label class="block font-bold text-slate-700 uppercase mb-1">Email, Username, or Mobile No</label>
+                        <input type="text" id="login-email" class="w-full text-sm p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:outline-none" placeholder="name@example.com or username or mobile" required />
                     </div>
                     <div>
                         <label class="block font-bold text-slate-700 uppercase mb-1">Password</label>
@@ -1430,8 +1669,8 @@
                     </div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                         <div>
-                            <label class="block font-bold text-slate-700 uppercase mb-0.5">Email Address</label>
-                            <input type="email" id="reg-email" class="w-full text-sm p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:outline-none" placeholder="name@domain.com" required />
+                            <label class="block font-bold text-slate-700 uppercase mb-0.5">Email or Username</label>
+                            <input type="text" id="reg-email" class="w-full text-sm p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:outline-none" placeholder="name@domain.com or username" required />
                         </div>
                         <div>
                             <label class="block font-bold text-slate-700 uppercase mb-0.5">Mobile Number</label>

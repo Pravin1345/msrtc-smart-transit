@@ -82,5 +82,8 @@ const MSRTCApi = {
   login: data => apiPost('/api/auth/login', data),
   logout: token => apiPost('/api/auth/logout', { token }),
   verifySession: token => apiGet('/api/auth/verify', { token }),
-  updateProfile: (token, data) => apiPost('/api/auth/profile', { token, ...data })
+  updateProfile: (token, data) => apiPost('/api/auth/profile', { token, ...data }),
+  getWomenSafetyDashboard: () => apiGet('/api/safety/women-dashboard'),
+  requestSafeDrop: data => apiPost('/api/safety/safe-drop', data),
+  shareJourneyTracking: data => apiPost('/api/safety/share-trip', data)
 };

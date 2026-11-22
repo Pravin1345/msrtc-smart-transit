@@ -161,6 +161,8 @@ function navigateTo(pageId) {
     loadBiddingStalls();
   } else if (pageId === 'cargo') {
     calculateLiveCargoTariff();
+  } else if (pageId === 'women-safety') {
+    loadWomenSafetyPage();
   } else if (pageId === 'book') {
     setDefaultBookingDate();
   }
@@ -2084,4 +2086,119 @@ function renderCargoTrackingTimeline(cargo) {
       </div>
     </div>
   `;
+}
+
+// =========================================================
+// 16. SINGLE WOMEN TRANSIT PROTECTION (MODULE 7)
+// =========================================================
+function loadWomenSafetyPage() {
+  if (currentUser && (currentUser.fullName || currentUser.name)) {
+    const nameEl = document.getElementById('ws-passenger-name');
+    const phoneEl = document.getElementById('ws-passenger-phone');
+    if (nameEl && !nameEl.value) nameEl.value = currentUser.fullName || currentUser.name;
+    if (phoneEl && !phoneEl.value) phoneEl.value = currentUser.phone || '';
+  }
+}
+
+async function handleSafeDropSubmit(e) {
+  e.preventDefault();
+  const passengerName = document.getElementById('ws-passenger-name').value.trim();
+  const phone = document.getElementById('ws-passenger-phone').value.trim();
+  const busNumber = document.getElementById('ws-bus-number').value.trim();
+  const dropLandmark = document.getElementById('ws-drop-landmark').value;
+  const notes = document.getElementById('ws-notes').value.trim();
+  const btn = document.getElementById('ws-safe-drop-btn');
+  const box = document.getElementById('ws-safe-drop-result');
+
+  if (btn) btn.disabled = true;
+  try {
+    const res = await MSRTCApi.requestSafeDrop({
+      passengerName, phone, busNumber, dropLandmark, notes
+    });
+    if (res && res.success) {
+      box.innerHTML = `
+        <div class="flex items-center justify-between pb-2 border-b border-emerald-200">
+          <div class="flex items-center gap-2">
+            <span class="w-6 h-6 rounded-full bg-emerald-600 text-white flex items-center justify-center text-xs">
+              <i class="fa-solid fa-check"></i>
+            </span>
+            <span class="font-extrabold text-emerald-900">Night Safe Drop Confirmed</span>
+          </div>
+          <span class="font-mono text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold">${esc(res.requestId)}</span>
+        </div>
+        <p class="text-[11px] text-emerald-950 mt-1 leading-relaxed">
+          <strong>Authorized Halt:</strong> ${esc(res.dropLandmark)}<br>
+          <strong>Bus Number:</strong> ${esc(res.busNumber)} | <strong>Passenger:</strong> ${esc(res.passengerName)}<br>
+          <strong>Crew Instruction:</strong> ${esc(res.crew_instructions)}
+        </p>
+        <div class="text-[10px] text-emerald-700 bg-white/70 p-2 rounded-lg border border-emerald-200 mt-1">
+          <i class="fa-solid fa-shield-halved mr-1"></i> ${esc(res.emergency_backup)} | Women SOS: <strong>1091</strong>
+        </div>
+      `;
+      box.classList.remove('hidden');
+    }
+  } catch (err) {
+    alert(err.message || "Failed to submit Safe Drop request.");
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+async function handleShareTripSubmit(e) {
+  e.preventDefault();
+  const contactName = document.getElementById('ws-contact-name').value.trim();
+  const contactPhone = document.getElementById('ws-contact-phone').value.trim();
+  const passengerName = (currentUser && (currentUser.fullName || currentUser.name)) || "Solo Female Traveler";
+  const busNumber = "MH-09-EM-8834";
+  const btn = document.getElementById('ws-share-btn');
+  const box = document.getElementById('ws-share-result');
+
+  if (btn) btn.disabled = true;
+  try {
+    const res = await MSRTCApi.shareJourneyTracking({
+      passengerName,
+      busNumber,
+      from: "Pune (Swargate)",
+      to: "Kolhapur CBS",
+      emergencyContact: `${contactName} (${contactPhone})`
+    });
+    if (res && res.success) {
+      const waUrl = `https://api.whatsapp.com/send?phone=${encodeURIComponent(contactPhone.replace(/[^0-9]/g, ''))}&text=${encodeURIComponent(res.whatsapp_share_text)}`;
+      box.innerHTML = `
+        <div class="flex items-center justify-between pb-2 border-b border-slate-200">
+          <span class="font-bold text-slate-800">Live Journey Tracking Link Generated</span>
+          <span class="font-mono text-[10px] text-slate-500 font-bold">${esc(res.trackingId)}</span>
+        </div>
+        <div class="space-y-1 text-[11px] text-slate-600 my-2">
+          <div><i class="fa-solid fa-location-dot text-rose-600 mr-1"></i> Current Checkpoint: <strong class="text-slate-800">${esc(res.current_location)}</strong></div>
+          <div><i class="fa-solid fa-id-badge text-indigo-600 mr-1"></i> Conductor: <strong>${esc(res.conductor_name)}</strong> (${esc(res.conductor_phone)})</div>
+          <div><i class="fa-solid fa-clock text-amber-600 mr-1"></i> Destination ETA: <strong>${esc(res.eta)}</strong></div>
+        </div>
+        <div class="flex flex-col sm:flex-row gap-2 pt-2">
+          <a href="${waUrl}" target="_blank" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-3 rounded-xl text-center text-xs flex items-center justify-center gap-1.5 shadow-sm transition">
+            <i class="fa-brands fa-whatsapp text-sm"></i> Share via WhatsApp
+          </a>
+          <button type="button" onclick="navigator.clipboard.writeText('${res.whatsapp_share_text}'); alert('Safety tracker link copied to clipboard!');" class="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-2 px-3 rounded-xl text-center text-xs transition">
+            <i class="fa-solid fa-copy mr-1"></i> Copy Link Text
+          </button>
+        </div>
+      `;
+      box.classList.remove('hidden');
+    }
+  } catch (err) {
+    alert(err.message || "Failed to generate tracking link.");
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+async function triggerWomenEmergencySOS() {
+  const activeBid = "MSRTC-SOS-WOMEN";
+  const busNo = "MH-09-EM-8834";
+  try {
+    const res = await MSRTCApi.triggerEmergencySOS(activeBid, busNo);
+    alert(`🚨 WOMEN EMERGENCY SOS DISPATCHED!\n\nAlert ID: ${res.sos_id}\nBus: ${res.bus_number}\n\nAuthorities Notified:\n• ${res.notified_authorities.join('\n• ')}\n\nAction: ${res.action_taken}`);
+  } catch (err) {
+    alert(`🚨 Emergency Call: Dial 1091 (Women Safety) or 112 (Highway Police) immediately.`);
+  }
 }

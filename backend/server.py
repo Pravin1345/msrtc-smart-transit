@@ -668,6 +668,8 @@ class Handler(BaseHTTPRequestHandler):
                 self.send_json(200, CARGO_SERVICE.track_cargo(q))
             elif path == "/api/cargo/all":
                 self.send_json(200, CARGO_SERVICE.list_all_cargo())
+            elif path == "/api/safety/women-dashboard":
+                self.send_json(200, SAFETY_SERVICE.get_women_safety_dashboard())
             elif path == "/api/auth/verify":
                 token = (qs.get("token") or [""])[0]
                 user = AUTH_SERVICE.verify(token)
@@ -717,6 +719,10 @@ class Handler(BaseHTTPRequestHandler):
             elif path == "/api/priority/check":
                 cat = body.get("category", "General")
                 self.send_json(200, SAFETY_SERVICE.get_priority_recommendation(cat))
+            elif path == "/api/safety/safe-drop":
+                self.send_json(200, SAFETY_SERVICE.request_safe_drop(body))
+            elif path == "/api/safety/share-trip":
+                self.send_json(200, SAFETY_SERVICE.share_journey_tracking(body))
             elif path == "/api/vendors/bid":
                 stall_id = body.get("stallId")
                 v_name = body.get("vendorName")
