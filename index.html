@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>MSRTC Smart Transit – ML-Based Revenue Optimization System</title>
+    <title>MSRTC Online Reservations</title>
 
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -38,15 +38,16 @@
 <body class="bg-gray-100 text-slate-800 min-h-screen flex flex-col antialiased">
 
     <!-- ================= TOP NOTIFICATION BAR ================= -->
-    <div class="bg-[#1e3a5f] text-white text-xs font-medium px-4 py-1.5 flex justify-between items-center border-b-2 border-[#9B1C1C]">
-        <div class="flex items-center gap-2 mx-auto">
-            <span class="bg-[#9B1C1C] text-white text-[10px] uppercase tracking-wider px-2 py-0.5 rounded font-bold">Government of Maharashtra</span>
-            <span>MSRTC • ML-Based Revenue Optimization System • Passenger Safety • Highway Vendor Tie-Ups</span>
-        </div>
-        <div class="hidden md:flex items-center gap-4 text-xs font-medium">
-            <span><i class="fa-solid fa-headset mr-1"></i> Helpline: 1800-22-1234</span>
-            <span><i class="fa-solid fa-shield-halved mr-1"></i> Women SOS 1091</span>
-            <span><i class="fa-solid fa-globe mr-1"></i> English / मराठी</span>
+    <div class="hidden md:flex bg-[#1e3a5f] text-white text-xs font-medium px-4 py-1.5 justify-between items-center border-b-2 border-[#9B1C1C]">
+        <div class="grid w-full grid-cols-3 items-center text-xs font-medium">
+            <span class="justify-self-start whitespace-nowrap"><i class="fa-solid fa-headset mr-1"></i> Helpline: 1800-22-1234</span>
+            <span class="justify-self-center whitespace-nowrap"><i class="fa-solid fa-shield-halved mr-1"></i> Women SOS 1091</span>
+            <div class="flex items-center justify-self-end gap-1 bg-white/10 rounded px-2 py-0.5 border border-white/20">
+                <i class="fa-solid fa-globe text-[11px] mr-1"></i>
+                <button type="button" onclick="setLanguage('en')" id="lang-btn-en" class="px-1.5 py-0.5 rounded text-[11px] font-bold bg-white text-[#1e3a5f] transition">English</button>
+                <span class="opacity-50">|</span>
+                <button type="button" onclick="setLanguage('mr')" id="lang-btn-mr" class="px-1.5 py-0.5 rounded text-[11px] font-semibold text-white hover:bg-white/20 transition">मराठी</button>
+            </div>
         </div>
     </div>
 
@@ -62,40 +63,41 @@
                     <div>
                         <div class="flex items-center gap-2">
                             <span class="font-bold text-xl tracking-tight text-slate-900">MSRTC <span class="text-[#9B1C1C]">Smart Transit</span></span>
-                            <span class="text-[10px] font-semibold bg-[#1e3a5f] text-white px-1.5 py-0.5 rounded">ML System</span>
                         </div>
-                        <p class="text-[11px] text-slate-500 font-medium hidden sm:block">महाराष्ट्र राज्य मार्ग परिवहन महामंडळ • Smart Transit</p>
                     </div>
                 </div>
 
                 <!-- Center Nav Items -->
                 <nav class="hidden lg:flex items-center gap-1">
                     <button onclick="navigateTo('home')" class="nav-btn px-3 py-2 rounded-lg text-sm font-semibold transition text-slate-700 hover:text-msrtc-red hover:bg-red-50" data-page="home">
-            <i class="fa-solid fa-compass mr-1"></i> Explore
+            <i class="fa-solid fa-compass mr-1"></i> <span data-i18n="nav_home">Explore</span>
+          </button>
+                    <button onclick="navigateTo('features')" class="nav-btn px-3 py-2 rounded-lg text-sm font-semibold transition text-slate-700 hover:text-msrtc-red hover:bg-red-50" data-page="features">
+            <i class="fa-solid fa-grid-2 fa-border-all mr-1"></i> <span data-i18n="nav_features">All Features</span>
           </button>
                     <button onclick="navigateTo('book')" class="nav-btn px-3 py-2 rounded-lg text-sm font-semibold transition text-slate-700 hover:text-msrtc-red hover:bg-red-50" data-page="book">
-            <i class="fa-solid fa-ticket mr-1"></i> Book Bus
+            <i class="fa-solid fa-ticket mr-1"></i> <span data-i18n="nav_book">Book Bus</span>
           </button>
                     <button onclick="navigateTo('ads')" class="nav-btn px-3 py-2 rounded-lg text-sm font-semibold transition text-slate-700 hover:text-msrtc-red hover:bg-red-50" data-page="ads">
-            <i class="fa-solid fa-bullhorn mr-1"></i> In-Bus Ads
+            <i class="fa-solid fa-bullhorn mr-1"></i> <span data-i18n="nav_ads">In-Bus Ads</span>
           </button>
                     <button onclick="navigateTo('vendors')" class="nav-btn px-3 py-2 rounded-lg text-sm font-semibold transition text-slate-700 hover:text-msrtc-red hover:bg-red-50" data-page="vendors">
-            <i class="fa-solid fa-utensils mr-1"></i> Rest-Stops
+            <i class="fa-solid fa-utensils mr-1"></i> <span data-i18n="nav_vendors">Rest-Stops</span>
           </button>
                     <button onclick="navigateTo('bidding')" class="nav-btn px-3 py-2 rounded-lg text-sm font-semibold transition text-slate-700 hover:text-msrtc-red hover:bg-red-50" data-page="bidding">
-            <i class="fa-solid fa-gavel mr-1"></i> Rest-Stop Bidding
+            <i class="fa-solid fa-gavel mr-1"></i> <span data-i18n="nav_bidding">Bidding</span>
           </button>
                     <button onclick="navigateTo('cargo')" class="nav-btn px-3 py-2 rounded-lg text-sm font-semibold transition text-slate-700 hover:text-msrtc-red hover:bg-red-50" data-page="cargo">
-            <i class="fa-solid fa-box-open mr-1"></i> Courier & Luggage
+            <i class="fa-solid fa-box-open mr-1"></i> <span data-i18n="nav_cargo">Courier</span>
           </button>
                     <button onclick="navigateTo('history')" class="nav-btn px-3 py-2 rounded-lg text-sm font-semibold transition text-slate-700 hover:text-msrtc-red hover:bg-red-50" data-page="history">
-            <i class="fa-solid fa-clock-rotate-left mr-1"></i> My Trips
+            <i class="fa-solid fa-clock-rotate-left mr-1"></i> <span data-i18n="nav_history">My Trips</span>
           </button>
                     <button onclick="navigateTo('smartid')" class="nav-btn px-3 py-2 rounded-lg text-sm font-semibold transition text-slate-700 hover:text-msrtc-red hover:bg-red-50" data-page="smartid">
-            <i class="fa-solid fa-id-card mr-1"></i> Smart ID
+            <i class="fa-solid fa-id-card mr-1"></i> <span data-i18n="nav_smartid">Smart ID</span>
           </button>
                     <button onclick="navigateTo('women-safety')" class="nav-btn px-3 py-2 rounded text-sm font-semibold transition text-slate-700 hover:text-[#9B1C1C] hover:bg-red-50" data-page="women-safety">
-            <i class="fa-solid fa-shield-halved mr-1"></i> Women Safety
+            <i class="fa-solid fa-shield-halved mr-1"></i> <span data-i18n="nav_safety">Women Safety</span>
           </button>
                 </nav>
 
@@ -117,19 +119,22 @@
                 <div class="max-w-7xl mx-auto">
                     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
                         <div>
-                            <p class="text-xs uppercase tracking-wider text-slate-300 font-semibold mb-1">
-                                Maharashtra State Road Transport Corporation • Official Online Reservation Portal
+                            <p class="text-xs uppercase tracking-wider text-slate-300 font-semibold mb-1" data-i18n="hero_subtitle">
+                                MSRTC • Online Reservation Portal
                             </p>
-                            <h1 class="text-2xl sm:text-3xl font-bold tracking-tight">
+                            <h1 class="text-2xl sm:text-3xl font-bold tracking-tight" data-i18n="hero_title">
                                 Book MSRTC Bus Tickets Online
                             </h1>
                         </div>
                         <div class="flex flex-wrap gap-2 text-xs">
+                            <button onclick="navigateTo('features')" class="bg-[#9B1C1C] hover:bg-[#7f1818] border border-white/25 text-white font-semibold px-4 py-2 rounded transition">
+                                <i class="fa-solid fa-border-all mr-1.5"></i> <span data-i18n="btn_all_features">All Services &amp; Features</span>
+                            </button>
                             <button onclick="navigateTo('revenue')" class="bg-white/10 hover:bg-white/20 border border-white/25 text-white font-semibold px-4 py-2 rounded transition">
-                                <i class="fa-solid fa-chart-pie mr-1.5"></i> Revenue &amp; ML Dashboard
+                                <i class="fa-solid fa-chart-pie mr-1.5"></i> <span data-i18n="btn_rev_dash">Revenue &amp; ML Dashboard</span>
                             </button>
                             <button onclick="navigateTo('ads')" class="bg-white/10 hover:bg-white/20 border border-white/25 text-white font-semibold px-4 py-2 rounded transition">
-                                <i class="fa-solid fa-qrcode mr-1.5"></i> Bus Ad QR
+                                <i class="fa-solid fa-qrcode mr-1.5"></i> <span data-i18n="btn_bus_qr">Bus Ad QR</span>
                             </button>
                         </div>
                     </div>
@@ -138,26 +143,26 @@
                     <div class="bg-white text-slate-900 rounded-lg shadow-md border border-slate-200 p-5">
                         <form onsubmit="handleHomeSearchSubmit(event)" class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
                             <div class="md:col-span-4">
-                                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1">Travelling From</label>
+                                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1" data-i18n="lbl_from">Travelling From</label>
                                 <input type="text" id="home-from-location" list="transit-locations-list" class="w-full text-sm p-2.5 border border-slate-300 rounded focus:ring-1 focus:ring-[#9B1C1C] focus:border-[#9B1C1C] outline-none" placeholder="e.g. Kolhapur CBS" required value="Kolhapur CBS (Central Bus Stand)" />
                             </div>
                             <div class="md:col-span-4">
-                                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1">Going To</label>
+                                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1" data-i18n="lbl_to">Going To</label>
                                 <input type="text" id="home-to-location" list="transit-locations-list" class="w-full text-sm p-2.5 border border-slate-300 rounded focus:ring-1 focus:ring-[#9B1C1C] focus:border-[#9B1C1C] outline-none" placeholder="e.g. Pune (Swargate)" required value="Pune (Swargate)" />
                             </div>
                             <div class="md:col-span-2">
                                 <div class="flex items-center justify-between mb-1">
-                                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide">Journey Date</label>
+                                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide" data-i18n="lbl_date">Journey Date</label>
                                     <div class="flex gap-1 text-[10px]">
-                                        <button type="button" onclick="setHomeQuickDate(0)" class="px-1.5 py-0.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded border border-slate-300">Today</button>
-                                        <button type="button" onclick="setHomeQuickDate(1)" class="px-1.5 py-0.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded border border-slate-300">Tom</button>
+                                        <button type="button" onclick="setHomeQuickDate(0)" class="px-1.5 py-0.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded border border-slate-300" data-i18n="btn_today">Today</button>
+                                        <button type="button" onclick="setHomeQuickDate(1)" class="px-1.5 py-0.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded border border-slate-300" data-i18n="btn_tom">Tom</button>
                                     </div>
                                 </div>
                                 <input type="date" id="home-travel-date" class="w-full text-sm p-2.5 border border-slate-300 rounded focus:ring-1 focus:ring-[#9B1C1C] focus:border-[#9B1C1C] outline-none" required />
                             </div>
                             <div class="md:col-span-2">
                                 <button type="submit" class="w-full bg-[#9B1C1C] hover:bg-[#7f1818] text-white font-bold p-2.5 rounded transition flex items-center justify-center gap-2 text-sm">
-                                    <i class="fa-solid fa-magnifying-glass"></i> Search Buses
+                                    <i class="fa-solid fa-magnifying-glass"></i> <span data-i18n="btn_search_buses">Search Buses</span>
                                 </button>
                             </div>
                         </form>
@@ -211,112 +216,296 @@
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div class="mb-6 border-b border-slate-200 pb-3 flex flex-col sm:flex-row sm:items-end justify-between gap-2">
                     <div>
-                        <h2 class="text-xl font-bold text-[#1e3a5f] border-l-4 border-[#9B1C1C] pl-3">
+                        <h2 class="text-xl font-bold text-[#1e3a5f] border-l-4 border-[#9B1C1C] pl-3" data-i18n="modules_heading">
                             MSRTC Integrated Transit &amp; Revenue Modules
                         </h2>
-                        <p class="text-xs text-slate-600 mt-1 pl-4">Official ML Demand Forecasting, Dynamic Fares, Commercial Tie-Ups, and Passenger Safety.</p>
+                        <p class="text-xs text-slate-600 mt-1 pl-4" data-i18n="modules_sub">Click any module below to open its portal directly.</p>
                     </div>
+                    <button onclick="navigateTo('features')" class="text-xs font-bold text-[#9B1C1C] hover:underline whitespace-nowrap">
+                        <span data-i18n="view_all_features">View All Services &amp; Features</span> <i class="fa-solid fa-arrow-right ml-1"></i>
+                    </button>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     <!-- Mod 1 -->
-                    <div class="bg-white p-5 rounded-lg border border-slate-200">
+                    <div onclick="navigateTo('revenue')" class="bg-white p-5 rounded-lg border border-slate-200 hover:border-[#9B1C1C] cursor-pointer transition">
                         <div class="flex items-center gap-2.5 mb-2">
                             <div class="w-8 h-8 rounded bg-slate-100 text-[#1e3a5f] flex items-center justify-center text-sm">
                                 <i class="fa-solid fa-brain"></i>
                             </div>
-                            <h3 class="font-bold text-slate-900 text-sm">1. ML Demand Forecasting</h3>
+                            <h3 class="font-bold text-slate-900 text-sm" data-i18n="mod1_title">1. ML Demand Forecasting</h3>
                         </div>
-                        <p class="text-xs text-slate-600 leading-relaxed mb-3">
+                        <p class="text-xs text-slate-600 leading-relaxed mb-3" data-i18n="mod1_desc">
                             Compares Linear Regression, Decision Tree, Random Forest &amp; XGBoost to forecast passenger loads, expected occupancy, and off-peak vacancies.
                         </p>
-                        <span class="text-[11px] font-semibold text-[#1e3a5f] bg-slate-100 px-2 py-0.5 rounded border border-slate-200">MAE &amp; RMSE Evaluated</span>
+                        <span class="text-[11px] font-semibold text-[#1e3a5f] bg-slate-100 px-2 py-0.5 rounded border border-slate-200">MAE &amp; RMSE Evaluated →</span>
                     </div>
 
                     <!-- Mod 2 & 3 -->
-                    <div class="bg-white p-5 rounded-lg border border-slate-200">
+                    <div onclick="navigateTo('book')" class="bg-white p-5 rounded-lg border border-slate-200 hover:border-[#9B1C1C] cursor-pointer transition">
                         <div class="flex items-center gap-2.5 mb-2">
                             <div class="w-8 h-8 rounded bg-slate-100 text-[#9B1C1C] flex items-center justify-center text-sm">
                                 <i class="fa-solid fa-tags"></i>
                             </div>
-                            <h3 class="font-bold text-slate-900 text-sm">2 &amp; 3. Dynamic Fare Optimizer</h3>
+                            <h3 class="font-bold text-slate-900 text-sm" data-i18n="mod2_title">2 &amp; 3. Dynamic Fare Optimizer</h3>
                         </div>
-                        <p class="text-xs text-slate-600 leading-relaxed mb-3">
+                        <p class="text-xs text-slate-600 leading-relaxed mb-3" data-i18n="mod2_desc">
                             Constrained Revenue Optimizer: <code>Expected Revenue = Fare × Expected Bookings</code>. Applies off-peak discounts only on low-occupancy buses.
                         </p>
-                        <span class="text-[11px] font-semibold text-[#9B1C1C] bg-slate-100 px-2 py-0.5 rounded border border-slate-200">Capacity &amp; Demand Controlled</span>
+                        <span class="text-[11px] font-semibold text-[#9B1C1C] bg-slate-100 px-2 py-0.5 rounded border border-slate-200">Capacity &amp; Demand Controlled →</span>
                     </div>
 
                     <!-- Mod 4 -->
-                    <div class="bg-white p-5 rounded-lg border border-slate-200">
+                    <div onclick="navigateTo('ads')" class="bg-white p-5 rounded-lg border border-slate-200 hover:border-[#9B1C1C] cursor-pointer transition">
                         <div class="flex items-center gap-2.5 mb-2">
                             <div class="w-8 h-8 rounded bg-slate-100 text-[#1e3a5f] flex items-center justify-center text-sm">
                                 <i class="fa-solid fa-rectangle-ad"></i>
                             </div>
-                            <h3 class="font-bold text-slate-900 text-sm">4. In-Bus Advertising (Dataset)</h3>
+                            <h3 class="font-bold text-slate-900 text-sm" data-i18n="mod4_title">4. In-Bus Advertising (Dataset)</h3>
                         </div>
-                        <p class="text-xs text-slate-600 leading-relaxed mb-3">
+                        <p class="text-xs text-slate-600 leading-relaxed mb-3" data-i18n="mod4_desc">
                             Position-based pricing (Front/First 10/Middle/Rear). Trained on 1,000 advertisement records predicting revenue and tracking QR scans.
                         </p>
-                        <span class="text-[11px] font-semibold text-[#1e3a5f] bg-slate-100 px-2 py-0.5 rounded border border-slate-200">1,000 Records ML Model</span>
+                        <span class="text-[11px] font-semibold text-[#1e3a5f] bg-slate-100 px-2 py-0.5 rounded border border-slate-200">1,000 Records ML Model →</span>
                     </div>
 
                     <!-- Mod 5 -->
-                    <div class="bg-white p-5 rounded-lg border border-slate-200">
+                    <div onclick="toggleGroupBookingModal()" class="bg-white p-5 rounded-lg border border-slate-200 hover:border-[#9B1C1C] cursor-pointer transition">
                         <div class="flex items-center gap-2.5 mb-2">
                             <div class="w-8 h-8 rounded bg-slate-100 text-[#1e3a5f] flex items-center justify-center text-sm">
                                 <i class="fa-solid fa-users"></i>
                             </div>
-                            <h3 class="font-bold text-slate-900 text-sm">5. Group &amp; Multi-Day Bulk</h3>
+                            <h3 class="font-bold text-slate-900 text-sm" data-i18n="mod5_title">5. Group &amp; Multi-Day Bulk</h3>
                         </div>
-                        <p class="text-xs text-slate-600 leading-relaxed mb-3">
+                        <p class="text-xs text-slate-600 leading-relaxed mb-3" data-i18n="mod5_desc">
                             Tiered discounts for wedding parties, college tours (10%–20%), multi-day reservations (&gt;3 days), and flexible multi-seat allocation.
                         </p>
-                        <span class="text-[11px] font-semibold text-[#1e3a5f] bg-slate-100 px-2 py-0.5 rounded border border-slate-200">Group &amp; Charter Engine</span>
+                        <span class="text-[11px] font-semibold text-[#1e3a5f] bg-slate-100 px-2 py-0.5 rounded border border-slate-200">Group &amp; Charter Engine →</span>
                     </div>
 
                     <!-- Mod 6 -->
-                    <div class="bg-white p-5 rounded-lg border border-slate-200">
+                    <div onclick="navigateTo('vendors')" class="bg-white p-5 rounded-lg border border-slate-200 hover:border-[#9B1C1C] cursor-pointer transition">
                         <div class="flex items-center gap-2.5 mb-2">
                             <div class="w-8 h-8 rounded bg-slate-100 text-[#1e3a5f] flex items-center justify-center text-sm">
                                 <i class="fa-solid fa-utensils"></i>
                             </div>
-                            <h3 class="font-bold text-slate-900 text-sm">6. Vendor &amp; Rest-Stop Tie-Ups</h3>
+                            <h3 class="font-bold text-slate-900 text-sm" data-i18n="mod6_title">6. Vendor &amp; Rest-Stop Tie-Ups</h3>
                         </div>
-                        <p class="text-xs text-slate-600 leading-relaxed mb-3">
+                        <p class="text-xs text-slate-600 leading-relaxed mb-3" data-i18n="mod6_desc">
                             Katraj Ghat Highway Food Plaza (Pune-Kolhapur NH48) &amp; Onboard MSRTC Rail Neer pre-orders, earning 10%–15% commission + rest-stop bidding fees.
                         </p>
-                        <span class="text-[11px] font-semibold text-[#1e3a5f] bg-slate-100 px-2 py-0.5 rounded border border-slate-200">Katraj Ghat Rest-Stop Partner</span>
+                        <span class="text-[11px] font-semibold text-[#1e3a5f] bg-slate-100 px-2 py-0.5 rounded border border-slate-200">Katraj Ghat Rest-Stop Partner →</span>
                     </div>
 
                     <!-- Mod 7 -->
-                    <div class="bg-white p-5 rounded-lg border border-slate-200">
+                    <div onclick="navigateTo('women-safety')" class="bg-white p-5 rounded-lg border border-slate-200 hover:border-[#9B1C1C] cursor-pointer transition">
                         <div class="flex items-center gap-2.5 mb-2">
                             <div class="w-8 h-8 rounded bg-slate-100 text-[#9B1C1C] flex items-center justify-center text-sm">
                                 <i class="fa-solid fa-shield-halved"></i>
                             </div>
-                            <h3 class="font-bold text-slate-900 text-sm">7. Passenger Priority &amp; Safety</h3>
+                            <h3 class="font-bold text-slate-900 text-sm" data-i18n="mod7_title">7. Passenger Priority &amp; Safety</h3>
                         </div>
-                        <p class="text-xs text-slate-600 leading-relaxed mb-3">
+                        <p class="text-xs text-slate-600 leading-relaxed mb-3" data-i18n="mod7_desc">
                             Priority seating for Senior Citizens (Row 1-2), Pregnant Women, and Solo Female Safe Matching with instant Control Room SOS dispatch.
                         </p>
-                        <span class="text-[11px] font-semibold text-[#9B1C1C] bg-slate-100 px-2 py-0.5 rounded border border-slate-200">SOS 1091 &amp; Concessions</span>
+                        <span class="text-[11px] font-semibold text-[#9B1C1C] bg-slate-100 px-2 py-0.5 rounded border border-slate-200">SOS 1091 &amp; Concessions →</span>
                     </div>
                 </div>
 
                 <!-- Unified Revenue Formula Callout -->
                 <div class="mt-6 bg-white p-5 rounded-lg border border-slate-200 border-l-4 border-l-[#9B1C1C] flex flex-col md:flex-row items-center justify-between gap-4">
                     <div>
-                        <span class="text-[11px] uppercase tracking-wider text-[#1e3a5f] font-bold">Consolidated Financial Framework</span>
-                        <h3 class="text-base font-bold text-slate-900 mt-0.5">Total Revenue Formula</h3>
+                        <span class="text-[11px] uppercase tracking-wider text-[#1e3a5f] font-bold" data-i18n="rev_framework">Consolidated Financial Framework</span>
+                        <h3 class="text-base font-bold text-slate-900 mt-0.5" data-i18n="rev_formula_title">Total Revenue Formula</h3>
                         <p class="text-slate-600 text-xs mt-1 font-mono">
                             R<sub>total</sub> = R<sub>ticket</sub> + R<sub>advertisement</sub> + R<sub>vendor</sub> + R<sub>partnership</sub>
                         </p>
                     </div>
                     <button onclick="navigateTo('revenue')" class="bg-[#1e3a5f] hover:bg-slate-800 text-white font-semibold text-xs px-5 py-2.5 rounded transition whitespace-nowrap">
-                        View Live Revenue Breakdown <i class="fa-solid fa-arrow-right ml-1"></i>
+                        <span data-i18n="btn_view_rev">View Live Revenue Breakdown</span> <i class="fa-solid fa-arrow-right ml-1"></i>
                     </button>
                 </div>
+            </div>
+        </section>
+
+        <!-- PAGE 1B: ALL SERVICES & FEATURES DIRECTORY (CLICKABLE HUB) -->
+        <section id="page-features" class="page-view hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="bg-[#1e3a5f] text-white p-6 rounded-lg border-b-4 border-[#9B1C1C] mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <p class="text-xs uppercase tracking-wider text-slate-300 font-semibold mb-1" data-i18n="feat_portal_label">MSRTC Smart Transit • Citizen &amp; Operator Services</p>
+                    <h2 class="text-2xl font-bold" data-i18n="feat_portal_title">All Services &amp; Features Directory</h2>
+                    <p class="text-xs text-slate-200 mt-1" data-i18n="feat_portal_sub">Select any service below to open it directly.</p>
+                </div>
+                <button onclick="navigateTo('home')" class="bg-white/10 hover:bg-white/20 border border-white/25 text-white text-xs font-semibold px-4 py-2 rounded transition self-start sm:self-auto">
+                    <i class="fa-solid fa-arrow-left mr-1"></i> <span data-i18n="btn_back_home">Back to Home</span>
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- 1. Bus Booking -->
+                <button onclick="navigateTo('book')" class="bg-white p-5 rounded-lg border border-slate-200 hover:border-[#9B1C1C] text-left transition flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="w-10 h-10 rounded bg-slate-100 text-[#9B1C1C] flex items-center justify-center text-lg border border-slate-200">
+                                <i class="fa-solid fa-ticket"></i>
+                            </div>
+                            <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200" data-i18n="tag_passenger">Passenger</span>
+                        </div>
+                        <h3 class="font-bold text-slate-900 text-sm mb-1" data-i18n="f_book_title">Bus Ticket Booking &amp; Dynamic Fares</h3>
+                        <p class="text-xs text-slate-600 leading-relaxed" data-i18n="f_book_desc">Search Shivneri, Shivshahi, Asiad &amp; Ordinary buses. Off-peak discounts on low-occupancy buses and regular fare on high-demand buses.</p>
+                    </div>
+                    <span class="mt-4 text-xs font-bold text-[#9B1C1C]"><span data-i18n="open_service">Open Service</span> →</span>
+                </button>
+
+                <!-- 2. Women Safety -->
+                <button onclick="navigateTo('women-safety')" class="bg-white p-5 rounded-lg border border-slate-200 hover:border-[#9B1C1C] text-left transition flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="w-10 h-10 rounded bg-slate-100 text-[#9B1C1C] flex items-center justify-center text-lg border border-slate-200">
+                                <i class="fa-solid fa-shield-halved"></i>
+                            </div>
+                            <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-slate-100 text-[#9B1C1C] border border-slate-200" data-i18n="tag_safety">Safety 1091</span>
+                        </div>
+                        <h3 class="font-bold text-slate-900 text-sm mb-1" data-i18n="f_safety_title">Women Safety, Night Safe Drop &amp; SOS</h3>
+                        <p class="text-xs text-slate-600 leading-relaxed" data-i18n="f_safety_desc">Automated female co-seating rule, Night Guardian Safe Drop requests (7 PM–6 AM), Family GPS tracker link, and 1-click SOS 1091.</p>
+                    </div>
+                    <span class="mt-4 text-xs font-bold text-[#9B1C1C]"><span data-i18n="open_service">Open Service</span> →</span>
+                </button>
+
+                <!-- 3. Courier & Luggage -->
+                <button onclick="navigateTo('cargo')" class="bg-white p-5 rounded-lg border border-slate-200 hover:border-[#9B1C1C] text-left transition flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="w-10 h-10 rounded bg-slate-100 text-[#1e3a5f] flex items-center justify-center text-lg border border-slate-200">
+                                <i class="fa-solid fa-box-open"></i>
+                            </div>
+                            <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200" data-i18n="tag_logistics">Logistics</span>
+                        </div>
+                        <h3 class="font-bold text-slate-900 text-sm mb-1" data-i18n="f_cargo_title">Courier &amp; Luggage Waybill Booking</h3>
+                        <p class="text-xs text-slate-600 leading-relaxed" data-i18n="f_cargo_desc">Send parcels and extra passenger luggage via MSRTC bus cargo compartments with instant digital waybill and tracking.</p>
+                    </div>
+                    <span class="mt-4 text-xs font-bold text-[#1e3a5f]"><span data-i18n="open_service">Open Service</span> →</span>
+                </button>
+
+                <!-- 4. My Trips / PNR -->
+                <button onclick="navigateTo('history')" class="bg-white p-5 rounded-lg border border-slate-200 hover:border-[#9B1C1C] text-left transition flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="w-10 h-10 rounded bg-slate-100 text-[#1e3a5f] flex items-center justify-center text-lg border border-slate-200">
+                                <i class="fa-solid fa-clock-rotate-left"></i>
+                            </div>
+                            <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200" data-i18n="tag_passenger">Passenger</span>
+                        </div>
+                        <h3 class="font-bold text-slate-900 text-sm mb-1" data-i18n="f_history_title">My Trips &amp; PNR Ticket Status</h3>
+                        <p class="text-xs text-slate-600 leading-relaxed" data-i18n="f_history_desc">View confirmed reservations, download Electronic Reservation Slips (ERS), check PNR status, or cancel bookings.</p>
+                    </div>
+                    <span class="mt-4 text-xs font-bold text-[#1e3a5f]"><span data-i18n="open_service">Open Service</span> →</span>
+                </button>
+
+                <!-- 5. Smart ID -->
+                <button onclick="navigateTo('smartid')" class="bg-white p-5 rounded-lg border border-slate-200 hover:border-[#9B1C1C] text-left transition flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="w-10 h-10 rounded bg-slate-100 text-[#1e3a5f] flex items-center justify-center text-lg border border-slate-200">
+                                <i class="fa-solid fa-id-card"></i>
+                            </div>
+                            <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200" data-i18n="tag_concession">Concession</span>
+                        </div>
+                        <h3 class="font-bold text-slate-900 text-sm mb-1" data-i18n="f_smartid_title">Digital Smart Transit ID</h3>
+                        <p class="text-xs text-slate-600 leading-relaxed" data-i18n="f_smartid_desc">QR-verified passenger pass for Senior Citizens, Mahila Samman, Students, and Divyangjan state travel concessions.</p>
+                    </div>
+                    <span class="mt-4 text-xs font-bold text-[#1e3a5f]"><span data-i18n="open_service">Open Service</span> →</span>
+                </button>
+
+                <!-- 6. Group & Bulk Booking -->
+                <button onclick="toggleGroupBookingModal()" class="bg-white p-5 rounded-lg border border-slate-200 hover:border-[#9B1C1C] text-left transition flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="w-10 h-10 rounded bg-slate-100 text-[#1e3a5f] flex items-center justify-center text-lg border border-slate-200">
+                                <i class="fa-solid fa-users"></i>
+                            </div>
+                            <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200" data-i18n="tag_bulk">Bulk / Charter</span>
+                        </div>
+                        <h3 class="font-bold text-slate-900 text-sm mb-1" data-i18n="f_group_title">Group &amp; Multi-Day Bulk Calculator</h3>
+                        <p class="text-xs text-slate-600 leading-relaxed" data-i18n="f_group_desc">Calculate tiered 10%–20% group discounts for college tours, wedding parties, and multi-day bus reservations.</p>
+                    </div>
+                    <span class="mt-4 text-xs font-bold text-[#1e3a5f]"><span data-i18n="open_service">Open Service</span> →</span>
+                </button>
+
+                <!-- 7. Rest-Stop Meal Pre-Order -->
+                <button onclick="navigateTo('vendors')" class="bg-white p-5 rounded-lg border border-slate-200 hover:border-[#9B1C1C] text-left transition flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="w-10 h-10 rounded bg-slate-100 text-[#1e3a5f] flex items-center justify-center text-lg border border-slate-200">
+                                <i class="fa-solid fa-utensils"></i>
+                            </div>
+                            <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200" data-i18n="tag_commercial">Commercial</span>
+                        </div>
+                        <h3 class="font-bold text-slate-900 text-sm mb-1" data-i18n="f_vendors_title">Highway Rest-Stop Food &amp; Rail Neer</h3>
+                        <p class="text-xs text-slate-600 leading-relaxed" data-i18n="f_vendors_desc">Pre-order verified highway meals and onboard drinking water from partner rest-stops like Katraj Ghat Food Plaza.</p>
+                    </div>
+                    <span class="mt-4 text-xs font-bold text-[#1e3a5f]"><span data-i18n="open_service">Open Service</span> →</span>
+                </button>
+
+                <!-- 8. Rest-Stop Tender Bidding -->
+                <button onclick="navigateTo('bidding')" class="bg-white p-5 rounded-lg border border-slate-200 hover:border-[#9B1C1C] text-left transition flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="w-10 h-10 rounded bg-slate-100 text-[#1e3a5f] flex items-center justify-center text-lg border border-slate-200">
+                                <i class="fa-solid fa-gavel"></i>
+                            </div>
+                            <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200" data-i18n="tag_tender">E-Tender</span>
+                        </div>
+                        <h3 class="font-bold text-slate-900 text-sm mb-1" data-i18n="f_bidding_title">Restaurant Registration &amp; Bidding</h3>
+                        <p class="text-xs text-slate-600 leading-relaxed" data-i18n="f_bidding_desc">Highway restaurant registration portal and live e-tender bidding for official MSRTC bus halt partnerships.</p>
+                    </div>
+                    <span class="mt-4 text-xs font-bold text-[#1e3a5f]"><span data-i18n="open_service">Open Service</span> →</span>
+                </button>
+
+                <!-- 9. In-Bus Advertising -->
+                <button onclick="navigateTo('ads')" class="bg-white p-5 rounded-lg border border-slate-200 hover:border-[#9B1C1C] text-left transition flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="w-10 h-10 rounded bg-slate-100 text-[#1e3a5f] flex items-center justify-center text-lg border border-slate-200">
+                                <i class="fa-solid fa-bullhorn"></i>
+                            </div>
+                            <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200" data-i18n="tag_analytics">ML + QR</span>
+                        </div>
+                        <h3 class="font-bold text-slate-900 text-sm mb-1" data-i18n="f_ads_title">In-Bus Advertising &amp; QR Scanner</h3>
+                        <p class="text-xs text-slate-600 leading-relaxed" data-i18n="f_ads_desc">Seat-position ad revenue predictor trained on 1,000 records, live campaign booking, and passenger QR coupon scanner.</p>
+                    </div>
+                    <span class="mt-4 text-xs font-bold text-[#1e3a5f]"><span data-i18n="open_service">Open Service</span> →</span>
+                </button>
+
+                <!-- 10. Revenue & ML Dashboard -->
+                <button onclick="navigateTo('revenue')" class="bg-white p-5 rounded-lg border border-slate-200 hover:border-[#9B1C1C] text-left transition flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="w-10 h-10 rounded bg-slate-100 text-[#9B1C1C] flex items-center justify-center text-lg border border-slate-200">
+                                <i class="fa-solid fa-chart-pie"></i>
+                            </div>
+                            <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-slate-100 text-[#9B1C1C] border border-slate-200" data-i18n="tag_ml">ML Engine</span>
+                        </div>
+                        <h3 class="font-bold text-slate-900 text-sm mb-1" data-i18n="f_rev_title">Unified Revenue &amp; ML Dashboard</h3>
+                        <p class="text-xs text-slate-600 leading-relaxed" data-i18n="f_rev_desc">Live ticket, ad, vendor, and partnership KPIs, ML model benchmarks (XGBoost/RF/DT/LR), and fare elasticity simulator.</p>
+                    </div>
+                    <span class="mt-4 text-xs font-bold text-[#9B1C1C]"><span data-i18n="open_service">Open Service</span> →</span>
+                </button>
+
+                <!-- 11. Passenger Profile & Account -->
+                <button onclick="navigateTo('profile')" class="bg-white p-5 rounded-lg border border-slate-200 hover:border-[#9B1C1C] text-left transition flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="w-10 h-10 rounded bg-slate-100 text-[#1e3a5f] flex items-center justify-center text-lg border border-slate-200">
+                                <i class="fa-solid fa-user-check"></i>
+                            </div>
+                            <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200" data-i18n="tag_account">Account</span>
+                        </div>
+                        <h3 class="font-bold text-slate-900 text-sm mb-1" data-i18n="f_profile_title">Passenger Registration &amp; Profile</h3>
+                        <p class="text-xs text-slate-600 leading-relaxed" data-i18n="f_profile_desc">Register or sign in to save passenger details, concession eligibility, emergency contacts, and travel preferences.</p>
+                    </div>
+                    <span class="mt-4 text-xs font-bold text-[#1e3a5f]"><span data-i18n="open_service">Open Service</span> →</span>
+                </button>
             </div>
         </section>
 
@@ -1146,7 +1335,7 @@
         </span>
                 <h2 class="text-2xl font-extrabold text-slate-900 mt-3 mb-2">Register or Sign In Before Profile Access</h2>
                 <p class="text-xs text-slate-500 max-w-md mx-auto mb-6">
-                    To manage personal information, update your MSRTC Smart ID, and claim Maharashtra government welfare travel concessions (Mahila Samman, Senior Citizen, Student, Divyangjan), please sign in or create an account first.
+                    To manage personal information, update your MSRTC Smart ID, and access eligible travel concessions (Mahila Samman, Senior Citizen, Student, Divyangjan), please sign in or create an account first.
                 </p>
                 <div class="flex flex-col sm:flex-row gap-3 justify-center max-w-md mx-auto">
                     <button onclick="openAuthModal('login')" class="flex-1 bg-msrtc-red hover:bg-msrtc-darkred text-white font-bold py-3 px-4 rounded-xl text-xs shadow-md transition flex items-center justify-center gap-2">
@@ -1245,7 +1434,7 @@
                 <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                     <div class="max-w-2xl">
                         <p class="text-[11px] uppercase tracking-wider text-slate-300 font-semibold mb-1">
-                            Maharashtra Mahila Samman &amp; Passenger Safety Cell
+                            Mahila Samman &amp; Passenger Safety
                         </p>
                         <h2 class="text-2xl sm:text-3xl font-bold tracking-tight mb-2">
                             Women Passenger Safety &amp; Security Portal
@@ -1446,7 +1635,7 @@
                             <i class="fa-solid fa-triangle-exclamation text-xl text-[#9B1C1C]"></i>
                         </div>
                         <p class="text-xs text-slate-600 mb-4">
-                            Sends immediate alert to MSRTC Transit Command, Maharashtra Highway Police, and Women Safety Cell (1091).
+                            Sends an immediate alert to the MSRTC Transit Command, Highway Police, and Women Safety Cell (1091).
                         </p>
 
                         <button onclick="triggerWomenEmergencySOS()" class="w-full bg-[#9B1C1C] hover:bg-[#7f1818] text-white font-bold py-3 rounded text-xs uppercase tracking-wider transition flex items-center justify-center gap-2 mb-4">
@@ -1669,7 +1858,7 @@
                     <i class="fa-solid fa-bus"></i>
                 </div>
                 <span class="text-[10px] font-extrabold uppercase tracking-widest text-slate-500 bg-slate-100 px-2.5 py-0.5 rounded-full">
-          Government of Maharashtra • MSRTC
+          MSRTC • Smart Transit
         </span>
                 <h3 id="auth-modal-title" class="text-xl font-extrabold text-slate-900 mt-2">Sign In to Transit Account</h3>
                 <p class="text-xs text-slate-500 mt-0.5">Required before managing profile & concession smart pass</p>

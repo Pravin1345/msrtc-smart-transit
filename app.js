@@ -1,7 +1,6 @@
 /**
  * =========================================================
  * MSRTC SMART TRANSIT - UNIFIED APPLICATION CONTROLLER
- * Title: ML-Based Revenue Optimization System for MSRTC ("HAPPY HOURS")
  * 
  * Supports:
  *   Module 1: ML Demand Forecasting (XGBoost, RF, DT, LR)
@@ -88,8 +87,221 @@ document.addEventListener('DOMContentLoaded', async () => {
   populateLocationsList();
   setDefaultBookingDate();
   loadVendorCatalog();
+  applyTranslations();
   navigateTo('home');
 });
+
+// 2B. BILINGUAL SUPPORT (ENGLISH / MARATHI)
+let currentLang = localStorage.getItem('msrtc_lang') || 'en';
+
+const TRANSLATIONS = {
+  en: {
+    top_banner_text: "MSRTC • ML-Based Revenue Optimization System • Passenger Safety • Highway Vendor Tie-Ups",
+    helpline: "Helpline: 1800-22-1234",
+    women_sos: "Women SOS 1091",
+    nav_home: "Explore",
+    nav_features: "All Features",
+    nav_book: "Book Bus",
+    nav_ads: "In-Bus Ads",
+    nav_vendors: "Rest-Stops",
+    nav_bidding: "Bidding",
+    nav_cargo: "Courier",
+    nav_history: "My Trips",
+    nav_smartid: "Smart ID",
+    nav_safety: "Women Safety",
+    hero_subtitle: "MSRTC • Online Reservation Portal",
+    hero_title: "Book MSRTC Bus Tickets Online",
+    btn_all_features: "All Services & Features",
+    btn_rev_dash: "Revenue & ML Dashboard",
+    btn_bus_qr: "Bus Ad QR",
+    lbl_from: "Travelling From",
+    lbl_to: "Going To",
+    lbl_date: "Journey Date",
+    btn_today: "Today",
+    btn_tom: "Tom",
+    btn_search_buses: "Search Buses",
+    qs_book: "Book Tickets",
+    qs_book_sub: "Live Schedules & Fares",
+    qs_pnr: "PNR / My Trips",
+    qs_pnr_sub: "Booking & Ticket Status",
+    qs_cargo: "Courier & Luggage",
+    qs_cargo_sub: "Parcel & Waybill Booking",
+    qs_safety: "Women Safety (1091)",
+    qs_safety_sub: "Safe Drop & SOS Portal",
+    modules_heading: "MSRTC Integrated Transit & Revenue Modules",
+    modules_sub: "Click any module below to open its portal directly.",
+    view_all_features: "View All Services & Features",
+    mod1_title: "1. ML Demand Forecasting",
+    mod1_desc: "Compares Linear Regression, Decision Tree, Random Forest & XGBoost to forecast passenger loads, expected occupancy, and off-peak vacancies.",
+    mod2_title: "2 & 3. Dynamic Fare Optimizer",
+    mod2_desc: "Constrained Revenue Optimizer: Expected Revenue = Fare × Expected Bookings. Applies off-peak discounts only on low-occupancy buses.",
+    mod4_title: "4. In-Bus Advertising (Dataset)",
+    mod4_desc: "Position-based pricing (Front/First 10/Middle/Rear). Trained on 1,000 advertisement records predicting revenue and tracking QR scans.",
+    mod5_title: "5. Group & Multi-Day Bulk",
+    mod5_desc: "Tiered discounts for wedding parties, college tours (10%–20%), multi-day reservations (>3 days), and flexible multi-seat allocation.",
+    mod6_title: "6. Vendor & Rest-Stop Tie-Ups",
+    mod6_desc: "Katraj Ghat Highway Food Plaza (Pune-Kolhapur NH48) & Onboard MSRTC Rail Neer pre-orders, earning 10%–15% commission + rest-stop bidding fees.",
+    mod7_title: "7. Passenger Priority & Safety",
+    mod7_desc: "Priority seating for Senior Citizens (Row 1-2), Pregnant Women, and Solo Female Safe Matching with instant Control Room SOS dispatch.",
+    rev_framework: "Consolidated Financial Framework",
+    rev_formula_title: "Total Revenue Formula",
+    btn_view_rev: "View Live Revenue Breakdown",
+    feat_portal_label: "MSRTC Smart Transit • Citizen & Operator Services",
+    feat_portal_title: "All Services & Features Directory",
+    feat_portal_sub: "Select any service below to open it directly.",
+    btn_back_home: "Back to Home",
+    open_service: "Open Service",
+    tag_passenger: "Passenger",
+    tag_safety: "Safety 1091",
+    tag_logistics: "Logistics",
+    tag_concession: "Concession",
+    tag_bulk: "Bulk / Charter",
+    tag_commercial: "Commercial",
+    tag_tender: "E-Tender",
+    tag_analytics: "ML + QR",
+    tag_ml: "ML Engine",
+    tag_account: "Account",
+    f_book_title: "Bus Ticket Booking & Dynamic Fares",
+    f_book_desc: "Search Shivneri, Shivshahi, Asiad & Ordinary buses. Off-peak discounts on low-occupancy buses and regular fare on high-demand buses.",
+    f_safety_title: "Women Safety, Night Safe Drop & SOS",
+    f_safety_desc: "Automated female co-seating rule, Night Guardian Safe Drop requests (7 PM–6 AM), Family GPS tracker link, and 1-click SOS 1091.",
+    f_cargo_title: "Courier & Luggage Waybill Booking",
+    f_cargo_desc: "Send parcels and extra passenger luggage via MSRTC bus cargo compartments with instant digital waybill and tracking.",
+    f_history_title: "My Trips & PNR Ticket Status",
+    f_history_desc: "View confirmed reservations, download Electronic Reservation Slips (ERS), check PNR status, or cancel bookings.",
+    f_smartid_title: "Digital Smart Transit ID",
+    f_smartid_desc: "QR-verified passenger pass for Senior Citizens, Mahila Samman, Students, and Divyangjan state travel concessions.",
+    f_group_title: "Group & Multi-Day Bulk Calculator",
+    f_group_desc: "Calculate tiered 10%–20% group discounts for college tours, wedding parties, and multi-day bus reservations.",
+    f_vendors_title: "Highway Rest-Stop Food & Rail Neer",
+    f_vendors_desc: "Pre-order verified highway meals and onboard drinking water from partner rest-stops like Katraj Ghat Food Plaza.",
+    f_bidding_title: "Restaurant Registration & Bidding",
+    f_bidding_desc: "Highway restaurant registration portal and live e-tender bidding for official MSRTC bus halt partnerships.",
+    f_ads_title: "In-Bus Advertising & QR Scanner",
+    f_ads_desc: "Seat-position ad revenue predictor trained on 1,000 records, live campaign booking, and passenger QR coupon scanner.",
+    f_rev_title: "Unified Revenue & ML Dashboard",
+    f_rev_desc: "Live ticket, ad, vendor, and partnership KPIs, ML model benchmarks (XGBoost/RF/DT/LR), and fare elasticity simulator.",
+    f_profile_title: "Passenger Registration & Profile",
+    f_profile_desc: "Register or sign in to save passenger details, concession eligibility, emergency contacts, and travel preferences."
+  },
+  mr: {
+    top_banner_text: "एस.टी. महामंडळ • एआय महसूल प्रणाली • प्रवासी सुरक्षा • महामार्ग थांबा भागीदारी",
+    helpline: "हेल्पलाईन: १८००-२२-१२३४",
+    women_sos: "महिला हेल्पलाईन १०९१",
+    nav_home: "मुख्यपृष्ठ",
+    nav_features: "सर्व सुविधा",
+    nav_book: "तिकीट बुकिंग",
+    nav_ads: "बस जाहिराती",
+    nav_vendors: "अल्पोपहार थांबे",
+    nav_bidding: "निविदा (Bidding)",
+    nav_cargo: "पार्सल व सामान",
+    nav_history: "माझा प्रवास",
+    nav_smartid: "स्मार्ट आयडी",
+    nav_safety: "महिला सुरक्षा",
+    hero_subtitle: "महाराष्ट्र राज्य मार्ग परिवहन महामंडळ • अधिकृत ऑनलाइन आरक्षण पोर्टल",
+    hero_title: "एमएसआरटीसी बस तिकिटे ऑनलाइन बुक करा",
+    btn_all_features: "सर्व सेवा आणि सुविधा",
+    btn_rev_dash: "महसूल व एमएल डॅशबोर्ड",
+    btn_bus_qr: "बस जाहिरात QR",
+    lbl_from: "कोठून प्रवास (From)",
+    lbl_to: "कोठे जाणार (To)",
+    lbl_date: "प्रवासाची तारीख",
+    btn_today: "आज",
+    btn_tom: "उद्या",
+    btn_search_buses: "बस शोधा",
+    qs_book: "तिकीट बुक करा",
+    qs_book_sub: "वेळापत्रक आणि भाडे दर",
+    qs_pnr: "PNR / माझा प्रवास",
+    qs_pnr_sub: "तिकीट स्थिती तपासा",
+    qs_cargo: "पार्सल व सामान",
+    qs_cargo_sub: "वे-बिल बुकिंग सेवा",
+    qs_safety: "महिला सुरक्षा (१०९१)",
+    qs_safety_sub: "रात्री सुरक्षित थांबा व SOS",
+    modules_heading: "एस.टी. स्मार्ट ट्रान्झिट आणि महसूल मॉड्यूल्स",
+    modules_sub: "थेट उघडण्यासाठी खालील कोणत्याही सेवेवर क्लिक करा.",
+    view_all_features: "सर्व सेवा व सुविधा पहा",
+    mod1_title: "१. प्रवासी मागणी अंदाज (ML)",
+    mod1_desc: "प्रवाशांची संख्या, बसची क्षमता आणि रिकाम्या जागांचा अंदाज घेण्यासाठी लिनियर रिग्रेशन, डिसिजन ट्री, रँडम फॉरेस्ट व XGBoost ची तुलना.",
+    mod2_title: "२ व ३. डायनॅमिक भाडे प्रणाली",
+    mod2_desc: "गर्दी नसलेल्या ऑफ-पीक बसवर सवलतीचे दर आणि जास्त मागणी असलेल्या बसवर नियमित भाडे लागू करण्याची प्रणाली.",
+    mod4_title: "४. बस अंतर्गत जाहिराती",
+    mod4_desc: "आसनांच्या स्थितीनुसार जाहिरात दर आणि १,००० नोंदींवर आधारित महसूल अंदाज व QR स्कॅन ट्रॅकिंग.",
+    mod5_title: "५. ग्रुप व बहु-दिवसीय बुकिंग",
+    mod5_desc: "लग्न समारंभ, शैक्षणिक सहली (१०%–२०% सवलत) आणि ३ दिवसांपेक्षा जास्त प्रवासासाठी विशेष ग्रुप सवलत.",
+    mod6_title: "६. महामार्ग हॉटेल व थांबा भागीदारी",
+    mod6_desc: "कात्रज घाट फूड प्लाझा व बसमधील रेल नीर पाण्याची पूर्व-नोंदणी तसेच हॉटेल निविदा महसूल प्रणाली.",
+    mod7_title: "७. प्रवासी प्राधान्य व सुरक्षा",
+    mod7_desc: "ज्येष्ठ नागरिक, गर्भवती महिला आणि एकट्या महिला प्रवाशांसाठी सुरक्षित आसन व्यवस्था व १०९१ SOS अलर्ट.",
+    rev_framework: "एकत्रित आर्थिक आराखडा",
+    rev_formula_title: "एकूण महसूल सूत्र",
+    btn_view_rev: "थेट महसूल तपशील पहा",
+    feat_portal_label: "एमएसआरटीसी स्मार्ट ट्रान्झिट • प्रवासी आणि व्यावसायिक सेवा",
+    feat_portal_title: "सर्व सेवा आणि सुविधा निर्देशिका",
+    feat_portal_sub: "ती सेवा उघडण्यासाठी खालील कोणत्याही कार्डवर क्लिक करा.",
+    btn_back_home: "मुख्यपृष्ठावर जा",
+    open_service: "सेवा उघडा",
+    tag_passenger: "प्रवासी सेवा",
+    tag_safety: "सुरक्षा १०९१",
+    tag_logistics: "मालवाहतूक",
+    tag_concession: "सवलत पास",
+    tag_bulk: "ग्रुप बुकिंग",
+    tag_commercial: "व्यावसायिक",
+    tag_tender: "ई-निविदा",
+    tag_analytics: "एमएल + QR",
+    tag_ml: "एमएल प्रणाली",
+    tag_account: "खाते",
+    f_book_title: "बस तिकीट बुकिंग व डायनॅमिक दर",
+    f_book_desc: "शिवनेरी, शिवशाही, निम-आराम आणि साध्या बस शोधा. कमी गर्दीच्या बसवर ऑफ-पीक सवलत व जास्त गर्दीवर नियमित भाडे.",
+    f_safety_title: "महिला सुरक्षा, रात्रीचा सुरक्षित थांबा व SOS",
+    f_safety_desc: "शेजारील महिला आसन संरक्षण, रात्री ७ ते सकाळी ६ सुरक्षित थांबा विनंती, कुटुंब GPS ट्रॅकर आणि १-क्लिक SOS १०९१.",
+    f_cargo_title: "पार्सल व सामान वे-बिल बुकिंग",
+    f_cargo_desc: "एस.टी. बसच्या मालवाहू डब्यातून पार्सल आणि जादा सामान पाठवण्यासाठी डिजिटल वे-बिल व ट्रॅकिंग सेवा.",
+    f_history_title: "माझा प्रवास आणि PNR तिकीट स्थिती",
+    f_history_desc: "बुक केलेली तिकिटे पहा, इलेक्ट्रॉनिक आरक्षण स्लिप (ERS) डाउनलोड करा, PNR तपासा किंवा तिकीट रद्द करा.",
+    f_smartid_title: "डिजिटल स्मार्ट ट्रान्झिट आयडी",
+    f_smartid_desc: "ज्येष्ठ नागरिक, महिला सन्मान, विद्यार्थी आणि दिव्यांग प्रवाशांसाठी QR-सत्यापित सवलत ओळखपत्र.",
+    f_group_title: "ग्रुप आणि बहु-दिवसीय बुकिंग कॅल्क्युलेटर",
+    f_group_desc: "शैक्षणिक सहली, लग्न कार्य आणि सामूहिक प्रवासासाठी १०% ते २०% ग्रुप सवलतीची गणना करा.",
+    f_vendors_title: "महामार्ग अल्पोपहार आणि रेल नीर नोंदणी",
+    f_vendors_desc: "कात्रज घाट फूड प्लाझा सारख्या अधिकृत महामार्ग थांब्यांवर जेवण व पिण्याचे पाणी आगाऊ बुक करा.",
+    f_bidding_title: "हॉटेल नोंदणी आणि ई-निविदा (Bidding)",
+    f_bidding_desc: "अधिकृत एस.टी. बस थांब्यासाठी महामार्ग हॉटेल नोंदणी आणि थेट निविदा प्रक्रिया.",
+    f_ads_title: "बस जाहिराती व QR कूपन स्कॅनर",
+    f_ads_desc: "१,००० नोंदींवर आधारित जाहिरात महसूल अंदाज, मोहीम नोंदणी आणि प्रवासी QR कूपन स्कॅनर.",
+    f_rev_title: "एकत्रित महसूल व एमएल डॅशबोर्ड",
+    f_rev_desc: "तिकीट, जाहिरात, हॉटेल आणि भागीदारी महसूल तसेच ML मॉडेल तुलना व भाडे सिम्युलेटर.",
+    f_profile_title: "प्रवासी नोंदणी आणि प्रोफाइल",
+    f_profile_desc: "प्रवासी माहिती, सवलत पात्रता आणि आपत्कालीन संपर्क जतन करण्यासाठी लॉगिन किंवा नोंदणी करा."
+  }
+};
+
+function setLanguage(lang) {
+  currentLang = (lang === 'mr') ? 'mr' : 'en';
+  localStorage.setItem('msrtc_lang', currentLang);
+  applyTranslations();
+}
+
+function applyTranslations() {
+  const dict = TRANSLATIONS[currentLang] || TRANSLATIONS.en;
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (dict[key]) {
+      el.textContent = dict[key];
+    }
+  });
+
+  const enBtn = document.getElementById('lang-btn-en');
+  const mrBtn = document.getElementById('lang-btn-mr');
+  if (enBtn && mrBtn) {
+    if (currentLang === 'mr') {
+      mrBtn.className = "px-1.5 py-0.5 rounded text-[11px] font-bold bg-white text-[#1e3a5f] transition";
+      enBtn.className = "px-1.5 py-0.5 rounded text-[11px] font-semibold text-white hover:bg-white/20 transition";
+    } else {
+      enBtn.className = "px-1.5 py-0.5 rounded text-[11px] font-bold bg-white text-[#1e3a5f] transition";
+      mrBtn.className = "px-1.5 py-0.5 rounded text-[11px] font-semibold text-white hover:bg-white/20 transition";
+    }
+  }
+}
 
 function renderAuthCorner() {
   const box = document.getElementById('auth-section');
@@ -718,7 +930,7 @@ function openTicketModal(b) {
       <div class="flex items-center justify-between">
         <div>
           <h2 class="text-xl font-black text-msrtc-red tracking-tight">MSRTC ELECTRONIC RESERVATION SLIP</h2>
-          <p class="text-[10px] text-slate-500 font-bold uppercase">Government of Maharashtra Road Transport Corporation</p>
+          <p class="text-[10px] text-slate-500 font-bold uppercase">MSRTC Passenger Transport Service</p>
         </div>
         <div class="text-right">
           <span class="text-xs font-mono font-extrabold bg-slate-900 text-white px-2.5 py-1 rounded">PNR: ${esc(b.pnr)}</span>
@@ -1425,7 +1637,7 @@ function renderSmartIDPass() {
     <div class="bg-gradient-to-br from-msrtc-red to-msrtc-darkred text-white p-6 rounded-3xl shadow-xl border-4 border-amber-300 relative overflow-hidden">
       <div class="flex justify-between items-center pb-3 border-b border-red-300/40">
         <div>
-          <span class="text-[10px] font-bold uppercase tracking-wider text-amber-300">Government of Maharashtra</span>
+          <span class="text-[10px] font-bold uppercase tracking-wider text-amber-300">MSRTC</span>
           <h3 class="text-base font-extrabold tracking-tight">MSRTC Digital Smart Transit Pass</h3>
         </div>
         <i class="fa-solid fa-id-card text-2xl text-amber-300"></i>
@@ -2015,7 +2227,6 @@ function openCargoModal(cargo) {
     <div class="border-4 border-slate-900 rounded-2xl p-6 bg-white space-y-4 font-sans">
       <div class="flex justify-between items-start border-b-2 border-slate-900 pb-3">
         <div>
-          <span class="text-[10px] font-black uppercase tracking-widest text-msrtc-red">महाराष्ट्र राज्य मार्ग परिवहन महामंडळ</span>
           <h2 class="text-xl font-black text-slate-900 uppercase">MSRTC Official Cargo Waybill (AWB)</h2>
           <p class="text-xs text-slate-500">State Transport Express Goods & Parcel Consignment Note</p>
         </div>
