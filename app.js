@@ -189,12 +189,39 @@ async function populateLocationsList() {
 }
 
 function setDefaultBookingDate() {
-  const dateInput = document.getElementById('travel-date');
-  if (dateInput && !dateInput.value) {
-    const today = new Date().toISOString().split('T')[0];
-    dateInput.value = today;
-    dateInput.min = today;
-  }
+  const today = new Date().toISOString().split('T')[0];
+  ['travel-date', 'home-travel-date'].forEach(id => {
+    const dateInput = document.getElementById(id);
+    if (dateInput) {
+      if (!dateInput.value) dateInput.value = today;
+      dateInput.min = today;
+    }
+  });
+}
+
+function setHomeQuickDate(daysOffset) {
+  const d = new Date();
+  d.setDate(d.getDate() + daysOffset);
+  const val = d.toISOString().split('T')[0];
+  const homeDate = document.getElementById('home-travel-date');
+  if (homeDate) homeDate.value = val;
+}
+
+function handleHomeSearchSubmit(e) {
+  e.preventDefault();
+  const fromVal = document.getElementById('home-from-location')?.value.trim() || '';
+  const toVal = document.getElementById('home-to-location')?.value.trim() || '';
+  const dateVal = document.getElementById('home-travel-date')?.value || new Date().toISOString().split('T')[0];
+
+  const bookFrom = document.getElementById('from-location');
+  const bookTo = document.getElementById('to-location');
+  const bookDate = document.getElementById('travel-date');
+  if (bookFrom) bookFrom.value = fromVal;
+  if (bookTo) bookTo.value = toVal;
+  if (bookDate) bookDate.value = dateVal;
+
+  navigateTo('book');
+  handleSearchSubmit(e);
 }
 
 // 5. SEARCH & BUS LIST WITH HAPPY HOURS BADGES

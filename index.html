@@ -94,8 +94,8 @@
                     <button onclick="navigateTo('smartid')" class="nav-btn px-3 py-2 rounded-lg text-sm font-semibold transition text-slate-700 hover:text-msrtc-red hover:bg-red-50" data-page="smartid">
             <i class="fa-solid fa-id-card mr-1"></i> Smart ID
           </button>
-                    <button onclick="navigateTo('women-safety')" class="nav-btn px-3 py-2 rounded-lg text-sm font-semibold transition text-rose-700 hover:text-rose-900 hover:bg-rose-50" data-page="women-safety">
-            <i class="fa-solid fa-shield-heart mr-1 text-rose-600"></i> Single Women Shield
+                    <button onclick="navigateTo('women-safety')" class="nav-btn px-3 py-2 rounded text-sm font-semibold transition text-slate-700 hover:text-[#9B1C1C] hover:bg-red-50" data-page="women-safety">
+            <i class="fa-solid fa-shield-halved mr-1"></i> Women Safety
           </button>
                 </nav>
 
@@ -112,148 +112,210 @@
 
         <!-- PAGE 1: HOME & EXPLORER -->
         <section id="page-home" class="page-view block">
-            <!-- Hero Banner -->
-            <div class="gradient-hero text-white py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-                <div class="absolute right-0 bottom-0 opacity-10 pointer-events-none transform translate-x-10 translate-y-10">
-                    <i class="fa-solid fa-bus text-[320px]"></i>
-                </div>
-                <div class="max-w-7xl mx-auto relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-                    <div class="lg:col-span-7">
-                        <span class="inline-flex items-center gap-2 bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider mb-3">
-              <i class="fa-solid fa-bolt text-amber-300"></i> ML-Powered Revenue Optimization System
-            </span>
-                        <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight leading-tight mb-4">
-                            Happy Hours Transit <br class="hidden sm:inline" />Smart Mobility & Revenue Engine
-                        </h1>
-                        <p class="text-red-100 text-base sm:text-lg mb-6">
-                            Empowering Maharashtra with Intelligent Passenger Demand Forecasting, Off-Peak "Happy Hours" Dynamic Fares, In-Bus Advertising, Highway Restaurant Tie-Ups, and Dedicated Passenger Safety.
-                        </p>
-                        <div class="flex flex-wrap gap-3">
-                            <button onclick="navigateTo('book')" class="bg-amber-400 hover:bg-amber-500 text-slate-900 font-bold px-6 py-3 rounded-xl shadow-lg shadow-black/10 transition flex items-center gap-2">
-                <i class="fa-solid fa-ticket"></i> Book Bus (Happy Hours Deals)
-              </button>
-                            <button onclick="navigateTo('revenue')" class="bg-white/10 hover:bg-white/20 border border-white/30 text-white font-semibold px-6 py-3 rounded-xl backdrop-blur-md transition flex items-center gap-2">
-                <i class="fa-solid fa-chart-pie"></i> Unified Revenue & ML Dashboard
-              </button>
-                            <button onclick="navigateTo('ads')" class="bg-slate-900/40 hover:bg-slate-900/60 border border-white/20 text-white font-semibold px-5 py-3 rounded-xl backdrop-blur-md transition flex items-center gap-2">
-                <i class="fa-solid fa-qrcode text-amber-300"></i> Scan Bus Ad QR
-              </button>
+            <!-- KSRTC-Swift Style Clean Official Reservation Header & Search Widget -->
+            <div class="bg-[#1e3a5f] text-white py-8 px-4 sm:px-6 lg:px-8 border-b-4 border-[#9B1C1C]">
+                <div class="max-w-7xl mx-auto">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                        <div>
+                            <p class="text-xs uppercase tracking-wider text-slate-300 font-semibold mb-1">
+                                Maharashtra State Road Transport Corporation • Official Online Reservation Portal
+                            </p>
+                            <h1 class="text-2xl sm:text-3xl font-bold tracking-tight">
+                                Book MSRTC Bus Tickets Online
+                            </h1>
+                        </div>
+                        <div class="flex flex-wrap gap-2 text-xs">
+                            <button onclick="navigateTo('revenue')" class="bg-white/10 hover:bg-white/20 border border-white/25 text-white font-semibold px-4 py-2 rounded transition">
+                                <i class="fa-solid fa-chart-pie mr-1.5"></i> Revenue &amp; ML Dashboard
+                            </button>
+                            <button onclick="navigateTo('ads')" class="bg-white/10 hover:bg-white/20 border border-white/25 text-white font-semibold px-4 py-2 rounded transition">
+                                <i class="fa-solid fa-qrcode mr-1.5"></i> Bus Ad QR
+                            </button>
                         </div>
                     </div>
 
-                    <!-- Hero Picture: Bus running on scenic road -->
-                    <div class="lg:col-span-5 relative">
-                        <div class="relative rounded-3xl overflow-hidden shadow-2xl border-4 border-white/20 group">
-                            <img src="bus-on-road.jpg" alt="MSRTC bus on road" class="w-full h-64 sm:h-72 lg:h-80 object-cover transform group-hover:scale-105 transition-transform duration-500" />
-                            <!-- Status badge -->
-                            <div class="absolute bottom-3 left-3 right-3 bg-slate-900/85 backdrop-blur-md text-white p-3 rounded-2xl flex items-center justify-between border border-white/15 text-xs shadow-lg">
-                                <div class="flex items-center gap-2">
-                                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                                    <span class="font-bold">Live AI Dynamic Fares</span>
-                                </div>
-                                <span class="text-[11px] text-amber-300 font-semibold flex items-center gap-1">
-                  <i class="fa-solid fa-bolt"></i> Happy Hours Off-Peak
-                </span>
+                    <!-- Prominent Clean Bus Search Box (KSRTC-Swift Style) -->
+                    <div class="bg-white text-slate-900 rounded-lg shadow-md border border-slate-200 p-5">
+                        <form onsubmit="handleHomeSearchSubmit(event)" class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+                            <div class="md:col-span-4">
+                                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1">Travelling From</label>
+                                <input type="text" id="home-from-location" list="transit-locations-list" class="w-full text-sm p-2.5 border border-slate-300 rounded focus:ring-1 focus:ring-[#9B1C1C] focus:border-[#9B1C1C] outline-none" placeholder="e.g. Kolhapur CBS" required value="Kolhapur CBS (Central Bus Stand)" />
                             </div>
-                        </div>
+                            <div class="md:col-span-4">
+                                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1">Going To</label>
+                                <input type="text" id="home-to-location" list="transit-locations-list" class="w-full text-sm p-2.5 border border-slate-300 rounded focus:ring-1 focus:ring-[#9B1C1C] focus:border-[#9B1C1C] outline-none" placeholder="e.g. Pune (Swargate)" required value="Pune (Swargate)" />
+                            </div>
+                            <div class="md:col-span-2">
+                                <div class="flex items-center justify-between mb-1">
+                                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide">Journey Date</label>
+                                    <div class="flex gap-1 text-[10px]">
+                                        <button type="button" onclick="setHomeQuickDate(0)" class="px-1.5 py-0.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded border border-slate-300">Today</button>
+                                        <button type="button" onclick="setHomeQuickDate(1)" class="px-1.5 py-0.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded border border-slate-300">Tom</button>
+                                    </div>
+                                </div>
+                                <input type="date" id="home-travel-date" class="w-full text-sm p-2.5 border border-slate-300 rounded focus:ring-1 focus:ring-[#9B1C1C] focus:border-[#9B1C1C] outline-none" required />
+                            </div>
+                            <div class="md:col-span-2">
+                                <button type="submit" class="w-full bg-[#9B1C1C] hover:bg-[#7f1818] text-white font-bold p-2.5 rounded transition flex items-center justify-center gap-2 text-sm">
+                                    <i class="fa-solid fa-magnifying-glass"></i> Search Buses
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
 
+            <!-- Quick Services Strip (KSRTC-Swift Style) -->
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-2">
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <button onclick="navigateTo('book')" class="bg-white p-4 rounded-lg border border-slate-200 hover:border-[#9B1C1C] text-left transition flex items-center gap-3">
+                        <div class="w-10 h-10 rounded bg-slate-100 text-[#9B1C1C] flex items-center justify-center shrink-0">
+                            <i class="fa-solid fa-ticket text-lg"></i>
+                        </div>
+                        <div>
+                            <span class="block text-sm font-bold text-slate-900">Book Tickets</span>
+                            <span class="block text-[11px] text-slate-500">Live Schedules &amp; Fares</span>
+                        </div>
+                    </button>
+                    <button onclick="navigateTo('history')" class="bg-white p-4 rounded-lg border border-slate-200 hover:border-[#9B1C1C] text-left transition flex items-center gap-3">
+                        <div class="w-10 h-10 rounded bg-slate-100 text-[#1e3a5f] flex items-center justify-center shrink-0">
+                            <i class="fa-solid fa-receipt text-lg"></i>
+                        </div>
+                        <div>
+                            <span class="block text-sm font-bold text-slate-900">PNR / My Trips</span>
+                            <span class="block text-[11px] text-slate-500">Booking &amp; Ticket Status</span>
+                        </div>
+                    </button>
+                    <button onclick="navigateTo('cargo')" class="bg-white p-4 rounded-lg border border-slate-200 hover:border-[#9B1C1C] text-left transition flex items-center gap-3">
+                        <div class="w-10 h-10 rounded bg-slate-100 text-[#1e3a5f] flex items-center justify-center shrink-0">
+                            <i class="fa-solid fa-box-open text-lg"></i>
+                        </div>
+                        <div>
+                            <span class="block text-sm font-bold text-slate-900">Courier &amp; Luggage</span>
+                            <span class="block text-[11px] text-slate-500">Parcel &amp; Waybill Booking</span>
+                        </div>
+                    </button>
+                    <button onclick="navigateTo('women-safety')" class="bg-white p-4 rounded-lg border border-slate-200 hover:border-[#9B1C1C] text-left transition flex items-center gap-3">
+                        <div class="w-10 h-10 rounded bg-slate-100 text-[#9B1C1C] flex items-center justify-center shrink-0">
+                            <i class="fa-solid fa-shield-halved text-lg"></i>
+                        </div>
+                        <div>
+                            <span class="block text-sm font-bold text-slate-900">Women Safety (1091)</span>
+                            <span class="block text-[11px] text-slate-500">Safe Drop &amp; SOS Portal</span>
+                        </div>
+                    </button>
+                </div>
+            </div>
+
             <!-- 7 Modules Overview Grid -->
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-                <div class="text-center max-w-3xl mx-auto mb-10">
-                    <span class="text-xs font-bold text-msrtc-red uppercase tracking-wider bg-red-50 border border-red-200 px-3 py-1 rounded-full">Complete Project Architecture</span>
-                    <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-2">7 Integrated Revenue & Mobility Modules</h2>
-                    <p class="text-sm text-slate-600 mt-1">Full implementation of the Machine Learning, Optimization, Advertising dataset, and Commercial Tie-Ups.</p>
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <div class="mb-6 border-b border-slate-200 pb-3 flex flex-col sm:flex-row sm:items-end justify-between gap-2">
+                    <div>
+                        <h2 class="text-xl font-bold text-[#1e3a5f] border-l-4 border-[#9B1C1C] pl-3">
+                            MSRTC Integrated Transit &amp; Revenue Modules
+                        </h2>
+                        <p class="text-xs text-slate-600 mt-1 pl-4">Official ML Demand Forecasting, Dynamic Fares, Commercial Tie-Ups, and Passenger Safety.</p>
+                    </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     <!-- Mod 1 -->
-                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition">
-                        <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-lg mb-4">
-                            <i class="fa-solid fa-brain"></i>
+                    <div class="bg-white p-5 rounded-lg border border-slate-200">
+                        <div class="flex items-center gap-2.5 mb-2">
+                            <div class="w-8 h-8 rounded bg-slate-100 text-[#1e3a5f] flex items-center justify-center text-sm">
+                                <i class="fa-solid fa-brain"></i>
+                            </div>
+                            <h3 class="font-bold text-slate-900 text-sm">1. ML Demand Forecasting</h3>
                         </div>
-                        <h3 class="font-bold text-slate-900 text-base mb-1">1. ML Demand Forecasting</h3>
-                        <p class="text-xs text-slate-500 leading-relaxed mb-3">
-                            Compares Linear Regression, Decision Tree, Random Forest & XGBoost to forecast passenger loads, expected occupancy, and off-peak vacancies.
+                        <p class="text-xs text-slate-600 leading-relaxed mb-3">
+                            Compares Linear Regression, Decision Tree, Random Forest &amp; XGBoost to forecast passenger loads, expected occupancy, and off-peak vacancies.
                         </p>
-                        <span class="text-[11px] font-semibold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-md">MAE & RMSE Evaluated</span>
+                        <span class="text-[11px] font-semibold text-[#1e3a5f] bg-slate-100 px-2 py-0.5 rounded border border-slate-200">MAE &amp; RMSE Evaluated</span>
                     </div>
 
                     <!-- Mod 2 & 3 -->
-                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition">
-                        <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold text-lg mb-4">
-                            <i class="fa-solid fa-tags"></i>
+                    <div class="bg-white p-5 rounded-lg border border-slate-200">
+                        <div class="flex items-center gap-2.5 mb-2">
+                            <div class="w-8 h-8 rounded bg-slate-100 text-[#9B1C1C] flex items-center justify-center text-sm">
+                                <i class="fa-solid fa-tags"></i>
+                            </div>
+                            <h3 class="font-bold text-slate-900 text-sm">2 &amp; 3. Dynamic Fare Optimizer</h3>
                         </div>
-                        <h3 class="font-bold text-slate-900 text-base mb-1">2 & 3. Happy Hours Optimizer</h3>
-                        <p class="text-xs text-slate-500 leading-relaxed mb-3">
-                            Constrained Revenue Optimizer: <code>Expected Revenue = Fare × Expected Bookings</code>. Evaluates 10%–50% discounts to maximize total revenue.
+                        <p class="text-xs text-slate-600 leading-relaxed mb-3">
+                            Constrained Revenue Optimizer: <code>Expected Revenue = Fare × Expected Bookings</code>. Applies off-peak discounts only on low-occupancy buses.
                         </p>
-                        <span class="text-[11px] font-semibold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-md">Constraint Satisfied (Capacity, Floor)</span>
+                        <span class="text-[11px] font-semibold text-[#9B1C1C] bg-slate-100 px-2 py-0.5 rounded border border-slate-200">Capacity &amp; Demand Controlled</span>
                     </div>
 
                     <!-- Mod 4 -->
-                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition">
-                        <div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center font-bold text-lg mb-4">
-                            <i class="fa-solid fa-rectangle-ad"></i>
+                    <div class="bg-white p-5 rounded-lg border border-slate-200">
+                        <div class="flex items-center gap-2.5 mb-2">
+                            <div class="w-8 h-8 rounded bg-slate-100 text-[#1e3a5f] flex items-center justify-center text-sm">
+                                <i class="fa-solid fa-rectangle-ad"></i>
+                            </div>
+                            <h3 class="font-bold text-slate-900 text-sm">4. In-Bus Advertising (Dataset)</h3>
                         </div>
-                        <h3 class="font-bold text-slate-900 text-base mb-1">4. In-Bus Advertising (Dataset)</h3>
-                        <p class="text-xs text-slate-500 leading-relaxed mb-3">
+                        <p class="text-xs text-slate-600 leading-relaxed mb-3">
                             Position-based pricing (Front/First 10/Middle/Rear). Trained on 1,000 advertisement records predicting revenue and tracking QR scans.
                         </p>
-                        <span class="text-[11px] font-semibold text-purple-700 bg-purple-50 px-2.5 py-1 rounded-md">1,000 Records ML Model</span>
+                        <span class="text-[11px] font-semibold text-[#1e3a5f] bg-slate-100 px-2 py-0.5 rounded border border-slate-200">1,000 Records ML Model</span>
                     </div>
 
                     <!-- Mod 5 -->
-                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition">
-                        <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-lg mb-4">
-                            <i class="fa-solid fa-users"></i>
+                    <div class="bg-white p-5 rounded-lg border border-slate-200">
+                        <div class="flex items-center gap-2.5 mb-2">
+                            <div class="w-8 h-8 rounded bg-slate-100 text-[#1e3a5f] flex items-center justify-center text-sm">
+                                <i class="fa-solid fa-users"></i>
+                            </div>
+                            <h3 class="font-bold text-slate-900 text-sm">5. Group &amp; Multi-Day Bulk</h3>
                         </div>
-                        <h3 class="font-bold text-slate-900 text-base mb-1">5. Group & Multi-Day Bulk</h3>
-                        <p class="text-xs text-slate-500 leading-relaxed mb-3">
-                            Tiered discounts for wedding parties, college tours (10%–20%), multi-day reservations (>3 days), and flexible multi-seat allocation.
+                        <p class="text-xs text-slate-600 leading-relaxed mb-3">
+                            Tiered discounts for wedding parties, college tours (10%–20%), multi-day reservations (&gt;3 days), and flexible multi-seat allocation.
                         </p>
-                        <span class="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md">Group & Charter Engine</span>
+                        <span class="text-[11px] font-semibold text-[#1e3a5f] bg-slate-100 px-2 py-0.5 rounded border border-slate-200">Group &amp; Charter Engine</span>
                     </div>
 
                     <!-- Mod 6 -->
-                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition">
-                        <div class="w-10 h-10 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center font-bold text-lg mb-4">
-                            <i class="fa-solid fa-utensils"></i>
+                    <div class="bg-white p-5 rounded-lg border border-slate-200">
+                        <div class="flex items-center gap-2.5 mb-2">
+                            <div class="w-8 h-8 rounded bg-slate-100 text-[#1e3a5f] flex items-center justify-center text-sm">
+                                <i class="fa-solid fa-utensils"></i>
+                            </div>
+                            <h3 class="font-bold text-slate-900 text-sm">6. Vendor &amp; Rest-Stop Tie-Ups</h3>
                         </div>
-                        <h3 class="font-bold text-slate-900 text-base mb-1">6. Vendor & Rest-Stop Tie-Ups</h3>
-                        <p class="text-xs text-slate-500 leading-relaxed mb-3">
-                            Katraj Ghat Highway Food Plaza (Pune-Kolhapur NH48) & Onboard MSRTC Rail Neer pre-orders, earning 10%–15% commission + rest-stop bidding fees.
+                        <p class="text-xs text-slate-600 leading-relaxed mb-3">
+                            Katraj Ghat Highway Food Plaza (Pune-Kolhapur NH48) &amp; Onboard MSRTC Rail Neer pre-orders, earning 10%–15% commission + rest-stop bidding fees.
                         </p>
-                        <span class="text-[11px] font-semibold text-orange-700 bg-orange-50 px-2.5 py-1 rounded-md">Katraj Ghat Rest-Stop Partner</span>
+                        <span class="text-[11px] font-semibold text-[#1e3a5f] bg-slate-100 px-2 py-0.5 rounded border border-slate-200">Katraj Ghat Rest-Stop Partner</span>
                     </div>
 
                     <!-- Mod 7 -->
-                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition">
-                        <div class="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center font-bold text-lg mb-4">
-                            <i class="fa-solid fa-shield-heart"></i>
+                    <div class="bg-white p-5 rounded-lg border border-slate-200">
+                        <div class="flex items-center gap-2.5 mb-2">
+                            <div class="w-8 h-8 rounded bg-slate-100 text-[#9B1C1C] flex items-center justify-center text-sm">
+                                <i class="fa-solid fa-shield-halved"></i>
+                            </div>
+                            <h3 class="font-bold text-slate-900 text-sm">7. Passenger Priority &amp; Safety</h3>
                         </div>
-                        <h3 class="font-bold text-slate-900 text-base mb-1">7. Passenger Priority & Safety</h3>
-                        <p class="text-xs text-slate-500 leading-relaxed mb-3">
+                        <p class="text-xs text-slate-600 leading-relaxed mb-3">
                             Priority seating for Senior Citizens (Row 1-2), Pregnant Women, and Solo Female Safe Matching with instant Control Room SOS dispatch.
                         </p>
-                        <span class="text-[11px] font-semibold text-rose-700 bg-rose-50 px-2.5 py-1 rounded-md">SOS 1091 & Concessions</span>
+                        <span class="text-[11px] font-semibold text-[#9B1C1C] bg-slate-100 px-2 py-0.5 rounded border border-slate-200">SOS 1091 &amp; Concessions</span>
                     </div>
                 </div>
 
                 <!-- Unified Revenue Formula Callout -->
-                <div class="mt-10 bg-slate-900 text-white p-6 sm:p-8 rounded-3xl shadow-xl flex flex-col md:flex-row items-center justify-between gap-6 border border-slate-700">
+                <div class="mt-6 bg-white p-5 rounded-lg border border-slate-200 border-l-4 border-l-[#9B1C1C] flex flex-col md:flex-row items-center justify-between gap-4">
                     <div>
-                        <span class="text-xs uppercase tracking-widest text-amber-400 font-bold">Consolidated Financial Framework</span>
-                        <h3 class="text-xl sm:text-2xl font-black mt-1">Total Revenue Formula</h3>
-                        <p class="text-slate-300 text-sm mt-1 font-mono">
+                        <span class="text-[11px] uppercase tracking-wider text-[#1e3a5f] font-bold">Consolidated Financial Framework</span>
+                        <h3 class="text-base font-bold text-slate-900 mt-0.5">Total Revenue Formula</h3>
+                        <p class="text-slate-600 text-xs mt-1 font-mono">
                             R<sub>total</sub> = R<sub>ticket</sub> + R<sub>advertisement</sub> + R<sub>vendor</sub> + R<sub>partnership</sub>
                         </p>
                     </div>
-                    <button onclick="navigateTo('revenue')" class="bg-msrtc-red hover:bg-msrtc-darkred text-white font-bold px-6 py-3 rounded-xl shadow-lg transition whitespace-nowrap">
-            View Live Revenue Breakdown <i class="fa-solid fa-arrow-right ml-1"></i>
-          </button>
+                    <button onclick="navigateTo('revenue')" class="bg-[#1e3a5f] hover:bg-slate-800 text-white font-semibold text-xs px-5 py-2.5 rounded transition whitespace-nowrap">
+                        View Live Revenue Breakdown <i class="fa-solid fa-arrow-right ml-1"></i>
+                    </button>
                 </div>
             </div>
         </section>
@@ -1178,62 +1240,62 @@
 
         <!-- PAGE 9: SINGLE WOMEN TRANSIT SAFETY SHIELD (MODULE 7) -->
         <section id="page-women-safety" class="page-view hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <!-- Hero Banner -->
-            <div class="bg-gradient-to-r from-rose-600 via-pink-600 to-red-600 rounded-3xl p-6 sm:p-10 text-white shadow-xl relative overflow-hidden mb-8">
-                <div class="absolute right-0 bottom-0 opacity-10 pointer-events-none transform translate-x-10 translate-y-10">
-                    <i class="fa-solid fa-shield-heart text-[260px]"></i>
-                </div>
-                <div class="max-w-3xl relative z-10">
-                    <span class="inline-flex items-center gap-1.5 bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-3">
-                        <i class="fa-solid fa-person-dress text-pink-200"></i> Maharashtra Mahila Samman &amp; Safety Initiative
-                    </span>
-                    <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight leading-tight mb-2">
-                        Single Women Safe Transit Shield <br /><span class="text-pink-200 text-2xl sm:text-3xl font-bold">(एकल महिला प्रवासी सुरक्षा कवच)</span>
-                    </h2>
-                    <p class="text-pink-100 text-xs sm:text-sm mb-6 leading-relaxed">
-                        Dedicated safety protocols for women traveling solo across Maharashtra: automated female co-seating protection, Night Guardian safe drop halts, live family journey WhatsApp tracking, and instant 1091 Women SOS dispatch.
-                    </p>
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
-                        <div class="bg-white/10 backdrop-blur-md p-3 rounded-2xl border border-white/20">
-                            <span class="block text-xl font-black text-amber-300">50% OFF</span>
-                            <span class="text-[10px] text-pink-100 uppercase font-semibold">Mahila Samman</span>
+            <!-- Official Header Banner -->
+            <div class="bg-[#1e3a5f] rounded-lg p-6 text-white border-b-4 border-[#9B1C1C] mb-6">
+                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                    <div class="max-w-2xl">
+                        <p class="text-[11px] uppercase tracking-wider text-slate-300 font-semibold mb-1">
+                            Maharashtra Mahila Samman &amp; Passenger Safety Cell
+                        </p>
+                        <h2 class="text-2xl sm:text-3xl font-bold tracking-tight mb-2">
+                            Women Passenger Safety &amp; Security Portal
+                            <span class="block text-base sm:text-lg font-normal text-slate-200 mt-0.5">(एकल महिला प्रवासी सुरक्षा कवच)</span>
+                        </h2>
+                        <p class="text-slate-200 text-xs sm:text-sm leading-relaxed">
+                            Automated female co-seating protection, authorized Night Safe Drop halts, live family journey tracking, and 24x7 Women SOS 1091 dispatch.
+                        </p>
+                    </div>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-center shrink-0">
+                        <div class="bg-white/10 px-3 py-2.5 rounded border border-white/20">
+                            <span class="block text-base font-bold text-white">50% OFF</span>
+                            <span class="text-[10px] text-slate-200 uppercase font-medium">Mahila Samman</span>
                         </div>
-                        <div class="bg-white/10 backdrop-blur-md p-3 rounded-2xl border border-white/20">
-                            <span class="block text-xl font-black text-amber-300">100% Locked</span>
-                            <span class="text-[10px] text-pink-100 uppercase font-semibold">Female Co-Seating</span>
+                        <div class="bg-white/10 px-3 py-2.5 rounded border border-white/20">
+                            <span class="block text-base font-bold text-white">Auto-Lock</span>
+                            <span class="text-[10px] text-slate-200 uppercase font-medium">Female Co-Seat</span>
                         </div>
-                        <div class="bg-white/10 backdrop-blur-md p-3 rounded-2xl border border-white/20">
-                            <span class="block text-xl font-black text-amber-300">7 PM – 6 AM</span>
-                            <span class="text-[10px] text-pink-100 uppercase font-semibold">Night Safe Drop</span>
+                        <div class="bg-white/10 px-3 py-2.5 rounded border border-white/20">
+                            <span class="block text-base font-bold text-white">7 PM – 6 AM</span>
+                            <span class="text-[10px] text-slate-200 uppercase font-medium">Night Safe Drop</span>
                         </div>
-                        <div class="bg-white/10 backdrop-blur-md p-3 rounded-2xl border border-white/20">
-                            <span class="block text-xl font-black text-amber-300">SOS 1091</span>
-                            <span class="text-[10px] text-pink-100 uppercase font-semibold">24x7 Command</span>
+                        <div class="bg-[#9B1C1C] px-3 py-2.5 rounded border border-white/20">
+                            <span class="block text-base font-bold text-white">SOS 1091</span>
+                            <span class="text-[10px] text-slate-100 uppercase font-medium">24x7 Helpline</span>
                         </div>
                     </div>
                 </div>
             </div>
 
             <!-- Main Feature Grid -->
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
                 <!-- Left 7 Cols: Night Safe Drop Service & Family Tracker -->
                 <div class="lg:col-span-7 space-y-6">
 
                     <!-- Tool 1: Night Safe Drop Halt Request -->
-                    <div class="bg-white p-6 sm:p-7 rounded-3xl border border-slate-200 shadow-sm">
-                        <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+                    <div class="bg-white p-5 sm:p-6 rounded-lg border border-slate-200">
+                        <div class="flex items-center justify-between pb-3 border-b border-slate-200 mb-4">
                             <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-xl bg-pink-50 text-rose-600 flex items-center justify-center text-lg border border-pink-200">
+                                <div class="w-9 h-9 rounded bg-slate-100 text-[#1e3a5f] flex items-center justify-center text-base border border-slate-200">
                                     <i class="fa-solid fa-moon"></i>
                                 </div>
                                 <div>
-                                    <h3 class="text-base font-extrabold text-slate-900">Night Guardian Safe Drop Request</h3>
-                                    <p class="text-xs text-slate-500">Authorized unscheduled halts at well-lit points between 7 PM and 6 AM</p>
+                                    <h3 class="text-sm font-bold text-slate-900">Night Guardian Safe Drop Request</h3>
+                                    <p class="text-xs text-slate-500">Authorized halts at well-lit points between 7 PM and 6 AM</p>
                                 </div>
                             </div>
-                            <span class="text-[10px] bg-rose-50 text-rose-700 font-extrabold px-2.5 py-1 rounded-full border border-rose-200">
-                                Realtime Crew Dispatch
+                            <span class="text-[10px] bg-slate-100 text-slate-700 font-semibold px-2 py-0.5 rounded border border-slate-200">
+                                Crew Dispatch
                             </span>
                         </div>
 
@@ -1241,21 +1303,21 @@
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div>
                                     <label class="block font-bold text-slate-700 uppercase mb-1">Passenger Name</label>
-                                    <input type="text" id="ws-passenger-name" class="w-full p-2.5 border border-slate-300 rounded-xl" placeholder="Full Name" required />
+                                    <input type="text" id="ws-passenger-name" class="w-full p-2.5 border border-slate-300 rounded focus:border-[#1e3a5f] outline-none" placeholder="Full Name" required />
                                 </div>
                                 <div>
                                     <label class="block font-bold text-slate-700 uppercase mb-1">Passenger Mobile No</label>
-                                    <input type="tel" id="ws-passenger-phone" class="w-full p-2.5 border border-slate-300 rounded-xl" placeholder="+91 98230 12345" required />
+                                    <input type="tel" id="ws-passenger-phone" class="w-full p-2.5 border border-slate-300 rounded focus:border-[#1e3a5f] outline-none" placeholder="+91 98230 12345" required />
                                 </div>
                             </div>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div>
                                     <label class="block font-bold text-slate-700 uppercase mb-1">Bus Number / PNR</label>
-                                    <input type="text" id="ws-bus-number" class="w-full p-2.5 border border-slate-300 rounded-xl font-mono" placeholder="MH-09-EM-8834" value="MH-09-EM-8834" required />
+                                    <input type="text" id="ws-bus-number" class="w-full p-2.5 border border-slate-300 rounded font-mono focus:border-[#1e3a5f] outline-none" placeholder="MH-09-EM-8834" value="MH-09-EM-8834" required />
                                 </div>
                                 <div>
                                     <label class="block font-bold text-slate-700 uppercase mb-1">Preferred Safe Drop Landmark</label>
-                                    <select id="ws-drop-landmark" class="w-full p-2.5 border border-slate-300 rounded-xl font-semibold text-slate-800">
+                                    <select id="ws-drop-landmark" class="w-full p-2.5 border border-slate-300 rounded font-medium text-slate-800 focus:border-[#1e3a5f] outline-none">
                                         <option value="Wakad Bridge Safe Drop Junction (Illuminated Auto Bay)">Wakad Bridge Safe Drop Junction (Illuminated Auto Bay)</option>
                                         <option value="Katraj Ghat Police Chowki & Lighted Bay">Katraj Ghat Police Chowki & Lighted Bay</option>
                                         <option value="Shirwal ST Stand Illuminated Exit (CCTV Monitored)">Shirwal ST Stand Illuminated Exit (CCTV Monitored)</option>
@@ -1267,30 +1329,30 @@
                             </div>
                             <div>
                                 <label class="block font-bold text-slate-700 uppercase mb-1">Emergency Assistance Notes (Optional)</label>
-                                <input type="text" id="ws-notes" class="w-full p-2.5 border border-slate-300 rounded-xl" placeholder="e.g. Traveling alone with luggage; request driver halt near lighted auto stand." />
+                                <input type="text" id="ws-notes" class="w-full p-2.5 border border-slate-300 rounded focus:border-[#1e3a5f] outline-none" placeholder="e.g. Traveling alone with luggage; request driver halt near lighted auto stand." />
                             </div>
-                            <button type="submit" id="ws-safe-drop-btn" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-extrabold py-3 rounded-xl transition shadow-md flex items-center justify-center gap-2">
+                            <button type="submit" id="ws-safe-drop-btn" class="w-full bg-[#1e3a5f] hover:bg-slate-800 text-white font-bold py-2.5 rounded transition flex items-center justify-center gap-2">
                                 <i class="fa-solid fa-shield-halved"></i> Request Night Safe Drop from Conductor
                             </button>
                         </form>
 
                         <!-- Safe Drop Confirmation Card -->
-                        <div id="ws-safe-drop-result" class="hidden mt-4 p-4 bg-emerald-50 border border-emerald-200 rounded-2xl text-xs space-y-2"></div>
+                        <div id="ws-safe-drop-result" class="hidden mt-4 p-4 bg-slate-50 border border-slate-200 rounded-lg text-xs space-y-2"></div>
                     </div>
 
                     <!-- Tool 2: Family Live Journey WhatsApp Share Link -->
-                    <div class="bg-white p-6 sm:p-7 rounded-3xl border border-slate-200 shadow-sm">
-                        <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+                    <div class="bg-white p-5 sm:p-6 rounded-lg border border-slate-200">
+                        <div class="flex items-center justify-between pb-3 border-b border-slate-200 mb-4">
                             <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg border border-emerald-200">
+                                <div class="w-9 h-9 rounded bg-slate-100 text-[#1e3a5f] flex items-center justify-center text-base border border-slate-200">
                                     <i class="fa-solid fa-share-nodes"></i>
                                 </div>
                                 <div>
-                                    <h3 class="text-base font-extrabold text-slate-900">Family Live Journey WhatsApp Tracker</h3>
+                                    <h3 class="text-sm font-bold text-slate-900">Family Live Journey Tracker</h3>
                                     <p class="text-xs text-slate-500">Share live GPS corridor, conductor contacts, and ETA with family</p>
                                 </div>
                             </div>
-                            <span class="text-[10px] bg-emerald-50 text-emerald-700 font-extrabold px-2.5 py-1 rounded-full border border-emerald-200">
+                            <span class="text-[10px] bg-slate-100 text-slate-700 font-semibold px-2 py-0.5 rounded border border-slate-200">
                                 1-Click Share
                             </span>
                         </div>
@@ -1299,20 +1361,20 @@
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div>
                                     <label class="block font-bold text-slate-700 uppercase mb-1">Emergency Contact Person</label>
-                                    <input type="text" id="ws-contact-name" class="w-full p-2.5 border border-slate-300 rounded-xl" placeholder="e.g. Mother / Father / Spouse / Sister" required />
+                                    <input type="text" id="ws-contact-name" class="w-full p-2.5 border border-slate-300 rounded focus:border-[#1e3a5f] outline-none" placeholder="e.g. Mother / Father / Spouse" required />
                                 </div>
                                 <div>
                                     <label class="block font-bold text-slate-700 uppercase mb-1">Emergency Contact Mobile</label>
-                                    <input type="tel" id="ws-contact-phone" class="w-full p-2.5 border border-slate-300 rounded-xl" placeholder="+91 98230 00000" required />
+                                    <input type="tel" id="ws-contact-phone" class="w-full p-2.5 border border-slate-300 rounded focus:border-[#1e3a5f] outline-none" placeholder="+91 98230 00000" required />
                                 </div>
                             </div>
-                            <button type="submit" id="ws-share-btn" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-extrabold py-3 rounded-xl transition shadow-md flex items-center justify-center gap-2">
-                                <i class="fa-solid fa-location-arrow text-emerald-400"></i> Generate Live Family Tracker Link
+                            <button type="submit" id="ws-share-btn" class="w-full bg-[#1e3a5f] hover:bg-slate-800 text-white font-bold py-2.5 rounded transition flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-location-arrow"></i> Generate Live Family Tracker Link
                             </button>
                         </form>
 
                         <!-- Share Link Output Box -->
-                        <div id="ws-share-result" class="hidden mt-4 p-4 bg-slate-50 border border-slate-200 rounded-2xl text-xs space-y-3"></div>
+                        <div id="ws-share-result" class="hidden mt-4 p-4 bg-slate-50 border border-slate-200 rounded-lg text-xs space-y-3"></div>
                     </div>
 
                 </div>
@@ -1321,88 +1383,88 @@
                 <div class="lg:col-span-5 space-y-6">
 
                     <!-- Co-Seating Shield Card -->
-                    <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
-                        <div class="flex items-center gap-2.5 mb-3">
-                            <span class="w-8 h-8 rounded-full bg-purple-100 text-purple-700 flex items-center justify-center font-bold text-sm">
-                                🌸
-                            </span>
+                    <div class="bg-white p-5 sm:p-6 rounded-lg border border-slate-200">
+                        <div class="flex items-center gap-2.5 pb-3 border-b border-slate-200 mb-3">
+                            <div class="w-8 h-8 rounded bg-slate-100 text-[#1e3a5f] flex items-center justify-center text-sm border border-slate-200">
+                                <i class="fa-solid fa-user-shield"></i>
+                            </div>
                             <div>
-                                <h3 class="text-sm font-extrabold text-slate-900">Safe Adjacent Co-Seating Shield</h3>
-                                <p class="text-[11px] text-slate-500">Automated Gender Matching Algorithm</p>
+                                <h3 class="text-sm font-bold text-slate-900">Safe Adjacent Co-Seating Rule</h3>
+                                <p class="text-[11px] text-slate-500">Automated Gender Matching Policy</p>
                             </div>
                         </div>
                         <p class="text-xs text-slate-600 mb-4 leading-relaxed">
-                            Under MSRTC smart transit rules, whenever a single woman traveler books a seat, the adjacent seat (e.g. window &amp; aisle pair) is automatically guarded:
+                            When a single woman traveler books a seat, the adjacent seat in the same pair is automatically reserved for female co-passengers only:
                         </p>
 
                         <!-- Visual Seat Pair Mockup -->
-                        <div class="p-4 bg-purple-50/60 border border-purple-200 rounded-2xl mb-4 space-y-2.5 text-xs">
+                        <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg mb-4 space-y-2.5 text-xs">
                             <div class="flex items-center justify-between">
-                                <span class="font-bold text-purple-900">Seat Pair Example: Row 3</span>
-                                <span class="text-[10px] bg-purple-200 text-purple-900 px-2 py-0.5 rounded font-extrabold">Active Shield</span>
+                                <span class="font-bold text-slate-800">Seat Pair Example: Row 3</span>
+                                <span class="text-[10px] bg-white text-[#1e3a5f] border border-slate-300 px-2 py-0.5 rounded font-semibold">Policy Active</span>
                             </div>
                             <div class="flex gap-3 justify-center py-2">
-                                <div class="w-20 h-16 bg-rose-600 text-white rounded-xl flex flex-col items-center justify-center text-[10px] font-bold shadow-md">
-                                    <i class="fa-solid fa-person-dress text-lg"></i>
+                                <div class="w-24 h-16 bg-[#9B1C1C] text-white rounded flex flex-col items-center justify-center text-[10px] font-bold">
+                                    <i class="fa-solid fa-person-dress text-base mb-0.5"></i>
                                     <span>Seat 3A</span>
-                                    <span class="text-[8px] opacity-90">Single Woman</span>
+                                    <span class="text-[9px] font-normal opacity-90">Booked (Female)</span>
                                 </div>
-                                <div class="w-20 h-16 bg-pink-100 border-2 border-dashed border-pink-400 text-pink-900 rounded-xl flex flex-col items-center justify-center text-[10px] font-bold">
-                                    <i class="fa-solid fa-lock text-sm text-pink-600 mb-0.5"></i>
+                                <div class="w-24 h-16 bg-white border-2 border-dashed border-[#1e3a5f] text-[#1e3a5f] rounded flex flex-col items-center justify-center text-[10px] font-bold">
+                                    <i class="fa-solid fa-lock text-sm mb-0.5"></i>
                                     <span>Seat 3B</span>
-                                    <span class="text-[8px] text-pink-700">Female Co-Pax Only</span>
+                                    <span class="text-[9px] font-normal">Female Only</span>
                                 </div>
                             </div>
-                            <p class="text-[11px] text-purple-800 text-center">
-                                <i class="fa-solid fa-check-circle mr-1 text-emerald-600"></i> Male passenger booking blocked on adjacent seat.
+                            <p class="text-[11px] text-slate-600 text-center">
+                                <i class="fa-solid fa-check-circle mr-1 text-green-700"></i> Adjacent seat restricted to female passengers.
                             </p>
                         </div>
 
-                        <div class="space-y-2 text-[11px] text-slate-600">
+                        <div class="space-y-2 text-[11px] text-slate-700">
                             <div class="flex items-center gap-2">
-                                <i class="fa-solid fa-shield-check text-rose-600"></i>
+                                <i class="fa-solid fa-check text-[#1e3a5f]"></i>
                                 <span>Dedicated Ladies Reserve: Seats 3A, 3B, 4A, 4B</span>
                             </div>
                             <div class="flex items-center gap-2">
-                                <i class="fa-solid fa-percent text-rose-600"></i>
+                                <i class="fa-solid fa-check text-[#1e3a5f]"></i>
                                 <span>50% Mahila Samman Concession applied automatically</span>
                             </div>
                             <div class="flex items-center gap-2">
-                                <i class="fa-solid fa-headset text-rose-600"></i>
+                                <i class="fa-solid fa-check text-[#1e3a5f]"></i>
                                 <span>Conductor alerted on passenger cabin manifest</span>
                             </div>
                         </div>
                     </div>
 
                     <!-- Direct Emergency SOS Card -->
-                    <div class="bg-gradient-to-br from-rose-900 to-slate-900 text-white p-6 rounded-3xl shadow-xl border-2 border-rose-500">
-                        <div class="flex items-center justify-between pb-3 border-b border-rose-700/50 mb-4">
+                    <div class="bg-white p-5 sm:p-6 rounded-lg border border-slate-200 border-t-4 border-t-[#9B1C1C]">
+                        <div class="flex items-center justify-between pb-3 border-b border-slate-200 mb-3">
                             <div>
-                                <span class="text-[10px] font-bold uppercase tracking-wider text-rose-300">24x7 Transit Safety</span>
-                                <h3 class="text-base font-extrabold">Instant Women SOS Dispatch</h3>
+                                <span class="text-[10px] font-bold uppercase tracking-wider text-[#9B1C1C]">24x7 Transit Safety</span>
+                                <h3 class="text-sm font-bold text-slate-900">Emergency SOS Dispatch</h3>
                             </div>
-                            <i class="fa-solid fa-triangle-exclamation text-2xl text-rose-400 animate-pulse"></i>
+                            <i class="fa-solid fa-triangle-exclamation text-xl text-[#9B1C1C]"></i>
                         </div>
-                        <p class="text-xs text-rose-100 mb-4">
-                            Triggers simultaneous emergency dispatch to MSRTC Transit Command, Maharashtra Highway Police, and the Women Safety Cell (1091).
+                        <p class="text-xs text-slate-600 mb-4">
+                            Sends immediate alert to MSRTC Transit Command, Maharashtra Highway Police, and Women Safety Cell (1091).
                         </p>
 
-                        <button onclick="triggerWomenEmergencySOS()" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-black py-3.5 rounded-2xl text-xs uppercase tracking-wider transition shadow-lg shadow-rose-900/50 flex items-center justify-center gap-2 mb-4">
-                            <i class="fa-solid fa-bell text-base"></i> Trigger 1-Click Emergency SOS
+                        <button onclick="triggerWomenEmergencySOS()" class="w-full bg-[#9B1C1C] hover:bg-[#7f1818] text-white font-bold py-3 rounded text-xs uppercase tracking-wider transition flex items-center justify-center gap-2 mb-4">
+                            <i class="fa-solid fa-bell"></i> Trigger Emergency SOS
                         </button>
 
-                        <div class="pt-3 border-t border-rose-800/40 space-y-2 text-xs">
-                            <div class="flex justify-between items-center bg-white/10 p-2 rounded-xl">
-                                <span>Women Safety Helpline:</span>
-                                <a href="tel:1091" class="font-bold text-amber-300 hover:underline font-mono text-sm">1091</a>
+                        <div class="pt-3 border-t border-slate-200 space-y-2 text-xs">
+                            <div class="flex justify-between items-center bg-slate-50 px-3 py-2 rounded border border-slate-200">
+                                <span class="text-slate-700 font-medium">Women Safety Helpline:</span>
+                                <a href="tel:1091" class="font-bold text-[#9B1C1C] hover:underline font-mono text-sm">1091</a>
                             </div>
-                            <div class="flex justify-between items-center bg-white/10 p-2 rounded-xl">
-                                <span>MSRTC Central Command:</span>
-                                <a href="tel:1800221234" class="font-bold text-amber-300 hover:underline font-mono text-sm">1800-22-1234</a>
+                            <div class="flex justify-between items-center bg-slate-50 px-3 py-2 rounded border border-slate-200">
+                                <span class="text-slate-700 font-medium">MSRTC Central Command:</span>
+                                <a href="tel:1800221234" class="font-bold text-[#1e3a5f] hover:underline font-mono text-sm">1800-22-1234</a>
                             </div>
-                            <div class="flex justify-between items-center bg-white/10 p-2 rounded-xl">
-                                <span>Police Emergency:</span>
-                                <a href="tel:112" class="font-bold text-amber-300 hover:underline font-mono text-sm">112</a>
+                            <div class="flex justify-between items-center bg-slate-50 px-3 py-2 rounded border border-slate-200">
+                                <span class="text-slate-700 font-medium">Police Emergency:</span>
+                                <a href="tel:112" class="font-bold text-[#1e3a5f] hover:underline font-mono text-sm">112</a>
                             </div>
                         </div>
                     </div>
@@ -1494,15 +1556,15 @@
 
     <!-- ================= SOS ALERT MODAL ================= -->
     <div id="sos-modal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border-2 border-rose-600 text-center">
-            <div class="w-14 h-14 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto text-2xl mb-3 animate-pulse">
+        <div class="bg-white rounded-lg max-w-md w-full p-6 shadow-xl border border-slate-200 border-t-4 border-t-[#9B1C1C] text-center">
+            <div class="w-12 h-12 bg-slate-100 text-[#9B1C1C] rounded-full flex items-center justify-center mx-auto text-xl mb-3 border border-slate-200">
                 <i class="fa-solid fa-triangle-exclamation"></i>
             </div>
-            <h3 class="text-lg font-extrabold text-slate-900">Passenger Safety SOS Triggered</h3>
-            <p class="text-xs text-slate-500 mt-1">Live coordinates dispatched to MSRTC Transit Command & Women Safety Helpline.</p>
-            <div id="sos-details-box" class="bg-rose-50 text-rose-950 p-4 rounded-xl border border-rose-200 text-xs text-left my-4 space-y-1.5 font-mono"></div>
-            <button onclick="closeSOSModal()" class="w-full bg-slate-900 text-white font-bold py-2.5 rounded-xl text-xs">
-        Acknowledge & Close
+            <h3 class="text-base font-bold text-slate-900">Passenger Safety SOS Triggered</h3>
+            <p class="text-xs text-slate-500 mt-1">Live coordinates dispatched to MSRTC Transit Command &amp; Women Safety Helpline (1091).</p>
+            <div id="sos-details-box" class="bg-slate-50 text-slate-900 p-4 rounded border border-slate-200 text-xs text-left my-4 space-y-1.5 font-mono"></div>
+            <button onclick="closeSOSModal()" class="w-full bg-[#1e3a5f] hover:bg-slate-800 text-white font-bold py-2.5 rounded text-xs transition">
+        Acknowledge &amp; Close
       </button>
         </div>
     </div>
