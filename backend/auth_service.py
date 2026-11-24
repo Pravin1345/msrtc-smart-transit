@@ -86,33 +86,34 @@ def _generate_smart_id():
 
 
 def _clean_and_resolve_email(raw_email, full_name=""):
+    """Accept either a valid email address (e.g. sarkarpavn997@gmail.com) or a username."""
     email = (raw_email or "").strip().lower()
 
     if not email:
-        raise ValueError("Email address is required.")
+        raise ValueError("Email address or username is required.")
 
-    # Reject spaces inside email
+    # Reject spaces inside email/username
     if re.search(r"\s", email):
-        raise ValueError("Email cannot contain spaces.")
+        raise ValueError("Email or username cannot contain spaces.")
 
-    # Validate email structure
+    # If user entered a plain username (no '@'), resolve to <username>@msrtc.in
+    if "@" not in email:
+        clean_user = re.sub(r"[^a-z0-9._-]", "", email)
+        if len(clean_user) < 3:
+            raise ValueError("Username must be at least 3 characters.")
+        return f"{clean_user}@msrtc.in"
+
+    # Validate email structure (accepts sarkarpavn997@gmail.com, etc.)
     pattern = r"^[a-z0-9._%+-]+@[a-z0-9-]+(?:\.[a-z0-9-]+)+$"
-
     if not re.fullmatch(pattern, email):
-        raise ValueError("Please enter a valid email address.")
+        raise ValueError("Please enter a valid email address (e.g. sarkarpavn997@gmail.com) or a username.")
 
     username, domain = email.split("@")
-
     if len(username) > 64 or len(email) > 254:
         raise ValueError("Email address is too long.")
-
     if ".." in username or ".." in domain:
         raise ValueError("Please enter a valid email address.")
-
-    if any(
-        not label or label.startswith("-") or label.endswith("-")
-        for label in domain.split(".")
-    ):
+    if any(not label or label.startswith("-") or label.endswith("-") for label in domain.split(".")):
         raise ValueError("Please enter a valid email address.")
 
     return email

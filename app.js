@@ -109,7 +109,6 @@ const TRANSLATIONS = {
     nav_history: "My Trips",
     nav_smartid: "Smart ID",
     nav_safety: "Women Safety",
-    hero_subtitle: "MSRTC • Online Reservation Portal",
     hero_title: "Book MSRTC Bus Tickets Online",
     btn_all_features: "All Services & Features",
     btn_rev_dash: "Revenue & ML Dashboard",
@@ -198,7 +197,6 @@ const TRANSLATIONS = {
     nav_history: "माझा प्रवास",
     nav_smartid: "स्मार्ट आयडी",
     nav_safety: "महिला सुरक्षा",
-    hero_subtitle: "महाराष्ट्र राज्य मार्ग परिवहन महामंडळ • अधिकृत ऑनलाइन आरक्षण पोर्टल",
     hero_title: "एमएसआरटीसी बस तिकिटे ऑनलाइन बुक करा",
     btn_all_features: "सर्व सेवा आणि सुविधा",
     btn_rev_dash: "महसूल व एमएल डॅशबोर्ड",
@@ -1765,8 +1763,8 @@ async function handleLoginSubmit(e) {
 async function handleRegisterSubmit(e) {
   e.preventDefault();
   const fullName = document.getElementById('reg-name').value.trim();
-  const email = document.getElementById('reg-email').value.trim();
-  const phone = document.getElementById('reg-phone').value.trim();
+  const email = document.getElementById('auth-reg-email').value.trim();
+  const phone = document.getElementById('auth-reg-phone').value.trim();
   const gender = document.getElementById('reg-gender').value;
   const age = parseInt(document.getElementById('reg-age').value);
   const category = document.getElementById('reg-category').value;
@@ -1781,13 +1779,13 @@ async function handleRegisterSubmit(e) {
   if (email.includes('@')) {
     const emailPattern = /^[^\s@]+@[^\s@]+(?:\.[^\s@]+)?$/;
     if (!emailPattern.test(email)) {
-      showAuthMsg("Please enter a valid email address, such as name@domain.com.", true);
-      document.getElementById('reg-email').focus();
+      showAuthMsg("Please enter a valid email address, such as sarkarpavn997@gmail.com.", true);
+      document.getElementById('auth-reg-email').focus();
       return;
     }
   } else if (email.replace(/[\s\-]/g, '').length < 3) {
     showAuthMsg("Username must be at least 3 characters.", true);
-    document.getElementById('reg-email').focus();
+    document.getElementById('auth-reg-email').focus();
     return;
   }
 
