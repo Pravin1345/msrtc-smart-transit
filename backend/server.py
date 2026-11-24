@@ -205,7 +205,13 @@ def search(frm, to, d, today=None):
         )
         
         # If ML identifies this trip as eligible for Happy Hours discount
-        is_happy_hours = ml_forecast["is_happy_hours_eligible"] and opt_res["is_happy_hours_recommended"]
+        # HIGH demand buses must NEVER show Happy Hours — show regular/surge fare instead
+        is_high_demand = ml_forecast["demand_class"] == "HIGH" or occ >= 0.65
+        is_happy_hours = (
+            ml_forecast["is_happy_hours_eligible"]
+            and opt_res["is_happy_hours_recommended"]
+            and not is_high_demand
+        )
         effective_fare = opt_res["optimal_fare"] if is_happy_hours else q["fare"]
         effective_multiplier = round(effective_fare / max(1, q["baseFare"]), 3)
         

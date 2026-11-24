@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Smart Transit • ML-Based Revenue Optimization ("HAPPY HOURS")</title>
+    <title>MSRTC Smart Transit – ML-Based Revenue Optimization System</title>
 
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -35,34 +35,34 @@
     <link rel="stylesheet" href="styles.css?v=20261120_2" />
 </head>
 
-<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col antialiased">
+<body class="bg-gray-100 text-slate-800 min-h-screen flex flex-col antialiased">
 
     <!-- ================= TOP NOTIFICATION BAR ================= -->
-    <div class="bg-amber-500 text-slate-900 text-xs font-semibold px-4 py-1.5 flex justify-between items-center text-center">
+    <div class="bg-[#1e3a5f] text-white text-xs font-medium px-4 py-1.5 flex justify-between items-center border-b-2 border-[#9B1C1C]">
         <div class="flex items-center gap-2 mx-auto">
-            <span class="bg-slate-900 text-white text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full font-bold">⚡ Happy Hours Active</span>
-            <span>MSRTC Revenue Optimization System • ML Demand Forecasting • In-Bus Ads • Highway Vendor Tie-Ups • Passenger Safety</span>
+            <span class="bg-[#9B1C1C] text-white text-[10px] uppercase tracking-wider px-2 py-0.5 rounded font-bold">Government of Maharashtra</span>
+            <span>MSRTC • ML-Based Revenue Optimization System • Passenger Safety • Highway Vendor Tie-Ups</span>
         </div>
         <div class="hidden md:flex items-center gap-4 text-xs font-medium">
             <span><i class="fa-solid fa-headset mr-1"></i> Helpline: 1800-22-1234</span>
-            <span><i class="fa-solid fa-shield-halved text-rose-800 mr-1"></i> Women SOS 1091</span>
+            <span><i class="fa-solid fa-shield-halved mr-1"></i> Women SOS 1091</span>
             <span><i class="fa-solid fa-globe mr-1"></i> English / मराठी</span>
         </div>
     </div>
 
     <!-- ================= NAVIGATION BAR ================= -->
-    <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
+    <header class="bg-white border-b-2 border-[#9B1C1C] sticky top-0 z-40 shadow-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-18 py-3">
                 <!-- Logo -->
                 <div class="flex items-center gap-3 cursor-pointer" onclick="navigateTo('home')">
-                    <div class="w-11 h-11 rounded-xl bg-msrtc-red flex items-center justify-center text-white shadow-md shadow-red-200">
+                    <div class="w-11 h-11 rounded bg-[#9B1C1C] flex items-center justify-center text-white">
                         <i class="fa-solid fa-bus-simple text-2xl"></i>
                     </div>
                     <div>
                         <div class="flex items-center gap-2">
-                            <span class="font-extrabold text-xl tracking-tight text-slate-900">MSRTC <span class="text-msrtc-red">Happy Hours</span></span>
-                            <span class="text-[10px] font-bold bg-amber-100 text-amber-900 px-1.5 py-0.5 rounded border border-amber-300">Revenue AI</span>
+                            <span class="font-bold text-xl tracking-tight text-slate-900">MSRTC <span class="text-[#9B1C1C]">Smart Transit</span></span>
+                            <span class="text-[10px] font-semibold bg-[#1e3a5f] text-white px-1.5 py-0.5 rounded">ML System</span>
                         </div>
                         <p class="text-[11px] text-slate-500 font-medium hidden sm:block">महाराष्ट्र राज्य मार्ग परिवहन महामंडळ • Smart Transit</p>
                     </div>
@@ -77,16 +77,16 @@
             <i class="fa-solid fa-ticket mr-1"></i> Book Bus
           </button>
                     <button onclick="navigateTo('ads')" class="nav-btn px-3 py-2 rounded-lg text-sm font-semibold transition text-slate-700 hover:text-msrtc-red hover:bg-red-50" data-page="ads">
-            <i class="fa-solid fa-bullhorn mr-1 text-amber-600"></i> In-Bus Ads
+            <i class="fa-solid fa-bullhorn mr-1"></i> In-Bus Ads
           </button>
                     <button onclick="navigateTo('vendors')" class="nav-btn px-3 py-2 rounded-lg text-sm font-semibold transition text-slate-700 hover:text-msrtc-red hover:bg-red-50" data-page="vendors">
-            <i class="fa-solid fa-utensils mr-1 text-emerald-600"></i> Rest-Stops
+            <i class="fa-solid fa-utensils mr-1"></i> Rest-Stops
           </button>
                     <button onclick="navigateTo('bidding')" class="nav-btn px-3 py-2 rounded-lg text-sm font-semibold transition text-slate-700 hover:text-msrtc-red hover:bg-red-50" data-page="bidding">
-            <i class="fa-solid fa-gavel mr-1 text-amber-600"></i> Rest-Stop Bidding
+            <i class="fa-solid fa-gavel mr-1"></i> Rest-Stop Bidding
           </button>
                     <button onclick="navigateTo('cargo')" class="nav-btn px-3 py-2 rounded-lg text-sm font-semibold transition text-slate-700 hover:text-msrtc-red hover:bg-red-50" data-page="cargo">
-            <i class="fa-solid fa-box-open mr-1 text-indigo-600"></i> Courier & Luggage
+            <i class="fa-solid fa-box-open mr-1"></i> Courier & Luggage
           </button>
                     <button onclick="navigateTo('history')" class="nav-btn px-3 py-2 rounded-lg text-sm font-semibold transition text-slate-700 hover:text-msrtc-red hover:bg-red-50" data-page="history">
             <i class="fa-solid fa-clock-rotate-left mr-1"></i> My Trips
@@ -1216,10 +1216,10 @@
 
             <!-- Main Feature Grid -->
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                
+
                 <!-- Left 7 Cols: Night Safe Drop Service & Family Tracker -->
                 <div class="lg:col-span-7 space-y-6">
-                    
+
                     <!-- Tool 1: Night Safe Drop Halt Request -->
                     <div class="bg-white p-6 sm:p-7 rounded-3xl border border-slate-200 shadow-sm">
                         <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
@@ -1319,7 +1319,7 @@
 
                 <!-- Right 5 Cols: Co-Seating Protection Visualizer & Direct SOS -->
                 <div class="lg:col-span-5 space-y-6">
-                    
+
                     <!-- Co-Seating Shield Card -->
                     <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
                         <div class="flex items-center gap-2.5 mb-3">
@@ -1670,7 +1670,7 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                         <div>
                             <label class="block font-bold text-slate-700 uppercase mb-0.5">Email or Username</label>
-                            <input type="text" id="reg-email" class="w-full text-sm p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:outline-none" placeholder="name@domain.com or username" required />
+                            <input type="text" id="reg-email" autocomplete="email" class="w-full text-sm p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:outline-none" placeholder="name@domain.com or username" minlength="3" required />
                         </div>
                         <div>
                             <label class="block font-bold text-slate-700 uppercase mb-0.5">Mobile Number</label>

@@ -1,32 +1,44 @@
 /**
  * =========================================================
- * MSRTC MOBILITY SMART TRANSIT - CUSTOM STYLES & PRINT
+ * MSRTC SMART TRANSIT - GOVERNMENT STYLE THEME
+ * Maharashtra State Road Transport Corporation
  * =========================================================
  */
 
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;500;600;700&display=swap');
 
 body {
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: 'Noto Sans', sans-serif;
+  background-color: #f5f5f5;
+  color: #1a1a1a;
 }
 
-/* Gradient Hero Banner */
+/* ---- Government Color Palette ----
+   Primary:  #9B1C1C  (deep maroon / government red)
+   Secondary: #1e3a5f (navy blue)
+   Neutral:  #f5f5f5, #ffffff, #e5e7eb
+   Text:     #111827, #374151, #6b7280
+*/
+
+/* Hero/Header Banner — sober navy + maroon */
 .gradient-hero {
-  background: linear-gradient(135deg, #9B0A20 0%, #C8102E 50%, #E63946 100%);
+  background: #1e3a5f;
+  border-bottom: 4px solid #9B1C1C;
 }
 
 .gradient-card-ad {
-  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  background: #1e3a5f;
 }
 
 .gradient-card-hh {
-  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  background: #f9fafb;
+  border: 1px solid #d1d5db;
 }
 
 /* Custom Slim Scrollbars */
 .custom-scroll::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 
 .custom-scroll::-webkit-scrollbar-track {
@@ -34,53 +46,78 @@ body {
 }
 
 .custom-scroll::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 4px;
+  background: #9ca3af;
+  border-radius: 3px;
 }
 
 .custom-scroll::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: #6b7280;
 }
 
 /* Active Nav Button Highlight */
 .nav-active {
-  color: #C8102E !important;
+  color: #9B1C1C !important;
   background-color: #fef2f2 !important;
+  border-bottom: 2px solid #9B1C1C;
 }
 
 /* Interactive Seat Styles */
 .seat-btn {
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.15s ease;
   position: relative;
+  border-radius: 4px;
 }
 .seat-btn:hover:not(:disabled) {
-  transform: translateY(-2px);
+  transform: translateY(-1px);
 }
 .seat-btn.selected {
-  background-color: #C8102E !important;
+  background-color: #9B1C1C !important;
   color: white !important;
-  box-shadow: 0 4px 12px rgba(200, 16, 46, 0.35);
-  border-color: #9B0A20 !important;
+  box-shadow: 0 2px 6px rgba(155, 28, 28, 0.4);
+  border-color: #7f1818 !important;
 }
 
 /* Priority Seat Badges */
 .seat-btn.seat-priority-senior {
-  border: 2px solid #2563eb !important;
+  border: 2px solid #1d4ed8 !important;
 }
 .seat-btn.seat-priority-pregnant {
-  border: 2px solid #ec4899 !important;
+  border: 2px solid #db2777 !important;
 }
 .seat-btn.seat-priority-ladies {
-  border: 2px solid #9333ea !important;
+  border: 2px solid #7c3aed !important;
 }
 
-/* Pulse animation for live Happy Hours indicator */
-@keyframes pulse-gold {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.85; transform: scale(1.03); }
-}
+/* Off-peak discount badge — simple, no pulsing */
+@keyframes none {}
 .animate-pulse-gold {
-  animation: pulse-gold 2s infinite ease-in-out;
+  /* removed animation for government look */
+  animation: none;
+}
+
+/* Government notice bar */
+.gov-notice-bar {
+  background: #1e3a5f;
+  color: #ffffff;
+  font-size: 0.75rem;
+  padding: 0.4rem 1rem;
+  border-bottom: 2px solid #9B1C1C;
+}
+
+/* Government nav bar */
+.gov-nav {
+  background: #ffffff;
+  border-bottom: 3px solid #9B1C1C;
+}
+
+/* Section headings — official style */
+.gov-section-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1e3a5f;
+  border-left: 4px solid #9B1C1C;
+  padding-left: 0.75rem;
+  margin-bottom: 1rem;
 }
 
 /* Electronic Reservation Slip Print Media Styles */
@@ -88,7 +125,7 @@ body {
   body * {
     visibility: hidden;
   }
-  #ticket-modal-content, 
+  #ticket-modal-content,
   #ticket-modal-content * {
     visibility: visible;
   }

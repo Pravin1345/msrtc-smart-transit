@@ -238,8 +238,8 @@ function renderSearchResults(buses, from, to, dateVal) {
   box.innerHTML = `
     <div class="flex items-center justify-between mb-2 text-xs text-slate-500 font-semibold px-1">
       <span>Available Schedules (${buses.length} trips on ${esc(dateVal)})</span>
-      <span class="text-amber-800 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
-        <i class="fa-solid fa-bolt text-amber-500 mr-1"></i> Happy Hours Engine Active
+      <span class="text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-300">
+        <i class="fa-solid fa-chart-line mr-1"></i> ML Demand Forecasting Active
       </span>
     </div>
     <div class="space-y-4">
@@ -253,7 +253,7 @@ function renderSearchResults(buses, from, to, dateVal) {
         }[bus.demand || "MEDIUM"];
 
         return `
-          <div class="bg-white rounded-2xl border ${isHH ? 'border-amber-300 shadow-md ring-1 ring-amber-200' : 'border-slate-200 shadow-sm'} p-5 transition hover:shadow-lg">
+          <div class="bg-white rounded border ${isHH ? 'border-green-600 shadow-sm' : (bus.demand === 'HIGH' ? 'border-red-300 shadow-sm' : 'border-slate-200 shadow-sm')} p-5 transition hover:shadow-md">
             <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
               <!-- Left: Bus Details -->
               <div class="space-y-1.5">
@@ -264,10 +264,18 @@ function renderSearchResults(buses, from, to, dateVal) {
                     ML Demand: ${esc(bus.demand)}
                   </span>
                   ${isHH ? `
-                    <span class="text-[10px] font-extrabold uppercase tracking-wider bg-gradient-to-r from-amber-500 to-amber-600 text-white px-2.5 py-0.5 rounded-full shadow-sm animate-pulse-gold">
-                      ⚡ Happy Hours: ${bus.happyHoursDiscountPct}% OFF
+                    <span class="text-[10px] font-bold uppercase tracking-wider bg-green-700 text-white px-2 py-0.5 rounded">
+                      ⚡ Off-Peak Discount: ${bus.happyHoursDiscountPct}% OFF
                     </span>
-                  ` : ''}
+                  ` : (bus.demand === 'HIGH' ? `
+                    <span class="text-[10px] font-bold uppercase tracking-wider bg-red-800 text-white px-2 py-0.5 rounded">
+                      🔥 High Demand – Regular Fare
+                    </span>
+                  ` : `
+                    <span class="text-[10px] font-bold uppercase tracking-wider bg-gray-500 text-white px-2 py-0.5 rounded">
+                      Regular Fare
+                    </span>
+                  `)}
                 </div>
 
                 <div class="flex items-center gap-4 text-xs text-slate-500 pt-1">
@@ -297,7 +305,7 @@ function renderSearchResults(buses, from, to, dateVal) {
                   <div class="flex items-baseline gap-1.5">
                     ${isHH ? `
                       <span class="text-xs text-slate-400 line-through">₹${bus.originalFare}</span>
-                      <span class="text-2xl font-black text-amber-700">₹${bus.fare}</span>
+                      <span class="text-2xl font-black text-green-800">₹${bus.fare}</span>
                     ` : `
                       <span class="text-2xl font-black text-slate-900">₹${bus.fare}</span>
                     `}
@@ -308,7 +316,7 @@ function renderSearchResults(buses, from, to, dateVal) {
                   </div>
                 </div>
 
-                <button onclick="openSeatModal(${idx})" class="mt-2 ${isHH ? 'bg-amber-400 hover:bg-amber-500 text-slate-950 font-extrabold' : 'bg-msrtc-red hover:bg-msrtc-darkred text-white font-bold'} text-xs px-5 py-2.5 rounded-xl shadow-md transition flex items-center gap-1.5">
+                <button onclick="openSeatModal(${idx})" class="mt-2 ${isHH ? 'bg-green-700 hover:bg-green-800 text-white font-bold' : (bus.demand === 'HIGH' ? 'bg-red-800 hover:bg-red-900 text-white font-bold' : 'bg-msrtc-red hover:bg-msrtc-darkred text-white font-bold')} text-xs px-5 py-2.5 rounded shadow transition flex items-center gap-1.5">
                   <i class="fa-solid fa-chair"></i> Select Seats & Book
                 </button>
               </div>
@@ -1526,6 +1534,23 @@ async function handleRegisterSubmit(e) {
   const password = document.getElementById('reg-password').value;
   const confirm = document.getElementById('reg-confirm').value;
   const btn = document.getElementById('reg-submit-btn');
+
+  if (!email) {
+    showAuthMsg("Email or username is required.", true);
+    return;
+  }
+  if (email.includes('@')) {
+    const emailPattern = /^[^\s@]+@[^\s@]+(?:\.[^\s@]+)?$/;
+    if (!emailPattern.test(email)) {
+      showAuthMsg("Please enter a valid email address, such as name@domain.com.", true);
+      document.getElementById('reg-email').focus();
+      return;
+    }
+  } else if (email.replace(/[\s\-]/g, '').length < 3) {
+    showAuthMsg("Username must be at least 3 characters.", true);
+    document.getElementById('reg-email').focus();
+    return;
+  }
 
   if (password !== confirm) {
     showAuthMsg("Passwords do not match. Please re-enter.", true);

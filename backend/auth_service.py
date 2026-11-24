@@ -84,15 +84,38 @@ def _generate_smart_id():
     return f"MH-MSRTC-{random.randint(10000, 99999)}-{chr(random.randint(65, 90))}"
 
 
-def _validate_email(email):
-    if not email:
-        return False
-    # Standard email format (name@domain.ext)
-    if '@' in email:
-        return bool(re.match(r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$', email))
-    # If passenger entered a username or phone number (at least 3 characters)
-    return bool(re.match(r'^[a-zA-Z0-9_.+-]{3,50}$', email))
 
+def _clean_and_resolve_email(raw_email, full_name=""):
+    email = (raw_email or "").strip().lower()
+
+    if not email:
+        raise ValueError("Email address is required.")
+
+    # Reject spaces inside email
+    if re.search(r"\s", email):
+        raise ValueError("Email cannot contain spaces.")
+
+    # Validate email structure
+    pattern = r"^[a-z0-9._%+-]+@[a-z0-9-]+(?:\.[a-z0-9-]+)+$"
+
+    if not re.fullmatch(pattern, email):
+        raise ValueError("Please enter a valid email address.")
+
+    username, domain = email.split("@")
+
+    if len(username) > 64 or len(email) > 254:
+        raise ValueError("Email address is too long.")
+
+    if ".." in username or ".." in domain:
+        raise ValueError("Please enter a valid email address.")
+
+    if any(
+        not label or label.startswith("-") or label.endswith("-")
+        for label in domain.split(".")
+    ):
+        raise ValueError("Please enter a valid email address.")
+
+    return email
 
 def _validate_phone(phone):
     digits = re.sub(r'[\s\-\+]', '', phone)
@@ -119,7 +142,7 @@ def _user_public(row):
 def register_user(data):
     """Register a new MSRTC transit passenger account."""
     full_name = (data.get("fullName") or data.get("name") or "").strip()
-    raw_email = (data.get("email") or "").strip().lower()
+    raw_email = (data.get("email") or data.get("username") or "").strip()
     phone = (data.get("phone") or "").strip()
     password = data.get("password") or ""
     gender = data.get("gender", "Male")
@@ -129,11 +152,9 @@ def register_user(data):
     # Validations
     if not full_name or len(full_name) < 2:
         raise ValueError("Full name is required (minimum 2 characters).")
-    if not _validate_email(raw_email):
-        raise ValueError("Please enter a valid email address (e.g. name@domain.com) or username.")
     
-    # If username entered without @domain, format cleanly with @msrtc.in
-    email = raw_email if '@' in raw_email else f"{raw_email}@msrtc.in"
+    # Automatically clean, sanitize, and resolve email/username
+    email = _clean_and_resolve_email(raw_email, full_name)
 
     if not _validate_phone(phone):
         raise ValueError("Please enter a valid 10-digit phone number.")
@@ -151,7 +172,7 @@ def register_user(data):
 
     with _get_conn() as conn:
         # Check duplicate email or username
-        if conn.execute("SELECT id FROM users WHERE email=? OR email=?", (email, raw_email)).fetchone():
+        if conn.execute("SELECT id FROM users WHERE email=? OR email=? OR email=?", (email, raw_email.lower(), f"{raw_email.lower()}@msrtc.in")).fetchone():
             raise ValueError("This email or username is already registered. Please log in instead.")
 
         uid = f"usr_{random.randint(100000, 999999)}"

@@ -193,9 +193,10 @@ class DemandForecastingEngine:
         else:
             demand_class = "LOW"
 
-        # Happy hours condition: off-peak slump (11:00 - 16:00 or late night) and occupancy < 55%
+        # Happy Hours condition: ONLY low/medium demand (occupancy < 55%) AND must be off-peak hour
+        # HIGH demand buses (occupancy >= 65%) are NEVER eligible -- show regular fare instead
         is_offpeak_hour = (11 <= dep_hour <= 16) or (dep_hour >= 21) or (dep_hour <= 6)
-        happy_hours_eligible = (expected_occupancy_pct < 55) or (is_offpeak_hour and expected_occupancy_pct < 65)
+        happy_hours_eligible = (expected_occupancy_pct < 55) and is_offpeak_hour
 
         return {
             'expected_demand': expected_demand,

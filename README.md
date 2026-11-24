@@ -1,4 +1,4 @@
-# 🚌 MSRTC Smart Transit • ML-Based Revenue Optimization ("HAPPY HOURS")
+# 🚌 Smart Transit • ML-Based Revenue Optimization ("HAPPY HOURS")
 
 > **Official Final-Year Project Implementation**  
 > **Title**: ML-Based Revenue Optimization System for MSRTC  
