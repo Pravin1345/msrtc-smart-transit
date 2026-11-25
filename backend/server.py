@@ -109,6 +109,22 @@ def connect():
         status TEXT,
         created_at TEXT
     );
+    CREATE TABLE IF NOT EXISTS ad_bookings (
+        id TEXT PRIMARY KEY,
+        brand_name TEXT,
+        contact_name TEXT,
+        contact_phone TEXT,
+        boarding_point TEXT,
+        dropping_point TEXT,
+        num_buses INTEGER,
+        position TEXT,
+        campaign_type TEXT,
+        duration_days INTEGER,
+        rate_per_bus_day REAL,
+        total_fee REAL,
+        status TEXT,
+        created_at TEXT
+    );
     CREATE TABLE IF NOT EXISTS vendor_orders (
         id TEXT PRIMARY KEY,
         booking_id TEXT,
@@ -435,9 +451,10 @@ def get_unified_revenue():
     happy_hours_bookings = sum(1 for r in rows if r["is_happy_hours"] == 1)
     happy_hours_revenue = sum(r["dynamic_subtotal"] for r in rows if r["is_happy_hours"] == 1)
     
-    # 2. Advertisement Revenue (from dataset and live ads)
+    # 2. Advertisement Revenue (from dataset + live DB ad bookings)
     ad_analytics = AD_SERVICE.get_analytics()
-    r_advertisement = ad_analytics.get("total_revenue", 0.0)
+    live_ad_rev = DB.execute("SELECT COALESCE(SUM(total_fee), 0) FROM ad_bookings WHERE status='CONFIRMED'").fetchone()[0]
+    r_advertisement = round(ad_analytics.get("total_revenue", 0.0) + float(live_ad_rev or 0.0), 2)
     
     # 3. Vendor Commission Revenue
     v_rows = DB.execute("SELECT * FROM vendor_orders WHERE status='CONFIRMED'").fetchall()
@@ -647,6 +664,9 @@ class Handler(BaseHTTPRequestHandler):
                 self.send_json(200, AD_SERVICE.get_analytics())
             elif path == "/api/ads/list":
                 self.send_json(200, AD_SERVICE.get_sample_ads())
+            elif path == "/api/ads/bookings":
+                rows = DB.execute("SELECT * FROM ad_bookings ORDER BY created_at DESC").fetchall()
+                self.send_json(200, [dict(r) for r in rows])
             elif path == "/api/vendors/catalog":
                 self.send_json(200, VENDOR_SERVICE.get_catalog())
             elif path == "/api/group/quote":
@@ -718,6 +738,65 @@ class Handler(BaseHTTPRequestHandler):
             elif path == "/api/ads/scan":
                 ad_id = body.get("advertisementId", "AD00001")
                 self.send_json(200, AD_SERVICE.simulate_qr_scan(ad_id))
+            elif path == "/api/ads/book":
+                brand = (body.get("brandName") or "").strip()
+                contact = (body.get("contactName") or "").strip()
+                phone = (body.get("contactPhone") or "").strip()
+                boarding = (body.get("boardingPoint") or "").strip()
+                dropping = (body.get("droppingPoint") or "").strip()
+                num_buses = int(body.get("numBuses") or 1)
+                pos = body.get("position", "Front")
+                ctype = body.get("campaignType", "Banner")
+                dur = int(body.get("durationDays") or 30)
+
+                if not brand or not boarding or not dropping:
+                    raise ApiError(400, "Brand name, boarding point, and dropping point are required.")
+                if boarding == dropping:
+                    raise ApiError(400, "Boarding point and dropping point must be different.")
+                if not 1 <= num_buses <= 200:
+                    raise ApiError(400, "Number of buses must be between 1 and 200.")
+                if not 1 <= dur <= 365:
+                    raise ApiError(400, "Duration must be between 1 and 365 days.")
+
+                pos_cfg = AD_SERVICE.POSITION_RATES.get(pos, AD_SERVICE.POSITION_RATES["Middle"])
+                type_factor = AD_SERVICE.CAMPAIGN_FACTORS.get(ctype, 1.0)
+                rate_per_bus_day = round(pos_cfg["base_daily_fee"] * type_factor, 2)
+                total_fee = round(rate_per_bus_day * num_buses * dur, 2)
+                ad_bid = f"ADB-{uuid.uuid4().hex[:8].upper()}"
+                created_at = datetime.now(IST).isoformat(timespec="seconds")
+
+                with DB:
+                    DB.execute(
+                        "INSERT INTO ad_bookings VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                        (ad_bid, brand, contact, phone, boarding, dropping, num_buses,
+                         pos, ctype, dur, rate_per_bus_day, total_fee, "CONFIRMED", created_at)
+                    )
+                self.send_json(201, {
+                    "id": ad_bid,
+                    "brand_name": brand,
+                    "contact_name": contact,
+                    "contact_phone": phone,
+                    "boarding_point": boarding,
+                    "dropping_point": dropping,
+                    "num_buses": num_buses,
+                    "position": pos,
+                    "campaign_type": ctype,
+                    "duration_days": dur,
+                    "rate_per_bus_day": rate_per_bus_day,
+                    "total_fee": total_fee,
+                    "status": "CONFIRMED",
+                    "created_at": created_at
+                })
+            elif path == "/api/ads/cancel":
+                ad_bid = body.get("bookingId")
+                if not ad_bid:
+                    raise ApiError(400, "bookingId is required.")
+                with DB:
+                    row = DB.execute("SELECT * FROM ad_bookings WHERE id=?", (ad_bid,)).fetchone()
+                    if not row:
+                        raise ApiError(404, "Advertisement booking not found.")
+                    DB.execute("UPDATE ad_bookings SET status='CANCELLED' WHERE id=?", (ad_bid,))
+                self.send_json(200, {"id": ad_bid, "status": "CANCELLED"})
             elif path == "/api/safety/sos":
                 bid = body.get("bookingId", "MSRTC-SOS-001")
                 bus_no = body.get("busNumber", "MH-09-EM-8834")

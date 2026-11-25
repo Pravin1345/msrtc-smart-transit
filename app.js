@@ -109,7 +109,7 @@ const TRANSLATIONS = {
     nav_history: "My Trips",
     nav_smartid: "Smart ID",
     nav_safety: "Women Safety",
-    hero_title: "Book MSRTC Bus Tickets Online",
+    hero_title: "Book Bus Tickets Online",
     btn_all_features: "All Services & Features",
     btn_rev_dash: "Revenue & ML Dashboard",
     btn_bus_qr: "Bus Ad QR",
@@ -145,7 +145,7 @@ const TRANSLATIONS = {
     rev_framework: "Consolidated Financial Framework",
     rev_formula_title: "Total Revenue Formula",
     btn_view_rev: "View Live Revenue Breakdown",
-    feat_portal_label: "MSRTC Smart Transit • Citizen & Operator Services",
+    feat_portal_label: "Happy Hours • Citizen & Operator Services",
     feat_portal_title: "All Services & Features Directory",
     feat_portal_sub: "Select any service below to open it directly.",
     btn_back_home: "Back to Home",
@@ -197,7 +197,7 @@ const TRANSLATIONS = {
     nav_history: "माझा प्रवास",
     nav_smartid: "स्मार्ट आयडी",
     nav_safety: "महिला सुरक्षा",
-    hero_title: "एमएसआरटीसी बस तिकिटे ऑनलाइन बुक करा",
+    hero_title: "बस तिकिटे ऑनलाइन बुक करा",
     btn_all_features: "सर्व सेवा आणि सुविधा",
     btn_rev_dash: "महसूल व एमएल डॅशबोर्ड",
     btn_bus_qr: "बस जाहिरात QR",
@@ -233,7 +233,7 @@ const TRANSLATIONS = {
     rev_framework: "एकत्रित आर्थिक आराखडा",
     rev_formula_title: "एकूण महसूल सूत्र",
     btn_view_rev: "थेट महसूल तपशील पहा",
-    feat_portal_label: "एमएसआरटीसी स्मार्ट ट्रान्झिट • प्रवासी आणि व्यावसायिक सेवा",
+    feat_portal_label: "Happy Hours • प्रवासी आणि व्यावसायिक सेवा",
     feat_portal_title: "सर्व सेवा आणि सुविधा निर्देशिका",
     feat_portal_sub: "ती सेवा उघडण्यासाठी खालील कोणत्याही कार्डवर क्लिक करा.",
     btn_back_home: "मुख्यपृष्ठावर जा",
@@ -1051,11 +1051,132 @@ async function loadAdsPage() {
   const grid = document.getElementById('active-ads-grid');
   grid.innerHTML = `<div class="col-span-3 text-center text-slate-400 py-8"><i class="fa-solid fa-spinner fa-spin text-xl"></i> Loading live ad campaigns from dataset...</div>`;
 
+  updateAdBookingQuote();
+  loadAdBookingsHistory();
+
   try {
     const ads = await MSRTCApi.getAdList();
     renderAdsGrid(ads);
   } catch (e) {
     grid.innerHTML = `<p class="col-span-3 text-rose-600 text-xs">Failed to load advertisement data.</p>`;
+  }
+}
+
+const AD_POS_BASE_RATES = {
+  "Front": 180,
+  "First 10 Seats Area": 150,
+  "Middle": 100,
+  "Rear": 70
+};
+const AD_TYPE_FACTORS = { "Banner": 1.0, "QR": 1.15, "Digital": 1.35 };
+
+function updateAdBookingQuote() {
+  const pos = document.getElementById('ad-book-pos')?.value || 'Front';
+  const ctype = document.getElementById('ad-book-type')?.value || 'Banner';
+  const buses = Math.max(1, parseInt(document.getElementById('ad-book-buses')?.value || 1));
+  const days = Math.max(1, parseInt(document.getElementById('ad-book-days')?.value || 1));
+  const ratePerBusDay = (AD_POS_BASE_RATES[pos] || 100) * (AD_TYPE_FACTORS[ctype] || 1.0);
+  const total = Math.round(ratePerBusDay * buses * days);
+
+  const box = document.getElementById('ad-book-quote-summary');
+  if (box) {
+    box.innerHTML = `
+      <span class="text-slate-600 font-semibold">${buses} Bus${buses > 1 ? 'es' : ''} × ${days} Days @ ₹${Math.round(ratePerBusDay)}/bus/day:</span>
+      <span class="text-base font-extrabold text-[#9B1C1C] font-mono">₹${total.toLocaleString()}</span>
+    `;
+  }
+}
+
+async function handleAdBookingSubmit(e) {
+  e.preventDefault();
+  const btn = document.getElementById('ad-book-submit-btn');
+  const resBox = document.getElementById('ad-booking-result');
+  const payload = {
+    brandName: document.getElementById('ad-book-brand').value.trim(),
+    contactName: document.getElementById('ad-book-contact').value.trim(),
+    contactPhone: document.getElementById('ad-book-phone').value.trim(),
+    boardingPoint: document.getElementById('ad-book-boarding').value.trim(),
+    droppingPoint: document.getElementById('ad-book-dropping').value.trim(),
+    numBuses: parseInt(document.getElementById('ad-book-buses').value || 1),
+    durationDays: parseInt(document.getElementById('ad-book-days').value || 30),
+    campaignType: document.getElementById('ad-book-type').value,
+    position: document.getElementById('ad-book-pos').value
+  };
+
+  if (btn) btn.disabled = true;
+  try {
+    const res = await MSRTCApi.bookAdCampaign(payload);
+    if (resBox) {
+      resBox.className = "mt-4 p-3 rounded border border-emerald-300 bg-emerald-50 text-emerald-900 text-xs";
+      resBox.innerHTML = `
+        <strong>Booking Confirmed (${esc(res.id)})</strong><br/>
+        ${esc(res.brand_name)} • ${res.num_buses} Buses (${esc(res.boarding_point)} → ${esc(res.dropping_point)})<br/>
+        Total Paid: <strong>₹${Number(res.total_fee).toLocaleString()}</strong> (Saved in Database)
+      `;
+      resBox.classList.remove('hidden');
+    }
+    document.getElementById('ad-book-brand').value = '';
+    updateAdBookingQuote();
+    await loadAdBookingsHistory();
+  } catch (err) {
+    if (resBox) {
+      resBox.className = "mt-4 p-3 rounded border border-rose-300 bg-rose-50 text-rose-900 text-xs";
+      resBox.innerText = err.message || "Failed to book advertisement.";
+      resBox.classList.remove('hidden');
+    }
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+async function loadAdBookingsHistory() {
+  const box = document.getElementById('ad-bookings-history-box');
+  if (!box) return;
+  try {
+    const rows = await MSRTCApi.getAdBookings();
+    if (!rows || !rows.length) {
+      box.innerHTML = `<div class="p-6 text-center text-xs text-slate-500 bg-slate-50 rounded border border-slate-200">No advertisement bookings recorded yet. Use the form on the left to book buses.</div>`;
+      return;
+    }
+    box.innerHTML = rows.map(b => {
+      const isCancelled = b.status === 'CANCELLED';
+      return `
+        <div class="p-3.5 rounded border border-slate-200 bg-slate-50 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+          <div class="space-y-1">
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="font-mono font-bold text-[#1e3a5f] bg-white px-2 py-0.5 rounded border border-slate-200">${esc(b.id)}</span>
+              <span class="font-bold text-slate-900 text-sm">${esc(b.brand_name)}</span>
+              <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded ${isCancelled ? 'bg-slate-200 text-slate-600' : 'bg-emerald-100 text-emerald-800'}">${esc(b.status)}</span>
+            </div>
+            <div class="text-slate-700 font-medium">
+              <i class="fa-solid fa-route text-[#9B1C1C] mr-1"></i> ${esc(b.boarding_point)} → ${esc(b.dropping_point)}
+            </div>
+            <div class="text-[11px] text-slate-500 flex flex-wrap gap-3">
+              <span><strong>${b.num_buses}</strong> Buses</span>
+              <span>• ${esc(b.position)} (${esc(b.campaign_type)})</span>
+              <span>• ${b.duration_days} Days</span>
+              <span>• ${esc((b.created_at || '').slice(0, 10))}</span>
+            </div>
+          </div>
+          <div class="flex sm:flex-col items-center sm:items-end justify-between gap-1 shrink-0">
+            <span class="text-sm font-extrabold text-[#9B1C1C] font-mono">₹${Number(b.total_fee).toLocaleString()}</span>
+            ${!isCancelled ? `<button onclick="cancelAdBookingItem('${esc(b.id)}')" class="text-[11px] text-rose-700 hover:underline font-semibold">Cancel</button>` : ''}
+          </div>
+        </div>
+      `;
+    }).join('');
+  } catch (e) {
+    box.innerHTML = `<p class="text-xs text-rose-600">Failed to load advertisement booking history.</p>`;
+  }
+}
+
+async function cancelAdBookingItem(bookingId) {
+  if (!confirm(`Cancel advertisement booking ${bookingId}?`)) return;
+  try {
+    await MSRTCApi.cancelAdBooking(bookingId);
+    await loadAdBookingsHistory();
+  } catch (e) {
+    alert(e.message || "Failed to cancel ad booking.");
   }
 }
 
