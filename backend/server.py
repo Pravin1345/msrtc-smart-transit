@@ -176,12 +176,12 @@ def ladies_seat_restrictions(trip_key):
     """Return (female_booked_set, ladies_only_adjacent_set) for a given trip_key."""
     female_seats = set()
     rows = DB.execute(
-        "SELECT payload_json FROM bookings WHERE trip_key=? AND status!='CANCELLED'",
+        "SELECT payload FROM bookings WHERE trip_key=? AND status!='CANCELLED'",
         (trip_key,)
     ).fetchall()
     for r in rows:
         try:
-            b = json.loads(r["payload_json"])
+            b = json.loads(r["payload"])
             seats = b.get("seats") or []
             pax = b.get("passengers") or []
             for s, p in zip(seats, pax):
