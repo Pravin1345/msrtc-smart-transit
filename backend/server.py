@@ -22,6 +22,7 @@ import re
 import sqlite3
 import sys
 import threading
+import uuid
 from datetime import date, datetime, timedelta, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, urlparse
