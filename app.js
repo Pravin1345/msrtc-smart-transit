@@ -383,8 +383,6 @@ function navigateTo(pageId) {
 // 4. LOCATIONS AUTOCOMPLETE
 async function populateLocationsList() {
   const list = document.getElementById('transit-locations-list');
-  if (!list) return;
-  
   let locations = [];
   try {
     locations = await MSRTCApi.getLocations();
@@ -395,7 +393,30 @@ async function populateLocationsList() {
     ];
   }
 
-  list.innerHTML = locations.map(loc => `<option value="${esc(loc)}">${esc(loc)}</option>`).join('');
+  window.msrtcLocations = locations;
+  const optionsHtml = locations.map(loc => `<option value="${esc(loc)}">${esc(loc)}</option>`).join('');
+  if (list) list.innerHTML = optionsHtml;
+
+  const fromDefaults = {
+    'home-from-location': 'Kolhapur CBS (Central Bus Stand)',
+    'from-location': 'Kolhapur CBS (Central Bus Stand)',
+    'modal-boarding-select': 'Kolhapur CBS (Central Bus Stand)'
+  };
+  const toDefaults = {
+    'home-to-location': 'Pune (Swargate)',
+    'to-location': 'Pune (Swargate)',
+    'modal-dropping-select': 'Pune (Swargate)'
+  };
+
+  Object.entries({ ...fromDefaults, ...toDefaults }).forEach(([id, defVal]) => {
+    const sel = document.getElementById(id);
+    if (sel) {
+      const prev = sel.value || defVal;
+      sel.innerHTML = optionsHtml;
+      if (locations.includes(prev)) sel.value = prev;
+      else if (locations.includes(defVal)) sel.value = defVal;
+    }
+  });
 }
 
 function setDefaultBookingDate() {
@@ -584,6 +605,15 @@ async function openSeatModal(busIndex) {
   document.getElementById('modal-bus-title').innerText = `${activeBus.busType} (${activeBus.busNumber})`;
   document.getElementById('modal-bus-sub').innerText = `${depStand} → ${arrStand} • ${activeBus.departure} Departure`;
 
+  const mBoard = document.getElementById('modal-boarding-select');
+  const mDrop = document.getElementById('modal-dropping-select');
+  if (mBoard) mBoard.value = depStand;
+  if (mDrop) mDrop.value = arrStand;
+  const distInfo = document.getElementById('modal-distance-fare-info');
+  if (distInfo) {
+    distInfo.innerText = `${activeBus.distanceKm || '--'} km • ₹${activeBus.fare || 0}/seat`;
+  }
+
   // Fetch taken seats and ladies-adjacent restrictions from server
   let takenSeats = [];
   window.activeLadiesOnlyAdjacent = new Set();
@@ -605,6 +635,46 @@ async function openSeatModal(busIndex) {
 
 function closeSeatModal() {
   document.getElementById('seat-selection-modal').classList.add('hidden');
+}
+
+async function handleModalRouteChange() {
+  if (!activeBus) return;
+  const mBoard = document.getElementById('modal-boarding-select')?.value;
+  const mDrop = document.getElementById('modal-dropping-select')?.value;
+  const trvDate = activeBus.date || document.getElementById('travel-date')?.value || new Date().toISOString().split('T')[0];
+  const distInfo = document.getElementById('modal-distance-fare-info');
+
+  if (!mBoard || !mDrop) return;
+  if (mBoard === mDrop) {
+    if (distInfo) distInfo.innerText = "Boarding & Dropping must differ";
+    return;
+  }
+
+  if (distInfo) distInfo.innerText = "Calculating...";
+  try {
+    const q = await MSRTCApi.getTripQuote(activeBus.id, mBoard, mDrop, trvDate);
+    activeBus.from = q.from;
+    activeBus.to = q.to;
+    activeBus.distanceKm = q.distanceKm;
+    activeBus.fare = q.fare;
+    activeBus.originalFare = q.originalFare;
+    activeBus.isHappyHours = q.isHappyHours;
+    activeBus.happyHoursDiscountPct = q.happyHoursDiscountPct;
+
+    document.getElementById('modal-bus-sub').innerText = `${q.from} → ${q.to} • ${activeBus.departure} Departure`;
+    if (distInfo) {
+      distInfo.innerText = `${q.distanceKm} km • ₹${q.fare}/seat${q.isHappyHours ? ` (${q.happyHoursDiscountPct}% OFF)` : ''}`;
+    }
+
+    selectedSeats = [];
+    document.getElementById('selected-seats-badge').innerText = 'None';
+    window.activeLadiesOnlyAdjacent = new Set(q.ladiesOnlyAdjacent || []);
+    renderSeatCabinGrid(q.taken || []);
+    renderPassengerInputs();
+    updateSummaryTotals();
+  } catch (e) {
+    if (distInfo) distInfo.innerText = e.message || "Route error";
+  }
 }
 
 function renderSeatCabinGrid(takenList) {
@@ -892,8 +962,8 @@ async function confirmBooking() {
   btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i> Reserving Seats...`;
 
   try {
-    const depStand = activeBus.from || document.getElementById('from-location')?.value.trim() || activeBus.origin;
-    const arrStand = activeBus.to || document.getElementById('to-location')?.value.trim() || activeBus.destination;
+    const depStand = document.getElementById('modal-boarding-select')?.value || activeBus.from || document.getElementById('from-location')?.value.trim() || activeBus.origin;
+    const arrStand = document.getElementById('modal-dropping-select')?.value || activeBus.to || document.getElementById('to-location')?.value.trim() || activeBus.destination;
     const trvDate = activeBus.date || document.getElementById('travel-date')?.value || new Date().toISOString().split('T')[0];
 
     const payload = {

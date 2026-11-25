@@ -416,6 +416,8 @@ def create_booking(data, today, created_at=None):
                     "departureTime": dep.isoformat(),
                     "arrivalTime": arr.isoformat(),
                     "boardingPoint": f"{frm} Express Bay",
+                    "droppingPoint": f"{to} Stand",
+                    "distanceKm": q["distanceKm"],
                     "duration": f"{mins // 60}h {mins % 60:02d}m"
                 },
                 "seats": seats,
@@ -707,6 +709,48 @@ class Handler(BaseHTTPRequestHandler):
                     "femaleBooked": sorted(female_booked),
                     "ladiesOnlyAdjacent": sorted(ladies_adj - taken_all),
                     "total": P.CAPACITY
+                })
+            elif path == "/api/quote":
+                sched_id = (qs.get("scheduleId") or [""])[0]
+                sched = P.SCHEDULE_BY_ID.get(sched_id)
+                if not sched:
+                    raise ApiError(400, "Unknown bus schedule.")
+                frm = (qs.get("from") or [""])[0].strip()
+                to = (qs.get("to") or [""])[0].strip()
+                check_route(frm, to)
+                d = check_date((qs.get("date") or [today_ist().isoformat()])[0])
+                today = today_ist()
+                base, mine = taken_seats((sched, frm, to, d))
+                taken_all = base | mine
+                booked = len(taken_all)
+                occ = booked / P.CAPACITY
+                q = P.quote(sched, frm, to, d, booked, today)
+                mins = P.duration_minutes(sched["busType"], q["distanceKm"])
+                arr = clock(d, sched["departure"], mins)
+                ml_forecast = FORECAST_ENGINE.predict_demand(q["distanceKm"], sched["departure"], d, sched["busType"])
+                opt_res = HAPPY_HOURS_OPTIMIZER.optimize_trip_fare(q["baseFare"], ml_forecast["expected_demand"], sched["busType"])
+                is_high_demand = ml_forecast["demand_class"] == "HIGH" or occ >= 0.65
+                is_happy_hours = (
+                    ml_forecast["is_happy_hours_eligible"]
+                    and opt_res["is_happy_hours_recommended"]
+                    and not is_high_demand
+                )
+                effective_fare = opt_res["optimal_fare"] if is_happy_hours else q["fare"]
+                key = P.trip_key(sched["id"], frm, to, d)
+                female_booked, ladies_adj = ladies_seat_restrictions(key)
+                self.send_json(200, {
+                    "from": frm,
+                    "to": to,
+                    "distanceKm": q["distanceKm"],
+                    "baseFare": q["baseFare"],
+                    "fare": effective_fare,
+                    "originalFare": q["fare"],
+                    "isHappyHours": is_happy_hours,
+                    "happyHoursDiscountPct": opt_res["optimal_discount_pct"] if is_happy_hours else 0,
+                    "duration": f"{mins // 60}h {mins % 60:02d}m",
+                    "arrival": arr.strftime("%H:%M"),
+                    "taken": sorted(taken_all),
+                    "ladiesOnlyAdjacent": sorted(ladies_adj - taken_all)
                 })
             elif path == "/api/revenue/unified" or path == "/api/revenue":
                 self.send_json(200, get_unified_revenue())

@@ -55,6 +55,7 @@ const MSRTCApi = {
   getLocations: () => apiGet('/api/locations'),
   searchBuses: (from, to, date) => apiGet('/api/search', { from, to, date }),
   getSeats: (scheduleId, from, to, date) => apiGet('/api/seats', { scheduleId, from, to, date }),
+  getTripQuote: (scheduleId, from, to, date) => apiGet('/api/quote', { scheduleId, from, to, date }),
   bookTicket: data => apiPost('/api/book', data),
   cancelTicket: bookingId => apiPost('/api/cancel', { bookingId }),
   getUnifiedRevenue: () => apiGet('/api/revenue/unified'),
