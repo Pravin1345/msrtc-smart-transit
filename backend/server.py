@@ -162,6 +162,41 @@ def taken_seats(trip):
     return P.baseline_booked(sched, frm, to, d), mine
 
 
+ADJACENT_COL = {"A": "B", "B": "A", "C": "D", "D": "C"}
+
+
+def adjacent_seat(seat):
+    """Return the paired adjacent seat in the 2+2 cabin layout (A<->B, C<->D)."""
+    if not seat or len(seat) < 2 or seat[-1] not in ADJACENT_COL:
+        return None
+    return f"{seat[:-1]}{ADJACENT_COL[seat[-1]]}"
+
+
+def ladies_seat_restrictions(trip_key):
+    """Return (female_booked_set, ladies_only_adjacent_set) for a given trip_key."""
+    female_seats = set()
+    rows = DB.execute(
+        "SELECT payload_json FROM bookings WHERE trip_key=? AND status!='CANCELLED'",
+        (trip_key,)
+    ).fetchall()
+    for r in rows:
+        try:
+            b = json.loads(r["payload_json"])
+            seats = b.get("seats") or []
+            pax = b.get("passengers") or []
+            for s, p in zip(seats, pax):
+                if p.get("gender") == "Female":
+                    female_seats.add(s)
+        except Exception:
+            continue
+    adjacent_restricted = set()
+    for s in female_seats:
+        adj = adjacent_seat(s)
+        if adj and adj not in female_seats:
+            adjacent_restricted.add(adj)
+    return female_seats, adjacent_restricted
+
+
 def clock(d, hhmm, minutes=0):
     t = datetime.fromisoformat(f"{d}T{hhmm}:00").replace(tzinfo=IST)
     return t + timedelta(minutes=minutes)
@@ -332,6 +367,14 @@ def create_booking(data, today, created_at=None):
             clash = sorted(set(seats) & (base_set | mine))
             if clash:
                 raise ApiError(409, "Some seats were just taken. Pick different seats.", seats=clash)
+
+            _, ladies_restricted = ladies_seat_restrictions(key)
+            for s, p in zip(seats, pax):
+                if s in ladies_restricted and p.get("gender") != "Female":
+                    raise ApiError(
+                        400,
+                        f"Seat {s} is adjacent to an already-booked Ladies seat and can only be booked by a Female passenger."
+                    )
                 
             q = P.quote(sched, frm, to, d, len(base_set | mine), today)
             
@@ -656,7 +699,15 @@ class Handler(BaseHTTPRequestHandler):
                 to = (qs.get("to") or [""])[0]
                 d = check_date((qs.get("date") or [""])[0])
                 base, mine = taken_seats((sched, frm, to, d))
-                self.send_json(200, {"taken": sorted(base | mine), "total": P.CAPACITY})
+                key = P.trip_key(sched["id"], frm, to, d)
+                female_booked, ladies_adj = ladies_seat_restrictions(key)
+                taken_all = base | mine
+                self.send_json(200, {
+                    "taken": sorted(taken_all),
+                    "femaleBooked": sorted(female_booked),
+                    "ladiesOnlyAdjacent": sorted(ladies_adj - taken_all),
+                    "total": P.CAPACITY
+                })
             elif path == "/api/revenue/unified" or path == "/api/revenue":
                 self.send_json(200, get_unified_revenue())
             elif path == "/api/ml/models":

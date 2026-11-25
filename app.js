@@ -584,11 +584,13 @@ async function openSeatModal(busIndex) {
   document.getElementById('modal-bus-title').innerText = `${activeBus.busType} (${activeBus.busNumber})`;
   document.getElementById('modal-bus-sub').innerText = `${depStand} → ${arrStand} • ${activeBus.departure} Departure`;
 
-  // Fetch taken seats from server
+  // Fetch taken seats and ladies-adjacent restrictions from server
   let takenSeats = [];
+  window.activeLadiesOnlyAdjacent = new Set();
   try {
     const sRes = await MSRTCApi.getSeats(activeBus.id, depStand, arrStand, trvDate);
     takenSeats = sRes.taken || [];
+    window.activeLadiesOnlyAdjacent = new Set(sRes.ladiesOnlyAdjacent || []);
   } catch (e) {
     takenSeats = ["1A", "2C", "4D"];
   }
@@ -650,6 +652,9 @@ function createSeatBtn(seatNo, takenSet, seniorSet, pregnantSet, ladiesSet) {
   if (isTaken) {
     extraClasses = "bg-slate-300 border-slate-300 text-slate-500 cursor-not-allowed";
     title = `Seat ${seatNo} (Taken)`;
+  } else if (window.activeLadiesOnlyAdjacent && window.activeLadiesOnlyAdjacent.has(seatNo)) {
+    extraClasses += " seat-priority-ladies bg-purple-100 text-purple-900 border-purple-500";
+    title = `Seat ${seatNo} (Ladies Only — Adjacent to Booked Ladies Seat)`;
   } else if (seniorSet.has(seatNo)) {
     extraClasses += " seat-priority-senior bg-blue-50/60 text-blue-900";
     title = `Seat ${seatNo} (Senior Citizen Priority)`;
@@ -700,16 +705,17 @@ function renderPassengerInputs() {
   }
 
   selectedSeats.forEach((seat, i) => {
+    const isLadiesRestricted = window.activeLadiesOnlyAdjacent && window.activeLadiesOnlyAdjacent.has(seat);
     // Default passenger info for the first seat is the logged-in user
     let defName = (i === 0 && currentUser.name) ? currentUser.name : '';
     let defAge = (i === 0 && currentUser.age) ? currentUser.age : 28;
-    let defGen = (i === 0 && currentUser.gender) ? currentUser.gender : 'Male';
-    let defCat = (defAge >= 60) ? "Senior Citizen (60+)" : (defGen === "Female" ? "Solo Female Traveler" : "General");
+    let defGen = isLadiesRestricted ? 'Female' : ((i === 0 && currentUser.gender) ? currentUser.gender : 'Male');
+    let defCat = isLadiesRestricted ? 'Solo Female Traveler' : ((defAge >= 60) ? "Senior Citizen (60+)" : (defGen === "Female" ? "Solo Female Traveler" : "General"));
 
     container.innerHTML += `
-      <div class="bg-white p-3 rounded-xl border border-slate-200 text-xs space-y-2">
+      <div class="bg-white p-3 rounded-xl border ${isLadiesRestricted ? 'border-purple-300 bg-purple-50/30' : 'border-slate-200'} text-xs space-y-2">
         <div class="flex items-center justify-between font-bold text-slate-800">
-          <span class="flex items-center gap-1.5"><i class="fa-solid fa-user text-slate-400"></i> Passenger for Seat <span class="text-msrtc-red font-mono">${seat}</span></span>
+          <span class="flex items-center gap-1.5"><i class="fa-solid fa-user text-slate-400"></i> Passenger for Seat <span class="text-msrtc-red font-mono">${seat}</span> ${isLadiesRestricted ? '<span class="text-[10px] bg-purple-100 text-purple-800 px-1.5 py-0.5 rounded">Ladies Only</span>' : ''}</span>
           <span class="text-[10px] text-slate-500 font-semibold" id="concession-badge-${i}">Checking concession...</span>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-12 gap-2">
@@ -720,10 +726,14 @@ function renderPassengerInputs() {
             <input type="number" id="pax-age-${i}" value="${defAge}" min="1" max="110" placeholder="Age" oninput="handlePaxChange(${i})" class="w-full p-2 border border-slate-300 rounded-lg" required />
           </div>
           <div class="sm:col-span-3">
-            <select id="pax-gender-${i}" onchange="handlePaxChange(${i})" class="w-full p-2 border border-slate-300 rounded-lg">
-              <option value="Male" ${defGen === 'Male' ? 'selected' : ''}>Male</option>
-              <option value="Female" ${defGen === 'Female' ? 'selected' : ''}>Female (50% Concession)</option>
-              <option value="Other">Other</option>
+            <select id="pax-gender-${i}" onchange="handlePaxChange(${i})" class="w-full p-2 border border-slate-300 rounded-lg" ${isLadiesRestricted ? 'title="Adjacent to Ladies seat — Female passengers only"' : ''}>
+              ${isLadiesRestricted ? `
+                <option value="Female" selected>Female (Ladies Only)</option>
+              ` : `
+                <option value="Male" ${defGen === 'Male' ? 'selected' : ''}>Male</option>
+                <option value="Female" ${defGen === 'Female' ? 'selected' : ''}>Female (50% Concession)</option>
+                <option value="Other">Other</option>
+              `}
             </select>
           </div>
           <div class="sm:col-span-3">
