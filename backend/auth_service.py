@@ -158,8 +158,8 @@ def register_user(data):
 
     if not _validate_phone(phone):
         raise ValueError("Please enter a valid 10-digit phone number.")
-    if len(password) < 6:
-        raise ValueError("Password must be at least 6 characters.")
+    if len(password) < 4:
+        raise ValueError("Password must be at least 4 characters.")
     if gender not in ("Male", "Female", "Other"):
         raise ValueError("Invalid gender selection.")
 

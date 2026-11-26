@@ -385,6 +385,32 @@ def create_booking(data, today, created_at=None):
     return booking
 
 
+def get_user_bookings(token="", user_id=""):
+    """Return bookings belonging strictly to the authenticated user."""
+    resolved_uid = None
+    if token:
+        u = AUTH_SERVICE.verify(token)
+        if u:
+            resolved_uid = u["userId"]
+    if not resolved_uid and user_id and user_id != "usr_guest":
+        resolved_uid = user_id
+    if not resolved_uid:
+        return []
+
+    rows = DB.execute("SELECT status, payload FROM bookings ORDER BY created_at DESC").fetchall()
+    result = []
+    for r in rows:
+        try:
+            p = json.loads(r["payload"])
+            if p.get("userId") == resolved_uid:
+                if r["status"] == "CANCELLED":
+                    p["tripStatus"] = "CANCELLED"
+                result.append(p)
+        except Exception:
+            continue
+    return result
+
+
 def get_cancellation_quote(booking_id):
     """
     Computes time-decay refund eligibility and amounts.
@@ -836,6 +862,10 @@ class Handler(BaseHTTPRequestHandler):
                 self.send_json(200, CARGO_SERVICE.list_all_cargo())
             elif path == "/api/safety/women-dashboard":
                 self.send_json(200, SAFETY_SERVICE.get_women_safety_dashboard())
+            elif path == "/api/bookings":
+                token = (qs.get("token") or [""])[0]
+                uid = (qs.get("userId") or [""])[0]
+                self.send_json(200, get_user_bookings(token=token, user_id=uid))
             elif path == "/api/cancel/quote":
                 bid = (qs.get("bookingId") or qs.get("id") or [""])[0].strip()
                 if not bid:

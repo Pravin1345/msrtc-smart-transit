@@ -53,16 +53,41 @@ function saveStoredUser(user) {
   localStorage.setItem('msrtc_active_user', JSON.stringify(user));
 }
 
+function getBookingsStorageKey() {
+  const uid = (currentUser && currentUser.userId) ? currentUser.userId : 'usr_guest';
+  return `msrtc_user_bookings_${uid}`;
+}
+
 function getStoredBookings() {
-  const b = localStorage.getItem('msrtc_user_bookings');
+  const uid = (currentUser && currentUser.userId) ? currentUser.userId : 'usr_guest';
+  const b = localStorage.getItem(getBookingsStorageKey());
   if (b) {
-    try { return JSON.parse(b); } catch(e) {}
+    try {
+      const parsed = JSON.parse(b);
+      if (Array.isArray(parsed)) {
+        return parsed.filter(item => !item.userId || item.userId === uid);
+      }
+    } catch(e) {}
   }
   return [];
 }
 
 function saveStoredBookings(bookings) {
-  localStorage.setItem('msrtc_user_bookings', JSON.stringify(bookings));
+  localStorage.setItem(getBookingsStorageKey(), JSON.stringify(bookings));
+}
+
+async function syncUserBookingsFromServer() {
+  if (!isAuthenticated()) return getStoredBookings();
+  try {
+    const serverBookings = await MSRTCApi.getUserBookings(authToken, currentUser.userId);
+    if (Array.isArray(serverBookings)) {
+      saveStoredBookings(serverBookings);
+      return serverBookings;
+    }
+  } catch (e) {
+    console.warn("Could not sync user bookings:", e);
+  }
+  return getStoredBookings();
 }
 
 // 2. INITIALIZATION
@@ -73,6 +98,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (res && res.valid && res.user) {
         currentUser = res.user;
         saveStoredUser(currentUser);
+        await syncUserBookingsFromServer();
       } else {
         authToken = null;
         currentUser = DEFAULT_USER;
@@ -88,7 +114,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   setDefaultBookingDate();
   loadVendorCatalog();
   applyTranslations();
-  checkDatabaseStatus();
   navigateTo('home');
 });
 
@@ -370,6 +395,7 @@ function navigateTo(pageId) {
 
   if (pageId === 'history') {
     renderBookingsList();
+    syncUserBookingsFromServer().then(() => renderBookingsList());
   } else if (pageId === 'profile') {
     loadProfileForm();
   } else if (pageId === 'smartid') {
@@ -430,25 +456,6 @@ async function populateLocationsList() {
       else if (locations.includes(defVal)) sel.value = defVal;
     }
   });
-}
-
-async function checkDatabaseStatus() {
-  try {
-    const info = await MSRTCApi.getDbStatus();
-    const badge = document.getElementById('db-status-badge');
-    if (badge && info) {
-      if (info.engine === 'PostgreSQL') {
-        badge.innerHTML = `<i class="fa-solid fa-database text-[10px] text-emerald-400"></i> <span class="text-emerald-300 font-bold">PostgreSQL</span> <span class="opacity-70 text-[10px]">(${info.database})</span>`;
-        badge.className = "inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-950/50 text-emerald-300 border border-emerald-500/30";
-        badge.title = `Connected to PostgreSQL 19 (${info.database} on ${info.host})`;
-      } else {
-        badge.innerHTML = `<i class="fa-solid fa-database text-[10px] text-amber-400"></i> <span class="text-amber-300 font-bold">SQLite</span> <span class="opacity-70 text-[10px]">(Fallback)</span>`;
-        badge.className = "inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-semibold bg-amber-950/50 text-amber-300 border border-amber-500/30";
-      }
-    }
-  } catch (e) {
-    console.warn("DB status check skipped:", e);
-  }
 }
 
 async function populateModalRoutePoints(bus, defaultBoarding, defaultDropping) {
@@ -595,11 +602,6 @@ function renderSearchResults(buses, from, to, dateVal) {
       ${buses.map((bus, idx) => {
         const isHH = bus.isHappyHours;
         const occPct = Math.round((bus.occupancy || 0) * 100);
-        const demandBadge = {
-          "HIGH": "bg-rose-100 text-rose-800 border-rose-300",
-          "MEDIUM": "bg-blue-100 text-blue-800 border-blue-300",
-          "LOW": "bg-emerald-100 text-emerald-800 border-emerald-300"
-        }[bus.demand || "MEDIUM"];
 
         return `
           <div class="bg-white rounded border ${isHH ? 'border-green-600 shadow-sm' : (bus.demand === 'HIGH' ? 'border-red-300 shadow-sm' : 'border-slate-200 shadow-sm')} p-5 transition hover:shadow-md">
@@ -609,9 +611,6 @@ function renderSearchResults(buses, from, to, dateVal) {
                 <div class="flex flex-wrap items-center gap-2">
                   <span class="font-extrabold text-base text-slate-900">${esc(bus.busType)}</span>
                   <span class="text-xs font-mono font-bold bg-slate-100 text-slate-700 px-2 py-0.5 rounded">${esc(bus.busNumber)}</span>
-                  <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border ${demandBadge}">
-                    ML Demand: ${esc(bus.demand)}
-                  </span>
                   ${isHH ? `
                     <span class="text-[10px] font-bold uppercase tracking-wider bg-green-700 text-white px-2 py-0.5 rounded">
                       ⚡ Off-Peak Discount: ${bus.happyHoursDiscountPct}% OFF
@@ -2124,12 +2123,15 @@ async function handleLoginSubmit(e) {
       currentUser = res.user;
       localStorage.setItem('msrtc_auth_token', authToken);
       saveStoredUser(currentUser);
+      await syncUserBookingsFromServer();
       showAuthMsg(res.message || "Login successful! Redirecting...", false);
       renderAuthCorner();
       setTimeout(() => {
         closeAuthModal();
         loadProfileForm();
         renderSmartIDPass();
+        renderBookingsList();
+        loadCancellationPage();
         if (btn) btn.disabled = false;
       }, 500);
     } else {
@@ -2175,8 +2177,8 @@ async function handleRegisterSubmit(e) {
     showAuthMsg("Passwords do not match. Please re-enter.", true);
     return;
   }
-  if (password.length < 6) {
-    showAuthMsg("Password must be at least 6 characters.", true);
+  if (password.length < 4) {
+    showAuthMsg("Password must be at least 4 characters.", true);
     return;
   }
 
@@ -2208,6 +2210,19 @@ async function handleRegisterSubmit(e) {
   }
 }
 
+function togglePasswordVisibility(inputId, btn) {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+  const icon = btn?.querySelector('i');
+  if (input.type === 'password') {
+    input.type = 'text';
+    if (icon) { icon.classList.remove('fa-eye'); icon.classList.add('fa-eye-slash'); }
+  } else {
+    input.type = 'password';
+    if (icon) { icon.classList.remove('fa-eye-slash'); icon.classList.add('fa-eye'); }
+  }
+}
+
 async function handleLogout() {
   if (authToken) {
     try {
@@ -2227,6 +2242,8 @@ async function handleLogout() {
   renderAuthCorner();
   loadProfileForm();
   renderSmartIDPass();
+  renderBookingsList();
+  loadCancellationPage();
 }
 
 // =========================================================
@@ -2856,13 +2873,17 @@ async function triggerWomenEmergencySOS() {
 // 17. TICKET CANCELLATION & TIME-DECAY REFUND (STRICT <4H RULE)
 // =========================================================
 
-function loadCancellationPage() {
+async function loadCancellationPage() {
   const container = document.getElementById('cancel-quick-chips');
   const box = document.getElementById('cancel-quick-chips-box');
   if (!container || !box) return;
 
+  if (isAuthenticated()) {
+    await syncUserBookingsFromServer();
+  }
   const bookings = getStoredBookings().filter(b => b.tripStatus !== 'CANCELLED');
   if (!bookings.length) {
+    container.innerHTML = '';
     box.classList.add('hidden');
     return;
   }
