@@ -14,9 +14,9 @@ Features:
 """
 
 import json
-import sqlite3
 import os
 import random
+import db
 from datetime import datetime, timezone, timedelta
 import pricing as P
 
@@ -39,9 +39,7 @@ class CargoService:
         self._init_db()
 
     def get_connection(self):
-        conn = sqlite3.connect(self.db_path, check_same_thread=False)
-        conn.row_factory = sqlite3.Row
-        return conn
+        return db.get_connection()
 
     def _init_db(self):
         with self.get_connection() as conn:

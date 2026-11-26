@@ -54,6 +54,8 @@ const inrPrecise = n => '₹' + (Number(n) || 0).toLocaleString('en-IN', { minim
 const MSRTCApi = {
   getLocations: () => apiGet('/api/locations'),
   searchBuses: (from, to, date) => apiGet('/api/search', { from, to, date }),
+  getRouteStops: (scheduleId, from, to) => apiGet('/api/route-stops', { scheduleId, from, to }),
+  getDbStatus: () => apiGet('/api/db-status'),
   getSeats: (scheduleId, from, to, date) => apiGet('/api/seats', { scheduleId, from, to, date }),
   getTripQuote: (scheduleId, from, to, date) => apiGet('/api/quote', { scheduleId, from, to, date }),
   bookTicket: data => apiPost('/api/book', data),

@@ -14,7 +14,8 @@ import hashlib
 import os
 import random
 import re
-import sqlite3
+import os
+import db
 from datetime import datetime, timezone, timedelta
 
 IST = timezone(timedelta(hours=5, minutes=30))
@@ -23,9 +24,7 @@ TOKEN_EXPIRY_HOURS = 72  # sessions last 3 days
 
 
 def _get_conn():
-    conn = sqlite3.connect(DB_PATH, check_same_thread=False)
-    conn.row_factory = sqlite3.Row
-    return conn
+    return db.get_connection()
 
 
 def _init_auth_tables():
@@ -200,7 +199,7 @@ def register_user(data):
             "success": True,
             "token": token,
             "user": _user_public(user_row),
-            "message": f"Welcome to MSRTC Smart Transit, {full_name}! Your Smart ID is {smart_id}."
+            "message": f"Welcome to Happy Hours, {full_name}! Your Smart ID is {smart_id}."
         }
 
 

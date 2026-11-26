@@ -88,6 +88,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   setDefaultBookingDate();
   loadVendorCatalog();
   applyTranslations();
+  checkDatabaseStatus();
   navigateTo('home');
 });
 
@@ -399,13 +400,11 @@ async function populateLocationsList() {
 
   const fromDefaults = {
     'home-from-location': 'Kolhapur CBS (Central Bus Stand)',
-    'from-location': 'Kolhapur CBS (Central Bus Stand)',
-    'modal-boarding-select': 'Kolhapur CBS (Central Bus Stand)'
+    'from-location': 'Kolhapur CBS (Central Bus Stand)'
   };
   const toDefaults = {
     'home-to-location': 'Pune (Swargate)',
-    'to-location': 'Pune (Swargate)',
-    'modal-dropping-select': 'Pune (Swargate)'
+    'to-location': 'Pune (Swargate)'
   };
 
   Object.entries({ ...fromDefaults, ...toDefaults }).forEach(([id, defVal]) => {
@@ -417,6 +416,84 @@ async function populateLocationsList() {
       else if (locations.includes(defVal)) sel.value = defVal;
     }
   });
+}
+
+async function checkDatabaseStatus() {
+  try {
+    const info = await MSRTCApi.getDbStatus();
+    const badge = document.getElementById('db-status-badge');
+    if (badge && info) {
+      if (info.engine === 'PostgreSQL') {
+        badge.innerHTML = `<i class="fa-solid fa-database text-[10px] text-emerald-400"></i> <span class="text-emerald-300 font-bold">PostgreSQL</span> <span class="opacity-70 text-[10px]">(${info.database})</span>`;
+        badge.className = "inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-950/50 text-emerald-300 border border-emerald-500/30";
+        badge.title = `Connected to PostgreSQL 19 (${info.database} on ${info.host})`;
+      } else {
+        badge.innerHTML = `<i class="fa-solid fa-database text-[10px] text-amber-400"></i> <span class="text-amber-300 font-bold">SQLite</span> <span class="opacity-70 text-[10px]">(Fallback)</span>`;
+        badge.className = "inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-semibold bg-amber-950/50 text-amber-300 border border-amber-500/30";
+      }
+    }
+  } catch (e) {
+    console.warn("DB status check skipped:", e);
+  }
+}
+
+async function populateModalRoutePoints(bus, defaultBoarding, defaultDropping) {
+  let stops = bus.stops;
+  if (!stops || stops.length === 0) {
+    try {
+      const res = await MSRTCApi.getRouteStops(bus.id, defaultBoarding, defaultDropping);
+      stops = res.stops || [];
+    } catch (e) {
+      stops = [{ name: defaultBoarding, km: 0 }, { name: defaultDropping, km: bus.distanceKm || 50 }];
+    }
+  }
+  bus.stops = stops;
+  window.activeBusRouteStops = stops;
+
+  const mBoard = document.getElementById('modal-boarding-select');
+  if (!mBoard) return;
+
+  // Boarding points: all stops except the final terminus
+  const boardingStops = stops.length > 1 ? stops.slice(0, stops.length - 1) : stops;
+  mBoard.innerHTML = boardingStops
+    .map(s => `<option value="${esc(s.name)}">${esc(s.name)} (${s.km} km)</option>`)
+    .join('');
+
+  const chosenBoarding = boardingStops.some(s => s.name === defaultBoarding) ? defaultBoarding : boardingStops[0].name;
+  mBoard.value = chosenBoarding;
+
+  updateDroppingOptions(chosenBoarding, defaultDropping);
+}
+
+function updateDroppingOptions(chosenBoarding, preferredDropping = null) {
+  const stops = window.activeBusRouteStops || [];
+  const mDrop = document.getElementById('modal-dropping-select');
+  if (!mDrop || stops.length === 0) return;
+
+  const boardIdx = stops.findIndex(s => s.name === chosenBoarding);
+  // Dropping points must strictly come AFTER boarding point on this bus's route
+  const availableDropping = boardIdx >= 0 ? stops.slice(boardIdx + 1) : stops.slice(1);
+
+  mDrop.innerHTML = availableDropping
+    .map(s => `<option value="${esc(s.name)}">${esc(s.name)} (${s.km} km)</option>`)
+    .join('');
+
+  if (preferredDropping && availableDropping.some(s => s.name === preferredDropping)) {
+    mDrop.value = preferredDropping;
+  } else if (availableDropping.length > 0) {
+    // Default to final stop
+    mDrop.value = availableDropping[availableDropping.length - 1].name;
+  }
+}
+
+function handleModalBoardingChange() {
+  const mBoard = document.getElementById('modal-boarding-select')?.value;
+  updateDroppingOptions(mBoard);
+  handleModalRouteChange();
+}
+
+function handleModalDroppingChange() {
+  handleModalRouteChange();
 }
 
 function setDefaultBookingDate() {
@@ -607,8 +684,11 @@ async function openSeatModal(busIndex) {
 
   const mBoard = document.getElementById('modal-boarding-select');
   const mDrop = document.getElementById('modal-dropping-select');
-  if (mBoard) mBoard.value = depStand;
-  if (mDrop) mDrop.value = arrStand;
+  await populateModalRoutePoints(activeBus, depStand, arrStand);
+  const curBoard = mBoard?.value || depStand;
+  const curDrop = mDrop?.value || arrStand;
+  activeBus.from = curBoard;
+  activeBus.to = curDrop;
   const distInfo = document.getElementById('modal-distance-fare-info');
   if (distInfo) {
     distInfo.innerText = `${activeBus.distanceKm || '--'} km • ₹${activeBus.fare || 0}/seat`;
@@ -616,16 +696,18 @@ async function openSeatModal(busIndex) {
 
   // Fetch taken seats and ladies-adjacent restrictions from server
   let takenSeats = [];
+  let femaleBookedSeats = [];
   window.activeLadiesOnlyAdjacent = new Set();
   try {
     const sRes = await MSRTCApi.getSeats(activeBus.id, depStand, arrStand, trvDate);
     takenSeats = sRes.taken || [];
+    femaleBookedSeats = sRes.femaleBooked || [];
     window.activeLadiesOnlyAdjacent = new Set(sRes.ladiesOnlyAdjacent || []);
   } catch (e) {
     takenSeats = ["1A", "2C", "4D"];
   }
 
-  renderSeatCabinGrid(takenSeats);
+  renderSeatCabinGrid(takenSeats, femaleBookedSeats);
   renderPassengerInputs();
   renderVendorAddons();
   updateSummaryTotals();
@@ -669,7 +751,7 @@ async function handleModalRouteChange() {
     selectedSeats = [];
     document.getElementById('selected-seats-badge').innerText = 'None';
     window.activeLadiesOnlyAdjacent = new Set(q.ladiesOnlyAdjacent || []);
-    renderSeatCabinGrid(q.taken || []);
+    renderSeatCabinGrid(q.taken || [], q.femaleBooked || []);
     renderPassengerInputs();
     updateSummaryTotals();
   } catch (e) {
@@ -677,10 +759,11 @@ async function handleModalRouteChange() {
   }
 }
 
-function renderSeatCabinGrid(takenList) {
+function renderSeatCabinGrid(takenList, femaleBookedList = []) {
   const grid = document.getElementById('bus-cabin-grid');
   grid.innerHTML = '';
   const takenSet = new Set(takenList);
+  const femaleBookedSet = new Set(femaleBookedList);
 
   // Priority seat sets
   const seniorPriority = new Set(["1A", "1B", "2A", "2B"]);
@@ -693,8 +776,8 @@ function renderSeatCabinGrid(takenList) {
 
     const leftPair = document.createElement('div');
     leftPair.className = "flex gap-1.5";
-    leftPair.appendChild(createSeatBtn(`${r}A`, takenSet, seniorPriority, pregnantPriority, ladiesSafe));
-    leftPair.appendChild(createSeatBtn(`${r}B`, takenSet, seniorPriority, pregnantPriority, ladiesSafe));
+    leftPair.appendChild(createSeatBtn(`${r}A`, takenSet, femaleBookedSet, seniorPriority, pregnantPriority, ladiesSafe));
+    leftPair.appendChild(createSeatBtn(`${r}B`, takenSet, femaleBookedSet, seniorPriority, pregnantPriority, ladiesSafe));
 
     const aisle = document.createElement('div');
     aisle.className = "text-[9px] font-mono text-slate-400 font-bold px-1";
@@ -702,8 +785,8 @@ function renderSeatCabinGrid(takenList) {
 
     const rightPair = document.createElement('div');
     rightPair.className = "flex gap-1.5";
-    rightPair.appendChild(createSeatBtn(`${r}C`, takenSet, seniorPriority, pregnantPriority, ladiesSafe));
-    rightPair.appendChild(createSeatBtn(`${r}D`, takenSet, seniorPriority, pregnantPriority, ladiesSafe));
+    rightPair.appendChild(createSeatBtn(`${r}C`, takenSet, femaleBookedSet, seniorPriority, pregnantPriority, ladiesSafe));
+    rightPair.appendChild(createSeatBtn(`${r}D`, takenSet, femaleBookedSet, seniorPriority, pregnantPriority, ladiesSafe));
 
     rowDiv.appendChild(leftPair);
     rowDiv.appendChild(aisle);
@@ -712,14 +795,17 @@ function renderSeatCabinGrid(takenList) {
   }
 }
 
-function createSeatBtn(seatNo, takenSet, seniorSet, pregnantSet, ladiesSet) {
+function createSeatBtn(seatNo, takenSet, femaleBookedSet, seniorSet, pregnantSet, ladiesSet) {
   const btn = document.createElement('button');
   const isTaken = takenSet.has(seatNo);
 
   let extraClasses = "bg-white border-slate-300 text-slate-800 hover:border-msrtc-red";
   let title = `Seat ${seatNo} (Available)`;
 
-  if (isTaken) {
+  if (isTaken && femaleBookedSet.has(seatNo)) {
+    extraClasses = "bg-purple-700 border-purple-800 text-white cursor-not-allowed";
+    title = `Seat ${seatNo} (Booked by a female passenger)`;
+  } else if (isTaken) {
     extraClasses = "bg-slate-300 border-slate-300 text-slate-500 cursor-not-allowed";
     title = `Seat ${seatNo} (Taken)`;
   } else if (window.activeLadiesOnlyAdjacent && window.activeLadiesOnlyAdjacent.has(seatNo)) {
@@ -779,8 +865,8 @@ function renderPassengerInputs() {
     // Default passenger info for the first seat is the logged-in user
     let defName = (i === 0 && currentUser.name) ? currentUser.name : '';
     let defAge = (i === 0 && currentUser.age) ? currentUser.age : 28;
-    let defGen = isLadiesRestricted ? 'Female' : ((i === 0 && currentUser.gender) ? currentUser.gender : 'Male');
-    let defCat = isLadiesRestricted ? 'Solo Female Traveler' : ((defAge >= 60) ? "Senior Citizen (60+)" : (defGen === "Female" ? "Solo Female Traveler" : "General"));
+    let defGen = isLadiesRestricted ? '' : ((i === 0 && currentUser.gender) ? currentUser.gender : 'Male');
+    let defCat = isLadiesRestricted ? "General" : ((defAge >= 60) ? "Senior Citizen (60+)" : (defGen === "Female" ? "Solo Female Traveler" : "General"));
 
     container.innerHTML += `
       <div class="bg-white p-3 rounded-xl border ${isLadiesRestricted ? 'border-purple-300 bg-purple-50/30' : 'border-slate-200'} text-xs space-y-2">
@@ -798,7 +884,8 @@ function renderPassengerInputs() {
           <div class="sm:col-span-3">
             <select id="pax-gender-${i}" onchange="handlePaxChange(${i})" class="w-full p-2 border border-slate-300 rounded-lg" ${isLadiesRestricted ? 'title="Adjacent to Ladies seat — Female passengers only"' : ''}>
               ${isLadiesRestricted ? `
-                <option value="Female" selected>Female (Ladies Only)</option>
+                <option value="" selected>Select female passenger</option>
+                <option value="Female">Female (Ladies Only)</option>
               ` : `
                 <option value="Male" ${defGen === 'Male' ? 'selected' : ''}>Male</option>
                 <option value="Female" ${defGen === 'Female' ? 'selected' : ''}>Female (50% Concession)</option>
@@ -824,12 +911,15 @@ function renderPassengerInputs() {
 
 function handlePaxChange(i) {
   const age = parseInt(document.getElementById(`pax-age-${i}`)?.value || 25);
-  const gen = document.getElementById(`pax-gender-${i}`)?.value || 'Male';
+  const gen = document.getElementById(`pax-gender-${i}`)?.value || '';
   const cat = document.getElementById(`pax-category-${i}`)?.value || 'General';
   const badge = document.getElementById(`concession-badge-${i}`);
 
   if (badge) {
-    if (age < 5) {
+    if (window.activeLadiesOnlyAdjacent?.has(selectedSeats[i]) && gen !== 'Female') {
+      badge.innerText = "Female passenger required";
+      badge.className = "text-[10px] text-purple-700 bg-purple-50 px-2 py-0.5 rounded font-bold";
+    } else if (age < 5) {
       badge.innerText = "50% Child Concession";
       badge.className = "text-[10px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded font-bold";
     } else if (age >= 60 || cat === "Senior Citizen (60+)") {
@@ -947,6 +1037,11 @@ async function confirmBooking() {
     const age = parseInt(document.getElementById(`pax-age-${i}`)?.value || 28);
     const gender = document.getElementById(`pax-gender-${i}`)?.value || 'Male';
     const category = document.getElementById(`pax-category-${i}`)?.value || 'General';
+
+    if (window.activeLadiesOnlyAdjacent?.has(selectedSeats[i]) && gender !== 'Female') {
+      alert(`Seat ${selectedSeats[i]} is adjacent to a booked female passenger and is available to female passengers only.`);
+      return;
+    }
 
     if (!name) {
       alert(`Please enter the name for seat ${selectedSeats[i]}`);

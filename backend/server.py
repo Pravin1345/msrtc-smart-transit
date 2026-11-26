@@ -28,6 +28,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, urlparse
 
 # Module imports
+import db
 import pricing as P
 from ml_demand_forecasting import FORECAST_ENGINE, BUS_CAPACITY
 from happy_hours_optimizer import HAPPY_HOURS_OPTIMIZER
@@ -63,91 +64,7 @@ class ApiError(Exception):
         self.status, self.message, self.extra = status, message, extra
 
 
-def connect():
-    db = sqlite3.connect(DB_PATH, check_same_thread=False, isolation_level=None)
-    db.row_factory = sqlite3.Row
-    db.executescript("""
-    CREATE TABLE IF NOT EXISTS bookings (
-        id TEXT PRIMARY KEY,
-        trip_key TEXT,
-        schedule_id TEXT,
-        bus_type TEXT,
-        from_loc TEXT,
-        to_loc TEXT,
-        travel_date TEXT,
-        seat_count INTEGER,
-        multiplier REAL,
-        dynamic_subtotal INTEGER,
-        static_subtotal INTEGER,
-        gst INTEGER,
-        vendor_subtotal INTEGER,
-        total INTEGER,
-        status TEXT,
-        is_happy_hours INTEGER,
-        happy_hours_discount INTEGER,
-        group_discount INTEGER,
-        priority_category TEXT,
-        created_at TEXT,
-        payload TEXT
-    );
-    CREATE TABLE IF NOT EXISTS seat_taken (
-        trip_key TEXT,
-        seat TEXT,
-        booking_id TEXT,
-        PRIMARY KEY (trip_key, seat)
-    );
-    CREATE TABLE IF NOT EXISTS ad_campaigns (
-        id TEXT PRIMARY KEY,
-        route_id TEXT,
-        bus_id TEXT,
-        position TEXT,
-        campaign_type TEXT,
-        duration_days INTEGER,
-        qr_scans INTEGER,
-        fee REAL,
-        revenue REAL,
-        brand_name TEXT,
-        status TEXT,
-        created_at TEXT
-    );
-    CREATE TABLE IF NOT EXISTS ad_bookings (
-        id TEXT PRIMARY KEY,
-        brand_name TEXT,
-        contact_name TEXT,
-        contact_phone TEXT,
-        boarding_point TEXT,
-        dropping_point TEXT,
-        num_buses INTEGER,
-        position TEXT,
-        campaign_type TEXT,
-        duration_days INTEGER,
-        rate_per_bus_day REAL,
-        total_fee REAL,
-        status TEXT,
-        created_at TEXT
-    );
-    CREATE TABLE IF NOT EXISTS vendor_orders (
-        id TEXT PRIMARY KEY,
-        booking_id TEXT,
-        items_json TEXT,
-        total_amount REAL,
-        commission REAL,
-        status TEXT,
-        created_at TEXT
-    );
-    CREATE TABLE IF NOT EXISTS sos_alerts (
-        id TEXT PRIMARY KEY,
-        booking_id TEXT,
-        bus_number TEXT,
-        location TEXT,
-        status TEXT,
-        created_at TEXT
-    );
-    """)
-    return db
-
-
-DB = connect()
+DB = db.get_db()
 
 
 def today_ist():
@@ -277,6 +194,7 @@ def search(frm, to, d, today=None):
             "from": frm,
             "to": to,
             "date": d,
+            "stops": P.get_route_stops(frm, to, sched["id"]),
             "fare": effective_fare,
             "originalFare": q["fare"],
             "multiplier": effective_multiplier,
@@ -687,6 +605,16 @@ class Handler(BaseHTTPRequestHandler):
                 self.send_json(200, {"status": "UP", "time": datetime.now(IST).isoformat()})
             elif path == "/api/locations":
                 self.send_json(200, sorted(P.COORDS.keys()))
+            elif path == "/api/route-stops":
+                sched_id = (qs.get("scheduleId") or [""])[0]
+                frm = (qs.get("from") or [""])[0].strip()
+                to = (qs.get("to") or [""])[0].strip()
+                if not frm or not to:
+                    raise ApiError(400, "from and to parameters are required.")
+                stops = P.get_route_stops(frm, to, sched_id)
+                self.send_json(200, {"stops": stops})
+            elif path == "/api/db-status":
+                self.send_json(200, db.get_db_info())
             elif path == "/api/search":
                 frm = (qs.get("from") or [""])[0]
                 to = (qs.get("to") or [""])[0]
@@ -750,6 +678,7 @@ class Handler(BaseHTTPRequestHandler):
                     "duration": f"{mins // 60}h {mins % 60:02d}m",
                     "arrival": arr.strftime("%H:%M"),
                     "taken": sorted(taken_all),
+                    "femaleBooked": sorted(female_booked),
                     "ladiesOnlyAdjacent": sorted(ladies_adj - taken_all)
                 })
             elif path == "/api/revenue/unified" or path == "/api/revenue":

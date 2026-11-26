@@ -12,9 +12,9 @@ Features:
 """
 
 import json
-import sqlite3
 import os
 import random
+import db
 from datetime import datetime, timezone, timedelta
 
 IST = timezone(timedelta(hours=5, minutes=30))
@@ -28,9 +28,7 @@ class VendorBiddingService:
         self._seed_sample_stalls()
 
     def get_connection(self):
-        conn = sqlite3.connect(self.db_path, check_same_thread=False)
-        conn.row_factory = sqlite3.Row
-        return conn
+        return db.get_connection()
 
     def _init_db(self):
         with self.get_connection() as conn:

@@ -181,6 +181,79 @@ def concession(gender, age, fare):
     return round(fare * 0.5), why
 
 
+CORRIDORS = [
+    [
+        "Kolhapur CBS (Central Bus Stand)", "Shiroli MIDC", "Peth Vadgaon Stand",
+        "Satara Central", "Pune (Swargate)", "Pune (Shivajinagar)",
+        "Mumbai (Dadar)", "Mumbai (Borivali)"
+    ],
+    [
+        "Kolhapur CBS (Central Bus Stand)", "Gandhinagar Stand", "Hatkanangle Stand",
+        "Jaisingpur Bus Stand", "Sangli Central Stand", "Miraj Stand"
+    ],
+    [
+        "Kolhapur CBS (Central Bus Stand)", "Gandhinagar Stand", "Hatkanangle Stand",
+        "Hupari (Silver City) Stand", "Ichalkaranji Central Stand"
+    ],
+    [
+        "Kolhapur CBS (Central Bus Stand)", "Kagal Bus Stand", "Kagal 5-Star MIDC",
+        "Gadhinglaj Central Stand", "Ajara Central Stand", "Chandgad Bus Stand",
+        "Goa (Panaji - Inter-State)"
+    ],
+    [
+        "Ratnagiri Stand", "Gaganbawda Stand", "Kolhapur Rankala Stand",
+        "Kolhapur CBS (Central Bus Stand)"
+    ],
+    [
+        "Pune (Swargate)", "Pune (Shivajinagar)", "Nashik (CBS)", "Shirdi Temple"
+    ],
+    [
+        "Pune (Swargate)", "Solapur Central"
+    ],
+    [
+        "Pune (Swargate)", "Chhatrapati Sambhajinagar", "Nagpur Central"
+    ]
+]
+
+
+def get_route_stops(frm, to, schedule_id=None):
+    """Return ordered list of stops along the selected bus route with cumulative km."""
+    # 1. Check if both frm and to lie on one of the defined transit corridors
+    for c in CORRIDORS:
+        if frm in c and to in c:
+            i1, i2 = c.index(frm), c.index(to)
+            if i1 < i2:
+                sub = c[i1:i2+1]
+            else:
+                sub = list(reversed(c[i2:i1+1]))
+            res = [{"name": sub[0], "km": 0}]
+            cum = 0
+            for i in range(1, len(sub)):
+                seg = distance_km(sub[i-1], sub[i])
+                cum += seg
+                res.append({"name": sub[i], "km": cum})
+            return res
+
+    # 2. Linear projection for any other arbitrary origin & destination
+    total = distance_km(frm, to)
+    candidates = []
+    for name in COORDS:
+        if name in (frm, to):
+            continue
+        d_from = distance_km(frm, name)
+        d_to = distance_km(name, to)
+        # Point lies on or very close to corridor without backtracking
+        if (d_from + d_to) <= total * 1.08 and d_from < total and d_to < total:
+            candidates.append((d_from, name))
+    candidates.sort(key=lambda x: x[0])
+
+    stops = [{"name": frm, "km": 0}]
+    for d_from, name in candidates:
+        stops.append({"name": name, "km": d_from})
+    stops.append({"name": to, "km": total})
+    return stops
+
+
 def price_passengers(per_seat_fare, passengers):
     rows, subtotal = [], 0
     for p in passengers:
