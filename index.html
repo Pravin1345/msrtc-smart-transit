@@ -1318,12 +1318,49 @@
                 </div>
             </div>
 
-            <!-- Happy Hours Simulator & Scenario Generator (Modules 2 & 3) -->
+            <!-- Happy Hours Dynamic Fare Optimizer Simulator (Modules 2 & 3 + 50,000-Row Pipeline) -->
             <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm mb-8">
-                <div class="mb-4">
-                    <span class="text-xs font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded-full uppercase">Modules 2 & 3 • Optimization Logic</span>
-                    <h3 class="text-lg font-extrabold text-slate-900 mt-1">Happy Hours Dynamic Fare Optimizer Simulator</h3>
-                    <p class="text-xs text-slate-500">Test different base fares and baseline demands to verify Expected Revenue = Fare × Expected Bookings and constraints.</p>
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+                    <div>
+                        <span class="text-xs font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded-full uppercase">Modules 2 &amp; 3 • 50,000-Row ML Pipeline</span>
+                        <h3 class="text-lg font-extrabold text-slate-900 mt-1">Happy Hours Dynamic Fare &amp; Elasticity Optimizer</h3>
+                        <p class="text-xs text-slate-500">Live evaluation against the 50,000-row training table, 120,000 fare response evaluations, and elasticity response.</p>
+                    </div>
+                    <div id="hh-model-badge" class="font-bold text-xs bg-emerald-50 text-emerald-800 border border-emerald-200 px-3 py-1.5 rounded-xl flex items-center gap-1.5">
+                        <i class="fa-solid fa-brain text-emerald-600"></i> Model: RF Regressor (R² 0.898)
+                    </div>
+                </div>
+
+                <!-- Parameters Specification Grid -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-2 p-3 bg-amber-50/70 rounded-2xl border border-amber-200/80 mb-6 text-[11px]">
+                    <div class="bg-white p-2 rounded-xl border border-amber-100">
+                        <span class="text-[9px] font-bold text-slate-400 uppercase block">Total Seats</span>
+                        <span class="font-extrabold text-slate-900 text-sm font-mono" id="hh-cfg-seats">45</span>
+                    </div>
+                    <div class="bg-white p-2 rounded-xl border border-amber-100">
+                        <span class="text-[9px] font-bold text-slate-400 uppercase block">Base Fare</span>
+                        <span class="font-extrabold text-[#9B1C1C] text-sm font-mono" id="hh-cfg-base-fare">₹450</span>
+                    </div>
+                    <div class="bg-white p-2 rounded-xl border border-amber-100">
+                        <span class="text-[9px] font-bold text-slate-400 uppercase block">Max Discount</span>
+                        <span class="font-extrabold text-amber-700 text-sm font-mono" id="hh-cfg-max-disc">25% (₹338)</span>
+                    </div>
+                    <div class="bg-white p-2 rounded-xl border border-amber-100">
+                        <span class="text-[9px] font-bold text-slate-400 uppercase block">Pricing Window</span>
+                        <span class="font-extrabold text-slate-800 text-sm font-mono" id="hh-cfg-window">48h → 1h</span>
+                    </div>
+                    <div class="bg-white p-2 rounded-xl border border-amber-100">
+                        <span class="text-[9px] font-bold text-slate-400 uppercase block">Priority Reserve</span>
+                        <span class="font-extrabold text-purple-700 text-sm font-mono" id="hh-cfg-priority">6 Seats</span>
+                    </div>
+                    <div class="bg-white p-2 rounded-xl border border-amber-100">
+                        <span class="text-[9px] font-bold text-slate-400 uppercase block">Elasticity</span>
+                        <span class="font-extrabold text-blue-700 text-sm font-mono" id="hh-cfg-elasticity">+6.0 / -2.5</span>
+                    </div>
+                    <div class="bg-white p-2 rounded-xl border border-amber-100">
+                        <span class="text-[9px] font-bold text-slate-400 uppercase block">Loyalty Rule</span>
+                        <span class="font-extrabold text-emerald-700 text-sm font-mono" id="hh-cfg-loyalty">1 pt / ₹10</span>
+                    </div>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
@@ -1331,32 +1368,44 @@
                         <div>
                             <div class="flex justify-between text-xs font-bold text-slate-700 mb-1">
                                 <span>Standard Base Fare:</span>
-                                <span id="sim-fare-val" class="text-msrtc-red font-mono">₹350</span>
+                                <span id="sim-fare-val" class="text-msrtc-red font-mono">₹450</span>
                             </div>
-                            <input type="range" id="sim-fare-slider" min="50" max="600" step="10" value="350" oninput="updateHappyHoursSimulator()" class="w-full accent-msrtc-red" />
+                            <input type="range" id="sim-fare-slider" min="100" max="600" step="10" value="450" oninput="updateHappyHoursSimulator()" class="w-full accent-msrtc-red" />
                         </div>
 
                         <div>
                             <div class="flex justify-between text-xs font-bold text-slate-700 mb-1">
-                                <span>Baseline Demand (Low Occupancy):</span>
-                                <span id="sim-demand-val" class="text-blue-600 font-mono">9 Seats (32%)</span>
+                                <span>Hours Before Departure:</span>
+                                <span id="sim-hours-val" class="text-purple-600 font-mono">24h</span>
                             </div>
-                            <input type="range" id="sim-demand-slider" min="2" max="25" step="1" value="9" oninput="updateHappyHoursSimulator()" class="w-full accent-blue-600" />
+                            <input type="range" id="sim-hours-slider" min="1" max="48" step="1" value="24" oninput="updateHappyHoursSimulator()" class="w-full accent-purple-600" />
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between text-xs font-bold text-slate-700 mb-1">
+                                <span>Current Bookings (Snapshot):</span>
+                                <span id="sim-demand-val" class="text-blue-600 font-mono">12 Seats (27%)</span>
+                            </div>
+                            <input type="range" id="sim-demand-slider" min="0" max="45" step="1" value="12" oninput="updateHappyHoursSimulator()" class="w-full accent-blue-600" />
                         </div>
 
                         <div id="sim-optimizer-result-card" class="bg-amber-100/70 p-3 rounded-xl border border-amber-300 text-xs"></div>
                     </div>
 
                     <div class="md:col-span-8 overflow-x-auto">
-                        <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Evaluated Promotional Scenarios</h4>
+                        <div class="flex justify-between items-center mb-2">
+                            <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider">Candidate Promotional Fares Evaluation</h4>
+                            <span class="text-[10px] text-slate-400">Total Seats: 45 | Priority Quota: 6</span>
+                        </div>
                         <table class="w-full text-xs text-left">
                             <thead>
                                 <tr class="text-slate-400 border-b border-slate-100 font-semibold text-[10px] uppercase">
+                                    <th class="pb-2">Candidate Fare</th>
                                     <th class="pb-2">Discount</th>
-                                    <th class="pb-2 text-right">Promo Fare</th>
-                                    <th class="pb-2 text-right">Exp. Bookings</th>
+                                    <th class="pb-2 text-right">Online Bookings</th>
+                                    <th class="pb-2 text-right">Offline Boardings</th>
                                     <th class="pb-2 text-right">Occupancy</th>
-                                    <th class="pb-2 text-right">Exp. Revenue</th>
+                                    <th class="pb-2 text-right">Expected Revenue</th>
                                     <th class="pb-2 text-center">Constraint Status</th>
                                 </tr>
                             </thead>

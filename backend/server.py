@@ -700,9 +700,14 @@ class Handler(BaseHTTPRequestHandler):
                 days = int((qs.get("days") or [1])[0])
                 self.send_json(200, GROUP_SERVICE.calculate_group_quote(fare, pax, days))
             elif path == "/api/happyhours/scenarios":
-                base_fare = int((qs.get("baseFare") or [300])[0])
-                baseline_demand = int((qs.get("demand") or [10])[0])
-                self.send_json(200, HAPPY_HOURS_OPTIMIZER.optimize_trip_fare(base_fare, baseline_demand))
+                base_fare = int((qs.get("baseFare") or [450])[0])
+                baseline_demand = int((qs.get("demand") or [12])[0])
+                hours_before = int((qs.get("hoursBefore") or [24])[0])
+                self.send_json(200, HAPPY_HOURS_OPTIMIZER.optimize_trip_fare(base_fare=base_fare, current_bookings=baseline_demand, hours_before_departure=hours_before))
+            elif path == "/api/happyhours/config":
+                self.send_json(200, HAPPY_HOURS_OPTIMIZER.config)
+            elif path == "/api/happyhours/model-metrics":
+                self.send_json(200, HAPPY_HOURS_OPTIMIZER.metrics)
             elif path == "/api/datasets/summary":
                 self.send_json(200, DATASET_HUB.get_all_summaries())
             elif path == "/api/datasets/view":
@@ -829,6 +834,22 @@ class Handler(BaseHTTPRequestHandler):
             elif path == "/api/priority/check":
                 cat = body.get("category", "General")
                 self.send_json(200, SAFETY_SERVICE.get_priority_recommendation(cat))
+            elif path == "/api/happyhours/config":
+                ok = HAPPY_HOURS_OPTIMIZER.save_config(body)
+                self.send_json(200, {"success": ok, "config": HAPPY_HOURS_OPTIMIZER.config})
+            elif path == "/api/happyhours/simulate":
+                b_fare = float(body.get("baseFare") or body.get("base_fare") or 450)
+                curr_b = int(body.get("currentBookings") or body.get("current_bookings") or 12)
+                h_before = int(body.get("hoursBeforeDeparture") or body.get("hours_before_departure") or 24)
+                d_km = float(body.get("distanceKm") or body.get("distance_km") or 230)
+                b_type = body.get("busType", "Shivshahi (AC Seater)")
+                self.send_json(200, HAPPY_HOURS_OPTIMIZER.optimize_trip_fare(
+                    base_fare=b_fare,
+                    current_bookings=curr_b,
+                    hours_before_departure=h_before,
+                    distance_km=d_km,
+                    bus_type=b_type
+                ))
             elif path == "/api/safety/safe-drop":
                 self.send_json(200, SAFETY_SERVICE.request_safe_drop(body))
             elif path == "/api/safety/share-trip":

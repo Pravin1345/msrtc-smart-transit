@@ -1,0 +1,9 @@
+location_id,name,type
+1,Pune,main_station
+2,Kolhapur,main_station
+3,Satara,depot
+4,Karad,stand
+5,Sangli,stand
+6,Solapur,main_station
+7,Nashik,main_station
+8,Mumbai,main_station

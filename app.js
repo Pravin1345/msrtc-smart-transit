@@ -1595,61 +1595,117 @@ function renderMLModelsTable(res) {
   }).join('');
 }
 
-function renderHappyHoursSimulatorInit() {
+async function renderHappyHoursSimulatorInit() {
+  try {
+    const [cfg, metrics] = await Promise.all([
+      MSRTCApi.getHappyHoursConfig().catch(() => null),
+      MSRTCApi.getHappyHoursModelMetrics().catch(() => null)
+    ]);
+    if (cfg) {
+      const seatsEl = document.getElementById('hh-cfg-seats');
+      if (seatsEl) seatsEl.innerText = cfg.total_seats;
+      const fareEl = document.getElementById('hh-cfg-base-fare');
+      if (fareEl) fareEl.innerText = `₹${cfg.base_fare}`;
+      const discEl = document.getElementById('hh-cfg-max-disc');
+      if (discEl) discEl.innerText = `${Math.round(cfg.max_discount * 100)}% (₹${cfg.min_happy_fare})`;
+      const winEl = document.getElementById('hh-cfg-window');
+      if (winEl) winEl.innerText = `${cfg.pricing_start_h}h → ${cfg.close_h}h`;
+      const prioEl = document.getElementById('hh-cfg-priority');
+      if (prioEl) prioEl.innerText = `${cfg.priority_reserve} Seats`;
+      const elastEl = document.getElementById('hh-cfg-elasticity');
+      if (elastEl) elastEl.innerText = `+${cfg.elast_online} / -${cfg.elast_manual}`;
+      const loyEl = document.getElementById('hh-cfg-loyalty');
+      if (loyEl) loyEl.innerText = `1 pt / ₹${cfg.points_earn_div}`;
+    }
+    if (metrics && metrics.r2) {
+      const badge = document.getElementById('hh-model-badge');
+      if (badge) {
+        badge.innerHTML = `<i class="fa-solid fa-brain text-emerald-600"></i> Model: RF Regressor (R² ${metrics.r2}, MAE ${metrics.mae})`;
+      }
+    }
+  } catch (e) {}
   updateHappyHoursSimulator();
 }
 
 async function updateHappyHoursSimulator() {
-  const fare = parseInt(document.getElementById('sim-fare-slider')?.value || 350);
-  const demand = parseInt(document.getElementById('sim-demand-slider')?.value || 9);
+  const fare = parseInt(document.getElementById('sim-fare-slider')?.value || 450);
+  const hours = parseInt(document.getElementById('sim-hours-slider')?.value || 24);
+  const demand = parseInt(document.getElementById('sim-demand-slider')?.value || 12);
 
-  document.getElementById('sim-fare-val').innerText = `₹${fare}`;
-  document.getElementById('sim-demand-val').innerText = `${demand} Seats (${Math.round(demand / 28 * 100)}%)`;
+  const fareVal = document.getElementById('sim-fare-val');
+  if (fareVal) fareVal.innerText = `₹${fare}`;
+  const hoursVal = document.getElementById('sim-hours-val');
+  if (hoursVal) hoursVal.innerText = `${hours}h before dep`;
+  const demVal = document.getElementById('sim-demand-val');
+  if (demVal) demVal.innerText = `${demand} Seats (${Math.round((demand / 45) * 100)}%)`;
 
   try {
-    const res = await MSRTCApi.simulateHappyHours(fare, demand);
+    const res = await MSRTCApi.simulateHappyHoursOptimization({
+      baseFare: fare,
+      currentBookings: demand,
+      hoursBeforeDeparture: hours,
+      distanceKm: 230
+    });
+
     const card = document.getElementById('sim-optimizer-result-card');
-    card.innerHTML = `
-      <div class="flex items-center justify-between font-bold text-amber-950 mb-1">
-        <span>Recommended Optimal Fare:</span>
-        <span class="text-base text-msrtc-red font-black">₹${res.optimal_fare} (${res.optimal_discount_pct}% Off)</span>
-      </div>
-      <div class="flex justify-between text-[11px] text-amber-900">
-        <span>Expected Bookings:</span>
-        <span class="font-bold">${res.expected_bookings} Seats (${res.expected_occupancy_pct}%)</span>
-      </div>
-      <div class="flex justify-between text-[11px] text-amber-900">
-        <span>Expected Revenue:</span>
-        <span class="font-extrabold text-emerald-800">₹${res.expected_revenue} (vs ₹${res.base_revenue_without_promo})</span>
-      </div>
-      <div class="text-[10px] text-emerald-700 font-bold mt-1">
-        +₹${res.revenue_gain} net revenue gain achieved via off-peak elasticity!
-      </div>
-    `;
+    if (card) {
+      if (res.is_happy_hours_recommended) {
+        card.innerHTML = `
+          <div class="flex items-center justify-between font-bold text-amber-950 mb-1">
+            <span>Recommended Optimal Fare:</span>
+            <span class="text-base text-msrtc-red font-black">₹${res.optimal_fare} (${res.optimal_discount_pct}% Off)</span>
+          </div>
+          <div class="flex justify-between text-[11px] text-amber-900">
+            <span>Online + Offline Demand:</span>
+            <span class="font-bold">${res.expected_total_passengers} Pax (${res.expected_occupancy_pct}% full)</span>
+          </div>
+          <div class="flex justify-between text-[11px] text-amber-900">
+            <span>Expected Total Revenue:</span>
+            <span class="font-extrabold text-emerald-800">₹${res.expected_revenue.toLocaleString('en-IN')} (vs ₹${res.base_revenue_without_promo.toLocaleString('en-IN')})</span>
+          </div>
+          <div class="text-[10px] text-emerald-700 font-bold mt-1">
+            ⚡ +₹${res.revenue_gain.toLocaleString('en-IN')} (${res.revenue_uplift_pct}%) Net Revenue Uplift via Elasticity!
+          </div>
+        `;
+      } else {
+        card.innerHTML = `
+          <div class="font-bold text-slate-800 text-xs mb-1">Standard Pricing Maintained</div>
+          <p class="text-[11px] text-slate-600 mb-1">No discount applied. Base fare: <span class="font-bold">₹${res.base_fare}</span></p>
+          <span class="inline-block text-[10px] font-bold px-2 py-0.5 rounded bg-slate-200 text-slate-700">
+            ${!res.window_active ? `Outside Window (${res.hours_before_departure}h)` : `Occupancy above cutoff (≥50%)`}
+          </span>
+        `;
+      }
+    }
 
     const tbody = document.getElementById('sim-scenarios-body');
-    tbody.innerHTML = (res.scenarios || []).map(sc => {
-      const isOptimal = sc.discount_pct === res.optimal_discount_pct;
-      return `
-        <tr class="border-t border-slate-100 ${isOptimal ? 'bg-amber-100/60 font-bold' : ''}">
-          <td class="py-2 text-slate-800">${sc.discount_pct}%</td>
-          <td class="py-2 text-right font-mono">₹${sc.promotional_fare}</td>
-          <td class="py-2 text-right font-mono">${sc.expected_bookings}</td>
-          <td class="py-2 text-right font-mono">${sc.occupancy_pct}%</td>
-          <td class="py-2 text-right font-mono font-bold text-slate-900">₹${sc.expected_revenue}</td>
-          <td class="py-2 text-center">
-            ${isOptimal ? `
-              <span class="text-[9px] uppercase font-black bg-amber-200 text-amber-900 px-2 py-0.5 rounded">Optimal</span>
-            ` : (sc.is_feasible ? `
-              <span class="text-[9px] text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">Feasible</span>
-            ` : `
-              <span class="text-[9px] text-rose-700 bg-rose-50 px-1.5 py-0.5 rounded">Infeasible</span>
-            `)}
-          </td>
-        </tr>
-      `;
-    }).join('');
-  } catch (e) {}
+    if (tbody) {
+      tbody.innerHTML = (res.scenarios || []).map(sc => {
+        const isOptimal = sc.candidate_fare === res.optimal_fare && res.is_happy_hours_recommended;
+        return `
+          <tr class="border-t border-slate-100 ${isOptimal ? 'bg-amber-100/70 font-bold' : ''}">
+            <td class="py-2 font-mono font-bold text-slate-900">₹${sc.candidate_fare}</td>
+            <td class="py-2 text-slate-700">${sc.discount_pct}%</td>
+            <td class="py-2 text-right font-mono">${sc.online_bookings || sc.expected_bookings}</td>
+            <td class="py-2 text-right font-mono">${sc.offline_boardings || 0}</td>
+            <td class="py-2 text-right font-mono">${sc.final_occupancy_percent || sc.occupancy_pct}%</td>
+            <td class="py-2 text-right font-mono font-bold text-slate-900">₹${(sc.expected_revenue || 0).toLocaleString('en-IN')}</td>
+            <td class="py-2 text-center">
+              ${isOptimal ? `
+                <span class="text-[9px] uppercase font-black bg-amber-200 text-amber-900 px-2 py-0.5 rounded">Optimal</span>
+              ` : (sc.is_feasible ? `
+                <span class="text-[9px] text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">Feasible</span>
+              ` : `
+                <span class="text-[9px] text-rose-700 bg-rose-50 px-1.5 py-0.5 rounded">Infeasible</span>
+              `)}
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+  } catch (e) {
+    console.error("Happy hours simulation error:", e);
+  }
 }
 
 function renderAdAnalyticsBreakdown(a) {

@@ -86,6 +86,61 @@ DATASET_METADATA = {
         "title": "Regional Route Weather History",
         "module": "Environmental Demand Features",
         "description": "3,000 weather records recording temperature, rainfall (mm), humidity %, and road conditions."
+    },
+    "happy_hours_dataset/training_table.csv": {
+        "title": "Happy Hours ML Training Table",
+        "module": "Happy Hours Pipeline (50,000 Snapshots)",
+        "description": "50,000 hourly trip snapshots before departure used to train the official Happy Hours demand prediction model."
+    },
+    "happy_hours_dataset/fare_response.csv": {
+        "title": "Happy Hours Fare Response Matrix",
+        "module": "Happy Hours Elasticity & Fare Scenarios",
+        "description": "120,000 candidate promotional fare evaluations across candidate fares (₹450, ₹430, ₹410, ₹390, ₹360, ₹338)."
+    },
+    "happy_hours_dataset/bookings_history.csv": {
+        "title": "Happy Hours Historical Bookings",
+        "module": "Historical Pre-Happy Hours Ground Truth",
+        "description": "79,139 individual seat bookings across online and manual channels with payment, points, and cancellation records."
+    },
+    "happy_hours_dataset/trips_master.csv": {
+        "title": "Happy Hours Trips Master",
+        "module": "Operational Trip Schedules",
+        "description": "2,500 scheduled trips with 45 total seats, base fare ₹450, departure timetable, and 48h–1h pricing windows."
+    },
+    "happy_hours_dataset/loyalty_transactions.csv": {
+        "title": "Passenger Loyalty Transactions",
+        "module": "MSRTC Reward Points System",
+        "description": "80,922 point transactions earning 1 pt per ₹10 spent, and redeeming points at ₹0.50/pt subject to ₹300 minimum fare."
+    },
+    "happy_hours_dataset/loyalty_accounts.csv": {
+        "title": "Passenger Loyalty Accounts",
+        "module": "Frequent Rider Pass Vault",
+        "description": "800 active passenger accounts with accumulated loyalty point balances and lifetime transit milestones."
+    },
+    "happy_hours_dataset/priority_safety.csv": {
+        "title": "Priority & Women Safety Seat Allocation",
+        "module": "Module 7 (Reserved Seat Enforcements)",
+        "description": "2,500 trip allocations with mandatory quotas: 3 Women seats, 2 Senior Citizen seats, and 1 Medical emergency seat (Total: 6)."
+    },
+    "happy_hours_dataset/routes.csv": {
+        "title": "Transit Network Corridors",
+        "module": "Route Distance Specifications",
+        "description": "8 primary Maharashtra transit corridors connecting Pune, Kolhapur, Satara, Karad, Sangli, Solapur, Nashik, and Mumbai."
+    },
+    "happy_hours_dataset/users.csv": {
+        "title": "Passenger Master Directory",
+        "module": "Identity & Smart ID Pass Registry",
+        "description": "800 verified citizen profiles with demographics, safety categories (Women, Senior, Medical, General), and contact credentials."
+    },
+    "happy_hours_dataset/calendar_features.csv": {
+        "title": "Calendar & Seasonal Features",
+        "module": "Temporal Demand Indicators",
+        "description": "731 daily operational records tracking weekends, holidays, festivals, college peak cycles, and seasonal shifts."
+    },
+    "happy_hours_dataset/locations_master.csv": {
+        "title": "Major Bus Stations & Depots",
+        "module": "Geographical Infrastructure",
+        "description": "8 key transit hubs including main stations, intermediate stands, and regional MSRTC depots."
     }
 }
 
