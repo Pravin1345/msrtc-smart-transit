@@ -395,7 +395,8 @@ function navigateTo(pageId) {
 
   if (pageId === 'history') {
     renderBookingsList();
-    syncUserBookingsFromServer().then(() => renderBookingsList());
+    renderAllFeatureHistory();
+    syncUserBookingsFromServer().then(() => { renderBookingsList(); renderAllFeatureHistory(); });
   } else if (pageId === 'profile') {
     loadProfileForm();
   } else if (pageId === 'smartid') {
@@ -1297,7 +1298,9 @@ async function handleAdBookingSubmit(e) {
     numBuses: parseInt(document.getElementById('ad-book-buses').value || 1),
     durationDays: parseInt(document.getElementById('ad-book-days').value || 30),
     campaignType: document.getElementById('ad-book-type').value,
-    position: document.getElementById('ad-book-pos').value
+    position: document.getElementById('ad-book-pos').value,
+    token: authToken || '',
+    userId: currentUser?.userId || 'usr_guest'
   };
 
   if (btn) btn.disabled = true;
@@ -1329,8 +1332,12 @@ async function handleAdBookingSubmit(e) {
 async function loadAdBookingsHistory() {
   const box = document.getElementById('ad-bookings-history-box');
   if (!box) return;
+  if (!isAuthenticated()) {
+    box.innerHTML = `<div class="p-6 text-center text-xs text-slate-500 bg-slate-50 rounded border border-slate-200">Sign in to view your personal advertisement bookings.</div>`;
+    return;
+  }
   try {
-    const rows = await MSRTCApi.getAdBookings();
+    const rows = await MSRTCApi.getAdBookings(authToken, currentUser.userId);
     if (!rows || !rows.length) {
       box.innerHTML = `<div class="p-6 text-center text-xs text-slate-500 bg-slate-50 rounded border border-slate-200">No advertisement bookings recorded yet. Use the form on the left to book buses.</div>`;
       return;
@@ -1909,6 +1916,104 @@ function renderBookingsList() {
   `).join('');
 }
 
+async function renderAllFeatureHistory() {
+  const container = document.getElementById('all-feature-history-container');
+  if (!container) return;
+
+  if (!isAuthenticated()) {
+    container.innerHTML = `
+      <div class="bg-slate-50 border border-slate-200 rounded-2xl p-6 text-center text-xs text-slate-500">
+        <i class="fa-solid fa-lock text-slate-400 text-lg mb-2 block"></i>
+        Sign in to your account to view your personal Courier/Luggage, In-Bus Advertisement, and Group Booking history.
+      </div>
+    `;
+    return;
+  }
+
+  try {
+    const data = await MSRTCApi.getAllUserHistory(authToken, currentUser.userId);
+    const cargo = data.cargoBookings || [];
+    const ads = data.adBookings || [];
+    const groups = data.groupBookings || [];
+
+    container.innerHTML = `
+      <!-- Courier, Cargo & Excess Luggage -->
+      <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-sm font-extrabold text-slate-900 flex items-center gap-2">
+            <i class="fa-solid fa-box-open text-[#1e3a5f]"></i> My Courier, Cargo &amp; Excess Luggage (${cargo.length})
+          </h3>
+          <button onclick="navigateTo('cargo')" class="text-xs font-bold text-[#9B1C1C] hover:underline">+ New Cargo/Luggage</button>
+        </div>
+        ${cargo.length ? `
+          <div class="space-y-2">
+            ${cargo.map(c => `
+              <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+                <div>
+                  <span class="font-mono font-bold text-indigo-700">${esc(c.id)}</span>
+                  <span class="ml-2 font-bold text-slate-800">${esc(c.booking_type === 'EXCESS_LUGGAGE' ? 'Excess Luggage Pass' : 'Parcel / Courier')}</span>
+                  <p class="text-[11px] text-slate-500 mt-0.5">${esc(c.from_stand)} → ${esc(c.to_stand)} • ${c.weight_kg} kg • ${esc(c.status)}</p>
+                </div>
+                <span class="font-black text-slate-900">₹${c.total_amount}</span>
+              </div>
+            `).join('')}
+          </div>
+        ` : `<p class="text-xs text-slate-400">No parcel or excess luggage bookings in your account yet.</p>`}
+      </div>
+
+      <!-- In-Bus Advertisement Bookings -->
+      <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-sm font-extrabold text-slate-900 flex items-center gap-2">
+            <i class="fa-solid fa-rectangle-ad text-purple-700"></i> My In-Bus Advertisement Bookings (${ads.length})
+          </h3>
+          <button onclick="navigateTo('ads')" class="text-xs font-bold text-[#9B1C1C] hover:underline">+ Book Bus Ad</button>
+        </div>
+        ${ads.length ? `
+          <div class="space-y-2">
+            ${ads.map(a => `
+              <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+                <div>
+                  <span class="font-mono font-bold text-purple-800">${esc(a.id)}</span>
+                  <span class="ml-2 font-bold text-slate-800">${esc(a.brand_name)}</span>
+                  <p class="text-[11px] text-slate-500 mt-0.5">${esc(a.boarding_point)} → ${esc(a.dropping_point)} • ${a.num_buses} Buses (${a.duration_days} Days) • ${esc(a.status)}</p>
+                </div>
+                <span class="font-black text-slate-900">₹${Number(a.total_fee || 0).toLocaleString()}</span>
+              </div>
+            `).join('')}
+          </div>
+        ` : `<p class="text-xs text-slate-400">No advertisement campaigns booked under your account yet.</p>`}
+      </div>
+
+      <!-- Group & Bulk Bookings -->
+      <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-sm font-extrabold text-slate-900 flex items-center gap-2">
+            <i class="fa-solid fa-users text-emerald-700"></i> My Group &amp; Bulk Reservations (${groups.length})
+          </h3>
+          <button onclick="toggleGroupBookingModal()" class="text-xs font-bold text-[#9B1C1C] hover:underline">+ Group Calculator</button>
+        </div>
+        ${groups.length ? `
+          <div class="space-y-2">
+            ${groups.map(g => `
+              <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+                <div>
+                  <span class="font-mono font-bold text-emerald-800">${esc(g.id)}</span>
+                  <span class="ml-2 font-bold text-slate-800">${esc(g.group_name)}</span>
+                  <p class="text-[11px] text-slate-500 mt-0.5">${esc(g.from_stand)} → ${esc(g.to_stand)} • ${g.passengers} Pax (${g.days} Days) • ${g.discount_pct}% Off</p>
+                </div>
+                <span class="font-black text-slate-900">₹${Number(g.total_amount || 0).toLocaleString()}</span>
+              </div>
+            `).join('')}
+          </div>
+        ` : `<p class="text-xs text-slate-400">No group reservations saved under your account yet.</p>`}
+      </div>
+    `;
+  } catch (e) {
+    console.warn("Failed to load unified feature history:", e);
+  }
+}
+
 // 14. PROFILE & SMART ID (AUTHENTICATION GATED)
 function loadProfileForm() {
   const unauthCard = document.getElementById('profile-unauth-card');
@@ -2131,6 +2236,8 @@ async function handleLoginSubmit(e) {
         loadProfileForm();
         renderSmartIDPass();
         renderBookingsList();
+        renderAllFeatureHistory();
+        loadAdBookingsHistory();
         loadCancellationPage();
         if (btn) btn.disabled = false;
       }, 500);
@@ -2243,6 +2350,8 @@ async function handleLogout() {
   loadProfileForm();
   renderSmartIDPass();
   renderBookingsList();
+  renderAllFeatureHistory();
+  loadAdBookingsHistory();
   loadCancellationPage();
 }
 
@@ -2502,6 +2611,104 @@ function renderRegisteredVendors(list) {
   `).join('');
 }
 
+async function renderAllFeatureHistory() {
+  const container = document.getElementById('all-feature-history-container');
+  if (!container) return;
+
+  if (!isAuthenticated()) {
+    container.innerHTML = `
+      <div class="bg-slate-50 border border-slate-200 rounded-2xl p-6 text-center text-xs text-slate-500">
+        <i class="fa-solid fa-lock text-slate-400 text-lg mb-2 block"></i>
+        Sign in to your account to view your personal Courier/Luggage, In-Bus Advertisement, and Group Booking history.
+      </div>
+    `;
+    return;
+  }
+
+  try {
+    const data = await MSRTCApi.getAllUserHistory(authToken, currentUser.userId);
+    const cargo = data.cargoBookings || [];
+    const ads = data.adBookings || [];
+    const groups = data.groupBookings || [];
+
+    container.innerHTML = `
+      <!-- Courier, Cargo & Excess Luggage -->
+      <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-sm font-extrabold text-slate-900 flex items-center gap-2">
+            <i class="fa-solid fa-box-open text-[#1e3a5f]"></i> My Courier, Cargo &amp; Excess Luggage (${cargo.length})
+          </h3>
+          <button onclick="navigateTo('cargo')" class="text-xs font-bold text-[#9B1C1C] hover:underline">+ New Cargo/Luggage</button>
+        </div>
+        ${cargo.length ? `
+          <div class="space-y-2">
+            ${cargo.map(c => `
+              <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+                <div>
+                  <span class="font-mono font-bold text-indigo-700">${esc(c.id)}</span>
+                  <span class="ml-2 font-bold text-slate-800">${esc(c.booking_type === 'EXCESS_LUGGAGE' ? 'Excess Luggage Pass' : 'Parcel / Courier')}</span>
+                  <p class="text-[11px] text-slate-500 mt-0.5">${esc(c.from_stand)} → ${esc(c.to_stand)} • ${c.weight_kg} kg • ${esc(c.status)}</p>
+                </div>
+                <span class="font-black text-slate-900">₹${c.total_amount}</span>
+              </div>
+            `).join('')}
+          </div>
+        ` : `<p class="text-xs text-slate-400">No parcel or excess luggage bookings in your account yet.</p>`}
+      </div>
+
+      <!-- In-Bus Advertisement Bookings -->
+      <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-sm font-extrabold text-slate-900 flex items-center gap-2">
+            <i class="fa-solid fa-rectangle-ad text-purple-700"></i> My In-Bus Advertisement Bookings (${ads.length})
+          </h3>
+          <button onclick="navigateTo('ads')" class="text-xs font-bold text-[#9B1C1C] hover:underline">+ Book Bus Ad</button>
+        </div>
+        ${ads.length ? `
+          <div class="space-y-2">
+            ${ads.map(a => `
+              <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+                <div>
+                  <span class="font-mono font-bold text-purple-800">${esc(a.id)}</span>
+                  <span class="ml-2 font-bold text-slate-800">${esc(a.brand_name)}</span>
+                  <p class="text-[11px] text-slate-500 mt-0.5">${esc(a.boarding_point)} → ${esc(a.dropping_point)} • ${a.num_buses} Buses (${a.duration_days} Days) • ${esc(a.status)}</p>
+                </div>
+                <span class="font-black text-slate-900">₹${Number(a.total_fee || 0).toLocaleString()}</span>
+              </div>
+            `).join('')}
+          </div>
+        ` : `<p class="text-xs text-slate-400">No advertisement campaigns booked under your account yet.</p>`}
+      </div>
+
+      <!-- Group & Bulk Bookings -->
+      <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-sm font-extrabold text-slate-900 flex items-center gap-2">
+            <i class="fa-solid fa-users text-emerald-700"></i> My Group &amp; Bulk Reservations (${groups.length})
+          </h3>
+          <button onclick="toggleGroupBookingModal()" class="text-xs font-bold text-[#9B1C1C] hover:underline">+ Group Calculator</button>
+        </div>
+        ${groups.length ? `
+          <div class="space-y-2">
+            ${groups.map(g => `
+              <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+                <div>
+                  <span class="font-mono font-bold text-emerald-800">${esc(g.id)}</span>
+                  <span class="ml-2 font-bold text-slate-800">${esc(g.group_name)}</span>
+                  <p class="text-[11px] text-slate-500 mt-0.5">${esc(g.from_stand)} → ${esc(g.to_stand)} • ${g.passengers} Pax (${g.days} Days) • ${g.discount_pct}% Off</p>
+                </div>
+                <span class="font-black text-slate-900">₹${Number(g.total_amount || 0).toLocaleString()}</span>
+              </div>
+            `).join('')}
+          </div>
+        ` : `<p class="text-xs text-slate-400">No group reservations saved under your account yet.</p>`}
+      </div>
+    `;
+  } catch (e) {
+    console.warn("Failed to load unified feature history:", e);
+  }
+}
+
 
 // =========================================================
 // 15. COURIER, CARGO & LUGGAGE BOOKING (MSRTC VAHATUK)
@@ -2575,7 +2782,9 @@ async function handleCargoBookingSubmit(e) {
     weightKg: parseFloat(document.getElementById('cargo-weight').value || 5),
     packagesCount: parseInt(document.getElementById('cargo-packages').value || 1),
     speedTier: document.querySelector('input[name="cargoSpeed"]:checked')?.value || 'STANDARD',
-    declaredValue: 2500
+    declaredValue: 2500,
+    token: authToken || '',
+    userId: currentUser?.userId || 'usr_guest'
   };
 
   try {
@@ -2599,27 +2808,31 @@ function calculatePassengerLuggageLive() {
   document.getElementById('luggage-excess-total').innerText = `₹${fee} (incl. 5% GST)`;
 }
 
-function bookExcessLuggagePass() {
+async function bookExcessLuggagePass() {
   const totalWeight = parseFloat(document.getElementById('luggage-weight-input')?.value || 25);
-  const excess = Math.max(0, totalWeight - 15.0);
-  const fee = Math.round(excess * 10 * 1.05);
-
-  const mockPass = {
-    consignmentId: `MSRTC-LUG-2026-${Math.floor(10000 + Math.random() * 90000)}`,
-    from: "Kolhapur CBS (Central Bus Stand)",
-    to: "Pune (Swargate)",
-    tariff: {
-      isExcessLuggage: true,
-      weightKg: totalWeight,
-      excessWeightKg: excess,
-      total: fee
-    },
-    sender: { name: currentUser.name, phone: currentUser.phone },
-    receiver: { name: currentUser.name, phone: currentUser.phone },
-    createdAt: new Date().toISOString().replace('T', ' ').substring(0, 19)
+  const payload = {
+    bookingType: 'EXCESS_LUGGAGE',
+    fromStand: 'Kolhapur CBS (Central Bus Stand)',
+    toStand: 'Pune (Swargate)',
+    senderName: (currentUser && (currentUser.fullName || currentUser.name)) || 'Guest Passenger',
+    senderPhone: (currentUser && currentUser.phone) || '+91 98230 12345',
+    receiverName: (currentUser && (currentUser.fullName || currentUser.name)) || 'Guest Passenger',
+    receiverPhone: (currentUser && currentUser.phone) || '+91 98230 12345',
+    category: 'Excess Passenger Luggage',
+    weightKg: totalWeight,
+    packagesCount: 1,
+    speedTier: 'STANDARD',
+    declaredValue: 1000,
+    token: authToken || '',
+    userId: currentUser?.userId || 'usr_guest'
   };
 
-  openCargoModal(mockPass);
+  try {
+    const res = await MSRTCApi.bookCargo(payload);
+    openCargoModal(res);
+  } catch (err) {
+    alert(`Luggage Pass Error: ${err.message}`);
+  }
 }
 
 function openCargoModal(cargo) {

@@ -246,6 +246,7 @@ class CargoService:
         prefix = "MSRTC-LUG" if is_excess else "MSRTC-CRG"
         cid = f"{prefix}-{year}-{rnd}"
         now_str = datetime.now(IST).strftime("%Y-%m-%d %H:%M:%S")
+        user_id = (data.get("userId") or "usr_guest").strip() or "usr_guest"
 
         with self.get_connection() as conn:
             conn.execute("""
@@ -254,15 +255,15 @@ class CargoService:
                 receiver_name, receiver_phone, from_stand, to_stand, distance_km,
                 weight_kg, packages_count, cargo_category, speed_tier, declared_value,
                 base_freight, distance_charge, surcharge, gst, total_amount,
-                bus_schedule_id, status, current_location, created_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                bus_schedule_id, status, current_location, created_at, user_id
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 cid, b_type, s_name, s_phone, data.get("senderAddress", ""),
                 r_name, r_phone, from_stand, to_stand, tariff["distanceKm"],
                 weight, packages, category, speed, int(data.get("declaredValue", 1000)),
                 tariff["baseFreight"], tariff["distanceCharge"], tariff["surcharge"],
                 tariff["gst"], tariff["total"], data.get("scheduleId", "SCHED-MSRTC-001"),
-                "BOOKED", f"{from_stand} Booking Office", now_str
+                "BOOKED", f"{from_stand} Booking Office", now_str, user_id
             ))
 
             # Initial milestone
@@ -328,9 +329,14 @@ class CargoService:
             cargo_dict["milestones"] = [dict(m) for m in milestones]
             return cargo_dict
 
-    def list_all_cargo(self, limit=15):
+    def list_all_cargo(self, user_id=None, limit=30):
         with self.get_connection() as conn:
-            rows = conn.execute("SELECT * FROM cargo_bookings ORDER BY created_at DESC LIMIT ?", (limit,)).fetchall()
+            if not user_id or user_id == "usr_guest":
+                return []
+            rows = conn.execute(
+                "SELECT * FROM cargo_bookings WHERE user_id = ? ORDER BY created_at DESC LIMIT ?",
+                (user_id, limit)
+            ).fetchall()
             return [dict(r) for r in rows]
 
 

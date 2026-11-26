@@ -385,15 +385,20 @@ def create_booking(data, today, created_at=None):
     return booking
 
 
-def get_user_bookings(token="", user_id=""):
-    """Return bookings belonging strictly to the authenticated user."""
-    resolved_uid = None
+def _resolve_request_user_id(token="", user_id=""):
+    """Resolve authenticated user_id from session token or explicit non-guest userId."""
     if token:
         u = AUTH_SERVICE.verify(token)
         if u:
-            resolved_uid = u["userId"]
-    if not resolved_uid and user_id and user_id != "usr_guest":
-        resolved_uid = user_id
+            return u["userId"]
+    if user_id and user_id != "usr_guest":
+        return user_id
+    return None
+
+
+def get_user_bookings(token="", user_id=""):
+    """Return bookings belonging strictly to the authenticated user."""
+    resolved_uid = _resolve_request_user_id(token, user_id)
     if not resolved_uid:
         return []
 
@@ -409,6 +414,80 @@ def get_user_bookings(token="", user_id=""):
         except Exception:
             continue
     return result
+
+
+def get_all_user_feature_history(token="", user_id=""):
+    """Return ALL feature bookings (Bus, Cargo/Luggage, Ads, Group) strictly for this user."""
+    resolved_uid = _resolve_request_user_id(token, user_id)
+    if not resolved_uid:
+        return {"busBookings": [], "cargoBookings": [], "adBookings": [], "groupBookings": []}
+
+    bus_bookings = get_user_bookings(token=token, user_id=resolved_uid)
+    cargo_bookings = CARGO_SERVICE.list_all_cargo(user_id=resolved_uid, limit=50)
+    ad_rows = DB.execute(
+        "SELECT * FROM ad_bookings WHERE user_id = ? ORDER BY created_at DESC",
+        (resolved_uid,)
+    ).fetchall()
+    group_rows = DB.execute(
+        "SELECT * FROM group_bookings_live WHERE user_id = ? ORDER BY created_at DESC",
+        (resolved_uid,)
+    ).fetchall()
+
+    return {
+        "busBookings": bus_bookings,
+        "cargoBookings": cargo_bookings,
+        "adBookings": [dict(r) for r in ad_rows],
+        "groupBookings": [dict(r) for r in group_rows],
+    }
+
+
+def book_group_reservation(body):
+    """Create and persist a Group & Bulk reservation under the current user's account."""
+    uid = _resolve_request_user_id(body.get("token", ""), body.get("userId", "")) or "usr_guest"
+    pax = max(1, int(body.get("passengers") or 12))
+    fare = max(1, float(body.get("baseFare") or 350))
+    days = max(1, int(body.get("days") or 1))
+    from_stand = (body.get("fromStand") or "Kolhapur CBS (Central Bus Stand)").strip()
+    to_stand = (body.get("toStand") or "Pune (Swargate)").strip()
+    travel_date = (body.get("travelDate") or today_ist().isoformat()).strip()
+    group_name = (body.get("groupName") or "MSRTC Group Charter").strip()
+    contact_name = (body.get("contactName") or "Group Organizer").strip()
+    contact_phone = (body.get("contactPhone") or "").strip()
+
+    q = GROUP_SERVICE.calculate_group_quote(int(fare), pax, days)
+    gid = f"MSRTC-GRP-{datetime.now(IST).year}-{random.randint(10000, 99999)}"
+    created_at = datetime.now(IST).isoformat(timespec="seconds")
+
+    with DB:
+        DB.execute(
+            """
+            INSERT INTO group_bookings_live (
+                id, user_id, group_name, contact_name, contact_phone,
+                from_stand, to_stand, travel_date, passengers, days,
+                base_fare, discount_pct, total_amount, tier_name, status, created_at
+            ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+            """,
+            (
+                gid, uid, group_name, contact_name, contact_phone,
+                from_stand, to_stand, travel_date, pax, days,
+                fare, q["total_discount_pct"], q["net_total"], q["tier_name"], "CONFIRMED", created_at
+            )
+        )
+    return {
+        "id": gid,
+        "user_id": uid,
+        "group_name": group_name,
+        "from_stand": from_stand,
+        "to_stand": to_stand,
+        "travel_date": travel_date,
+        "passengers": pax,
+        "days": days,
+        "discount_pct": q["total_discount_pct"],
+        "total_amount": q["net_total"],
+        "tier_name": q["tier_name"],
+        "status": "CONFIRMED",
+        "created_at": created_at,
+    }
 
 
 def get_cancellation_quote(booking_id):
@@ -826,8 +905,12 @@ class Handler(BaseHTTPRequestHandler):
             elif path == "/api/ads/list":
                 self.send_json(200, AD_SERVICE.get_sample_ads())
             elif path == "/api/ads/bookings":
-                rows = DB.execute("SELECT * FROM ad_bookings ORDER BY created_at DESC").fetchall()
-                self.send_json(200, [dict(r) for r in rows])
+                uid = _resolve_request_user_id((qs.get("token") or [""])[0], (qs.get("userId") or [""])[0])
+                if not uid:
+                    self.send_json(200, [])
+                else:
+                    rows = DB.execute("SELECT * FROM ad_bookings WHERE user_id = ? ORDER BY created_at DESC", (uid,)).fetchall()
+                    self.send_json(200, [dict(r) for r in rows])
             elif path == "/api/vendors/catalog":
                 self.send_json(200, VENDOR_SERVICE.get_catalog())
             elif path == "/api/group/quote":
@@ -859,7 +942,19 @@ class Handler(BaseHTTPRequestHandler):
                 q = (qs.get("id") or qs.get("query") or [""])[0]
                 self.send_json(200, CARGO_SERVICE.track_cargo(q))
             elif path == "/api/cargo/all":
-                self.send_json(200, CARGO_SERVICE.list_all_cargo())
+                uid = _resolve_request_user_id((qs.get("token") or [""])[0], (qs.get("userId") or [""])[0])
+                self.send_json(200, CARGO_SERVICE.list_all_cargo(user_id=uid))
+            elif path == "/api/group/bookings":
+                uid = _resolve_request_user_id((qs.get("token") or [""])[0], (qs.get("userId") or [""])[0])
+                if not uid:
+                    self.send_json(200, [])
+                else:
+                    rows = DB.execute("SELECT * FROM group_bookings_live WHERE user_id = ? ORDER BY created_at DESC", (uid,)).fetchall()
+                    self.send_json(200, [dict(r) for r in rows])
+            elif path == "/api/user/all-history":
+                token = (qs.get("token") or [""])[0]
+                uid = (qs.get("userId") or [""])[0]
+                self.send_json(200, get_all_user_feature_history(token=token, user_id=uid))
             elif path == "/api/safety/women-dashboard":
                 self.send_json(200, SAFETY_SERVICE.get_women_safety_dashboard())
             elif path == "/api/bookings":
@@ -939,12 +1034,13 @@ class Handler(BaseHTTPRequestHandler):
                 total_fee = round(rate_per_bus_day * num_buses * dur, 2)
                 ad_bid = f"ADB-{uuid.uuid4().hex[:8].upper()}"
                 created_at = datetime.now(IST).isoformat(timespec="seconds")
+                ad_uid = _resolve_request_user_id(body.get("token", ""), body.get("userId", "")) or "usr_guest"
 
                 with DB:
                     DB.execute(
-                        "INSERT INTO ad_bookings VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                        "INSERT INTO ad_bookings (id, brand_name, contact_name, contact_phone, boarding_point, dropping_point, num_buses, position, campaign_type, duration_days, rate_per_bus_day, total_fee, status, created_at, user_id) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                         (ad_bid, brand, contact, phone, boarding, dropping, num_buses,
-                         pos, ctype, dur, rate_per_bus_day, total_fee, "CONFIRMED", created_at)
+                         pos, ctype, dur, rate_per_bus_day, total_fee, "CONFIRMED", created_at, ad_uid)
                     )
                 self.send_json(201, {
                     "id": ad_bid,
@@ -1017,7 +1113,11 @@ class Handler(BaseHTTPRequestHandler):
                 is_lug = bool(body.get("isExcessLuggage", False))
                 self.send_json(200, CARGO_SERVICE.calculate_tariff(f_std, t_std, w_kg, cat, spd, pk, is_lug))
             elif path == "/api/cargo/book":
+                resolved_uid = _resolve_request_user_id(body.get("token", ""), body.get("userId", "")) or "usr_guest"
+                body["userId"] = resolved_uid
                 self.send_json(201, CARGO_SERVICE.book_cargo(body))
+            elif path == "/api/group/book":
+                self.send_json(201, book_group_reservation(body))
             elif path == "/api/auth/register":
                 self.send_json(201, AUTH_SERVICE.register(body))
             elif path == "/api/auth/login":

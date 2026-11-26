@@ -258,6 +258,26 @@ CREATE TABLE IF NOT EXISTS ad_bookings (
     rate_per_bus_day REAL,
     total_fee REAL,
     status TEXT,
+    created_at TEXT,
+    user_id TEXT DEFAULT 'usr_guest'
+);
+
+CREATE TABLE IF NOT EXISTS group_bookings_live (
+    id TEXT PRIMARY KEY,
+    user_id TEXT DEFAULT 'usr_guest',
+    group_name TEXT,
+    contact_name TEXT,
+    contact_phone TEXT,
+    from_stand TEXT,
+    to_stand TEXT,
+    travel_date TEXT,
+    passengers INTEGER,
+    days INTEGER,
+    base_fare REAL,
+    discount_pct REAL,
+    total_amount REAL,
+    tier_name TEXT,
+    status TEXT DEFAULT 'CONFIRMED',
     created_at TEXT
 );
 
@@ -478,6 +498,21 @@ def _sync_postgres_sequences(pg_wrapper):
             pass
 
 
+def _ensure_user_id_columns(conn, is_postgres=True):
+    """Ensure every feature booking table has a user_id column for strict per-user isolation."""
+    tables = ("ad_bookings", "cargo_bookings", "vendor_orders", "sos_alerts", "excess_luggage_records")
+    for t in tables:
+        try:
+            if is_postgres:
+                conn.execute(f"ALTER TABLE {t} ADD COLUMN IF NOT EXISTS user_id TEXT DEFAULT 'usr_guest'")
+            else:
+                cols = [r[1] for r in conn.execute(f"PRAGMA table_info({t})").fetchall()]
+                if "user_id" not in cols:
+                    conn.execute(f"ALTER TABLE {t} ADD COLUMN user_id TEXT DEFAULT 'usr_guest'")
+        except Exception:
+            pass
+
+
 def init_db():
     global _GLOBAL_DB
     with _LOCK:
@@ -486,6 +521,7 @@ def init_db():
             print(f"[DB] Successfully connected to PostgreSQL (DB: {PG_DB} on {PG_HOST}:{PG_PORT})")
             schemas = _get_table_schemas(is_postgres=True)
             pg_conn.executescript(schemas)
+            _ensure_user_id_columns(pg_conn, is_postgres=True)
             _migrate_sqlite_to_postgres(pg_conn)
             _sync_postgres_sequences(pg_conn)
             _GLOBAL_DB = pg_conn
@@ -495,6 +531,7 @@ def init_db():
         sq_conn = _try_connect_sqlite()
         schemas = _get_table_schemas(is_postgres=False)
         sq_conn.executescript(schemas)
+        _ensure_user_id_columns(sq_conn, is_postgres=False)
         _GLOBAL_DB = sq_conn
         return _GLOBAL_DB
 
