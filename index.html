@@ -87,6 +87,9 @@
                     <button onclick="navigateTo('women-safety')" class="nav-btn px-3.5 py-2 rounded text-sm font-semibold transition text-slate-700 hover:text-[#9B1C1C] hover:bg-red-50" data-page="women-safety">
             <i class="fa-solid fa-shield-halved mr-1"></i> <span data-i18n="nav_safety">Women Safety</span>
           </button>
+                    <button onclick="navigateTo('cancellation')" class="nav-btn px-3.5 py-2 rounded text-sm font-semibold transition text-slate-700 hover:text-[#9B1C1C] hover:bg-red-50" data-page="cancellation">
+            <i class="fa-solid fa-ban mr-1"></i> <span data-i18n="nav_cancellation">Cancellation &amp; Refund</span>
+          </button>
                 </nav>
 
                 <!-- Auth / User Corner -->
@@ -161,160 +164,55 @@
 
             <!-- Quick Services Strip (KSRTC-Swift Style) -->
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-2">
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                    <button onclick="navigateTo('book')" class="bg-white p-4 rounded-lg border border-slate-200 hover:border-[#9B1C1C] text-left transition flex items-center gap-3">
-                        <div class="w-10 h-10 rounded bg-slate-100 text-[#9B1C1C] flex items-center justify-center shrink-0">
-                            <i class="fa-solid fa-ticket text-lg"></i>
+                <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                    <button onclick="navigateTo('book')" class="bg-white p-3.5 rounded-lg border border-slate-200 hover:border-[#9B1C1C] text-left transition flex items-center gap-2.5">
+                        <div class="w-9 h-9 rounded bg-slate-100 text-[#9B1C1C] flex items-center justify-center shrink-0">
+                            <i class="fa-solid fa-ticket text-base"></i>
                         </div>
                         <div>
-                            <span class="block text-sm font-bold text-slate-900">Book Tickets</span>
-                            <span class="block text-[11px] text-slate-500">Live Schedules &amp; Fares</span>
+                            <span class="block text-xs font-bold text-slate-900" data-i18n="qs_book">Book Tickets</span>
+                            <span class="block text-[10px] text-slate-500" data-i18n="qs_book_sub">Live Schedules &amp; Fares</span>
                         </div>
                     </button>
-                    <button onclick="navigateTo('history')" class="bg-white p-4 rounded-lg border border-slate-200 hover:border-[#9B1C1C] text-left transition flex items-center gap-3">
-                        <div class="w-10 h-10 rounded bg-slate-100 text-[#1e3a5f] flex items-center justify-center shrink-0">
-                            <i class="fa-solid fa-receipt text-lg"></i>
+                    <button onclick="navigateTo('history')" class="bg-white p-3.5 rounded-lg border border-slate-200 hover:border-[#9B1C1C] text-left transition flex items-center gap-2.5">
+                        <div class="w-9 h-9 rounded bg-slate-100 text-[#1e3a5f] flex items-center justify-center shrink-0">
+                            <i class="fa-solid fa-receipt text-base"></i>
                         </div>
                         <div>
-                            <span class="block text-sm font-bold text-slate-900">PNR / My Trips</span>
-                            <span class="block text-[11px] text-slate-500">Booking &amp; Ticket Status</span>
+                            <span class="block text-xs font-bold text-slate-900" data-i18n="qs_pnr">PNR / My Trips</span>
+                            <span class="block text-[10px] text-slate-500" data-i18n="qs_pnr_sub">Booking &amp; Status</span>
                         </div>
                     </button>
-                    <button onclick="navigateTo('cargo')" class="bg-white p-4 rounded-lg border border-slate-200 hover:border-[#9B1C1C] text-left transition flex items-center gap-3">
-                        <div class="w-10 h-10 rounded bg-slate-100 text-[#1e3a5f] flex items-center justify-center shrink-0">
-                            <i class="fa-solid fa-box-open text-lg"></i>
+                    <button onclick="navigateTo('cancellation')" class="bg-white p-3.5 rounded-lg border-2 border-red-200 hover:border-[#9B1C1C] text-left transition flex items-center gap-2.5 bg-red-50/20">
+                        <div class="w-9 h-9 rounded bg-red-100 text-[#9B1C1C] flex items-center justify-center shrink-0">
+                            <i class="fa-solid fa-ban text-base"></i>
                         </div>
                         <div>
-                            <span class="block text-sm font-bold text-slate-900">Courier &amp; Luggage</span>
-                            <span class="block text-[11px] text-slate-500">Parcel &amp; Waybill Booking</span>
+                            <span class="block text-xs font-bold text-[#9B1C1C]" data-i18n="qs_cancel">Cancel &amp; Refund</span>
+                            <span class="block text-[10px] text-slate-500" data-i18n="qs_cancel_sub">Before 4h Only</span>
                         </div>
                     </button>
-                    <button onclick="navigateTo('women-safety')" class="bg-white p-4 rounded-lg border border-slate-200 hover:border-[#9B1C1C] text-left transition flex items-center gap-3">
-                        <div class="w-10 h-10 rounded bg-slate-100 text-[#9B1C1C] flex items-center justify-center shrink-0">
-                            <i class="fa-solid fa-shield-halved text-lg"></i>
+                    <button onclick="navigateTo('cargo')" class="bg-white p-3.5 rounded-lg border border-slate-200 hover:border-[#9B1C1C] text-left transition flex items-center gap-2.5">
+                        <div class="w-9 h-9 rounded bg-slate-100 text-[#1e3a5f] flex items-center justify-center shrink-0">
+                            <i class="fa-solid fa-box-open text-base"></i>
                         </div>
                         <div>
-                            <span class="block text-sm font-bold text-slate-900">Women Safety (1091)</span>
-                            <span class="block text-[11px] text-slate-500">Safe Drop &amp; SOS Portal</span>
+                            <span class="block text-xs font-bold text-slate-900" data-i18n="qs_cargo">Courier &amp; Cargo</span>
+                            <span class="block text-[10px] text-slate-500" data-i18n="qs_cargo_sub">Waybill Booking</span>
+                        </div>
+                    </button>
+                    <button onclick="navigateTo('women-safety')" class="bg-white p-3.5 rounded-lg border border-slate-200 hover:border-[#9B1C1C] text-left transition flex items-center gap-2.5">
+                        <div class="w-9 h-9 rounded bg-slate-100 text-[#9B1C1C] flex items-center justify-center shrink-0">
+                            <i class="fa-solid fa-shield-halved text-base"></i>
+                        </div>
+                        <div>
+                            <span class="block text-xs font-bold text-slate-900" data-i18n="qs_safety">Women Safety</span>
+                            <span class="block text-[10px] text-slate-500" data-i18n="qs_safety_sub">SOS Portal (1091)</span>
                         </div>
                     </button>
                 </div>
             </div>
 
-            <!-- 7 Modules Overview Grid -->
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <div class="mb-6 border-b border-slate-200 pb-3 flex flex-col sm:flex-row sm:items-end justify-between gap-2">
-                    <div>
-                        <h2 class="text-xl font-bold text-[#1e3a5f] border-l-4 border-[#9B1C1C] pl-3" data-i18n="modules_heading">
-                            MSRTC Integrated Transit &amp; Revenue Modules
-                        </h2>
-                        <p class="text-xs text-slate-600 mt-1 pl-4" data-i18n="modules_sub">Click any module below to open its portal directly.</p>
-                    </div>
-                    <button onclick="navigateTo('features')" class="text-xs font-bold text-[#9B1C1C] hover:underline whitespace-nowrap">
-                        <span data-i18n="view_all_features">View All Services &amp; Features</span> <i class="fa-solid fa-arrow-right ml-1"></i>
-                    </button>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <!-- Mod 1 -->
-                    <div onclick="navigateTo('revenue')" class="bg-white p-5 rounded-lg border border-slate-200 hover:border-[#9B1C1C] cursor-pointer transition">
-                        <div class="flex items-center gap-2.5 mb-2">
-                            <div class="w-8 h-8 rounded bg-slate-100 text-[#1e3a5f] flex items-center justify-center text-sm">
-                                <i class="fa-solid fa-brain"></i>
-                            </div>
-                            <h3 class="font-bold text-slate-900 text-sm" data-i18n="mod1_title">1. ML Demand Forecasting</h3>
-                        </div>
-                        <p class="text-xs text-slate-600 leading-relaxed mb-3" data-i18n="mod1_desc">
-                            Compares Linear Regression, Decision Tree, Random Forest &amp; XGBoost to forecast passenger loads, expected occupancy, and off-peak vacancies.
-                        </p>
-                        <span class="text-[11px] font-semibold text-[#1e3a5f] bg-slate-100 px-2 py-0.5 rounded border border-slate-200">MAE &amp; RMSE Evaluated →</span>
-                    </div>
-
-                    <!-- Mod 2 & 3 -->
-                    <div onclick="navigateTo('book')" class="bg-white p-5 rounded-lg border border-slate-200 hover:border-[#9B1C1C] cursor-pointer transition">
-                        <div class="flex items-center gap-2.5 mb-2">
-                            <div class="w-8 h-8 rounded bg-slate-100 text-[#9B1C1C] flex items-center justify-center text-sm">
-                                <i class="fa-solid fa-tags"></i>
-                            </div>
-                            <h3 class="font-bold text-slate-900 text-sm" data-i18n="mod2_title">2 &amp; 3. Dynamic Fare Optimizer</h3>
-                        </div>
-                        <p class="text-xs text-slate-600 leading-relaxed mb-3" data-i18n="mod2_desc">
-                            Constrained Revenue Optimizer: <code>Expected Revenue = Fare × Expected Bookings</code>. Applies off-peak discounts only on low-occupancy buses.
-                        </p>
-                        <span class="text-[11px] font-semibold text-[#9B1C1C] bg-slate-100 px-2 py-0.5 rounded border border-slate-200">Capacity &amp; Demand Controlled →</span>
-                    </div>
-
-                    <!-- Mod 4 -->
-                    <div onclick="navigateTo('ads')" class="bg-white p-5 rounded-lg border border-slate-200 hover:border-[#9B1C1C] cursor-pointer transition">
-                        <div class="flex items-center gap-2.5 mb-2">
-                            <div class="w-8 h-8 rounded bg-slate-100 text-[#1e3a5f] flex items-center justify-center text-sm">
-                                <i class="fa-solid fa-rectangle-ad"></i>
-                            </div>
-                            <h3 class="font-bold text-slate-900 text-sm" data-i18n="mod4_title">4. In-Bus Advertising (Dataset)</h3>
-                        </div>
-                        <p class="text-xs text-slate-600 leading-relaxed mb-3" data-i18n="mod4_desc">
-                            Position-based pricing (Front/First 10/Middle/Rear). Trained on 1,000 advertisement records predicting revenue and tracking QR scans.
-                        </p>
-                        <span class="text-[11px] font-semibold text-[#1e3a5f] bg-slate-100 px-2 py-0.5 rounded border border-slate-200">1,000 Records ML Model →</span>
-                    </div>
-
-                    <!-- Mod 5 -->
-                    <div onclick="toggleGroupBookingModal()" class="bg-white p-5 rounded-lg border border-slate-200 hover:border-[#9B1C1C] cursor-pointer transition">
-                        <div class="flex items-center gap-2.5 mb-2">
-                            <div class="w-8 h-8 rounded bg-slate-100 text-[#1e3a5f] flex items-center justify-center text-sm">
-                                <i class="fa-solid fa-users"></i>
-                            </div>
-                            <h3 class="font-bold text-slate-900 text-sm" data-i18n="mod5_title">5. Group &amp; Multi-Day Bulk</h3>
-                        </div>
-                        <p class="text-xs text-slate-600 leading-relaxed mb-3" data-i18n="mod5_desc">
-                            Tiered discounts for wedding parties, college tours (10%–20%), multi-day reservations (&gt;3 days), and flexible multi-seat allocation.
-                        </p>
-                        <span class="text-[11px] font-semibold text-[#1e3a5f] bg-slate-100 px-2 py-0.5 rounded border border-slate-200">Group &amp; Charter Engine →</span>
-                    </div>
-
-                    <!-- Mod 6 -->
-                    <div onclick="navigateTo('vendors')" class="bg-white p-5 rounded-lg border border-slate-200 hover:border-[#9B1C1C] cursor-pointer transition">
-                        <div class="flex items-center gap-2.5 mb-2">
-                            <div class="w-8 h-8 rounded bg-slate-100 text-[#1e3a5f] flex items-center justify-center text-sm">
-                                <i class="fa-solid fa-utensils"></i>
-                            </div>
-                            <h3 class="font-bold text-slate-900 text-sm" data-i18n="mod6_title">6. Vendor &amp; Rest-Stop Tie-Ups</h3>
-                        </div>
-                        <p class="text-xs text-slate-600 leading-relaxed mb-3" data-i18n="mod6_desc">
-                            Katraj Ghat Highway Food Plaza (Pune-Kolhapur NH48) &amp; Onboard MSRTC Rail Neer pre-orders, earning 10%–15% commission + rest-stop bidding fees.
-                        </p>
-                        <span class="text-[11px] font-semibold text-[#1e3a5f] bg-slate-100 px-2 py-0.5 rounded border border-slate-200">Katraj Ghat Rest-Stop Partner →</span>
-                    </div>
-
-                    <!-- Mod 7 -->
-                    <div onclick="navigateTo('women-safety')" class="bg-white p-5 rounded-lg border border-slate-200 hover:border-[#9B1C1C] cursor-pointer transition">
-                        <div class="flex items-center gap-2.5 mb-2">
-                            <div class="w-8 h-8 rounded bg-slate-100 text-[#9B1C1C] flex items-center justify-center text-sm">
-                                <i class="fa-solid fa-shield-halved"></i>
-                            </div>
-                            <h3 class="font-bold text-slate-900 text-sm" data-i18n="mod7_title">7. Passenger Priority &amp; Safety</h3>
-                        </div>
-                        <p class="text-xs text-slate-600 leading-relaxed mb-3" data-i18n="mod7_desc">
-                            Priority seating for Senior Citizens (Row 1-2), Pregnant Women, and Solo Female Safe Matching with instant Control Room SOS dispatch.
-                        </p>
-                        <span class="text-[11px] font-semibold text-[#9B1C1C] bg-slate-100 px-2 py-0.5 rounded border border-slate-200">SOS 1091 &amp; Concessions →</span>
-                    </div>
-                </div>
-
-                <!-- Unified Revenue Formula Callout -->
-                <div class="mt-6 bg-white p-5 rounded-lg border border-slate-200 border-l-4 border-l-[#9B1C1C] flex flex-col md:flex-row items-center justify-between gap-4">
-                    <div>
-                        <span class="text-[11px] uppercase tracking-wider text-[#1e3a5f] font-bold" data-i18n="rev_framework">Consolidated Financial Framework</span>
-                        <h3 class="text-base font-bold text-slate-900 mt-0.5" data-i18n="rev_formula_title">Total Revenue Formula</h3>
-                        <p class="text-slate-600 text-xs mt-1 font-mono">
-                            R<sub>total</sub> = R<sub>ticket</sub> + R<sub>advertisement</sub> + R<sub>vendor</sub> + R<sub>partnership</sub>
-                        </p>
-                    </div>
-                    <button onclick="navigateTo('revenue')" class="bg-[#1e3a5f] hover:bg-slate-800 text-white font-semibold text-xs px-5 py-2.5 rounded transition whitespace-nowrap">
-                        <span data-i18n="btn_view_rev">View Live Revenue Breakdown</span> <i class="fa-solid fa-arrow-right ml-1"></i>
-                    </button>
-                </div>
-            </div>
         </section>
 
         <!-- PAGE 1B: ALL SERVICES & FEATURES DIRECTORY (CLICKABLE HUB) -->
@@ -389,6 +287,21 @@
                         <p class="text-xs text-slate-600 leading-relaxed" data-i18n="f_history_desc">View confirmed reservations, download Electronic Reservation Slips (ERS), check PNR status, or cancel bookings.</p>
                     </div>
                     <span class="mt-4 text-xs font-bold text-[#1e3a5f]"><span data-i18n="open_service">Open Service</span> →</span>
+                </button>
+
+                <!-- 4B. Ticket Cancellation & Refund (Under Item 4) -->
+                <button onclick="navigateTo('cancellation')" class="bg-white p-5 rounded-lg border-2 border-red-200 hover:border-[#9B1C1C] text-left transition flex flex-col justify-between bg-red-50/10 shadow-sm hover:shadow">
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="w-10 h-10 rounded bg-red-50 text-[#9B1C1C] flex items-center justify-center text-lg border border-red-200">
+                                <i class="fa-solid fa-ban"></i>
+                            </div>
+                            <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-red-100 text-[#9B1C1C] border border-red-200" data-i18n="tag_cancellation">Before 4h Only</span>
+                        </div>
+                        <h3 class="font-bold text-slate-900 text-sm mb-1" data-i18n="f_cancel_title">Ticket Cancellation &amp; Refund</h3>
+                        <p class="text-xs text-slate-600 leading-relaxed" data-i18n="f_cancel_desc">Cancel tickets before 4 hours of departure. Tiered refund: ≥24h (90%), 12–24h (75%), 4–12h (50%), &lt;4h (Non-refundable / Blocked).</p>
+                    </div>
+                    <span class="mt-4 text-xs font-bold text-[#9B1C1C]"><span data-i18n="open_service">Open Service</span> →</span>
                 </button>
 
                 <!-- 5. Smart ID -->
@@ -1465,6 +1378,159 @@
 
             <div id="bookings-list-container" class="space-y-4"></div>
         </section>
+
+        <!-- PAGE 6B: TICKET CANCELLATION & TIME-DECAY REFUND PORTAL -->
+        <section id="page-cancellation" class="page-view hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <!-- Official Banner -->
+            <div class="bg-[#1e3a5f] rounded-lg p-6 text-white border-b-4 border-[#9B1C1C] mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <span class="text-[10px] font-bold uppercase tracking-wider bg-red-900/60 text-red-200 px-2.5 py-1 rounded border border-red-500/30">
+                        <i class="fa-solid fa-clock mr-1"></i> Strict 4-Hour Rule Enforced
+                    </span>
+                    <h2 class="text-2xl sm:text-3xl font-extrabold mt-2 text-white">Ticket Cancellation &amp; Refund Portal</h2>
+                    <p class="text-xs sm:text-sm text-slate-300 mt-1">Official Maharashtra State Road Transport Corporation refund calculator with time-decay deduction rules.</p>
+                </div>
+                <div class="text-right">
+                    <button onclick="navigateTo('history')" class="bg-white/10 hover:bg-white/20 text-white text-xs font-semibold px-4 py-2 rounded border border-white/20 transition inline-flex items-center gap-1.5">
+                        <i class="fa-solid fa-receipt"></i> View My Trips
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tiered Refund Policy Visual Matrix -->
+            <div class="mb-8">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                        <i class="fa-solid fa-scale-balanced text-[#9B1C1C]"></i> Official MSRTC Time-Decay Refund Policy
+                    </h3>
+                    <span class="text-[11px] text-slate-500 font-medium">As per State Transit Fare &amp; Ticketing Rules 2026</span>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                    <!-- Tier 1: > 24 Hours -->
+                    <div class="bg-white p-4 rounded-lg border-2 border-emerald-300 shadow-sm relative overflow-hidden">
+                        <div class="absolute top-0 right-0 bg-emerald-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-bl">
+                            90% REFUND
+                        </div>
+                        <span class="text-[10px] uppercase font-bold text-emerald-800 tracking-wider">Tier 1 • Early Notice</span>
+                        <h4 class="text-base font-extrabold text-slate-900 mt-1">&ge; 24 Hours</h4>
+                        <p class="text-[11px] text-slate-600 mt-0.5">Prior to bus departure time</p>
+                        <div class="mt-3 pt-2.5 border-t border-slate-100 flex justify-between text-xs">
+                            <span class="text-slate-500">Deduction:</span>
+                            <span class="font-bold text-slate-800">10% of total fare</span>
+                        </div>
+                    </div>
+
+                    <!-- Tier 2: 12 - 24 Hours -->
+                    <div class="bg-white p-4 rounded-lg border-2 border-blue-300 shadow-sm relative overflow-hidden">
+                        <div class="absolute top-0 right-0 bg-blue-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-bl">
+                            75% REFUND
+                        </div>
+                        <span class="text-[10px] uppercase font-bold text-blue-800 tracking-wider">Tier 2 • Standard Notice</span>
+                        <h4 class="text-base font-extrabold text-slate-900 mt-1">12 to 24 Hours</h4>
+                        <p class="text-[11px] text-slate-600 mt-0.5">Prior to bus departure time</p>
+                        <div class="mt-3 pt-2.5 border-t border-slate-100 flex justify-between text-xs">
+                            <span class="text-slate-500">Deduction:</span>
+                            <span class="font-bold text-slate-800">25% of total fare</span>
+                        </div>
+                    </div>
+
+                    <!-- Tier 3: 4 - 12 Hours -->
+                    <div class="bg-white p-4 rounded-lg border-2 border-amber-300 shadow-sm relative overflow-hidden">
+                        <div class="absolute top-0 right-0 bg-amber-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-bl">
+                            50% REFUND
+                        </div>
+                        <span class="text-[10px] uppercase font-bold text-amber-800 tracking-wider">Tier 3 • Late Notice</span>
+                        <h4 class="text-base font-extrabold text-slate-900 mt-1">4 to 12 Hours</h4>
+                        <p class="text-[11px] text-slate-600 mt-0.5">Prior to bus departure time</p>
+                        <div class="mt-3 pt-2.5 border-t border-slate-100 flex justify-between text-xs">
+                            <span class="text-slate-500">Deduction:</span>
+                            <span class="font-bold text-slate-800">50% of total fare</span>
+                        </div>
+                    </div>
+
+                    <!-- Tier 4: < 4 Hours (Strict Block) -->
+                    <div class="bg-red-50/50 p-4 rounded-lg border-2 border-red-400 shadow-sm relative overflow-hidden">
+                        <div class="absolute top-0 right-0 bg-[#9B1C1C] text-white text-[10px] font-bold px-2 py-0.5 rounded-bl">
+                            NO REFUND (0%)
+                        </div>
+                        <span class="text-[10px] uppercase font-bold text-[#9B1C1C] tracking-wider flex items-center gap-1">
+                            <i class="fa-solid fa-lock"></i> Strict Cut-Off
+                        </span>
+                        <h4 class="text-base font-extrabold text-red-950 mt-1">&lt; 4 Hours</h4>
+                        <p class="text-[11px] text-red-800 mt-0.5 font-medium">Or after departure has commenced</p>
+                        <div class="mt-3 pt-2.5 border-t border-red-200 flex justify-between text-xs">
+                            <span class="text-red-700">Deduction:</span>
+                            <span class="font-bold text-[#9B1C1C]">100% (Cancellation Blocked)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Booking / PNR Lookup Card -->
+            <div class="bg-white p-6 rounded-lg border border-slate-200 shadow-sm mb-6">
+                <h3 class="text-base font-bold text-slate-900 mb-2">Find Ticket for Cancellation</h3>
+                <p class="text-xs text-slate-500 mb-4">Enter your MSRTC Booking ID (e.g., <code class="bg-slate-100 px-1 py-0.5 rounded text-slate-700 font-mono">MSRTC-2026-XXXXX</code>) or your 10-digit PNR number.</p>
+
+                <form onsubmit="handleCancellationLookupSubmit(event)" class="flex flex-col sm:flex-row gap-3">
+                    <div class="relative flex-grow">
+                        <span class="absolute left-3.5 top-3 text-slate-400">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </span>
+                        <input type="text" id="cancel-lookup-input" placeholder="Enter Booking ID (MSRTC-2026-...) or PNR..." required class="w-full pl-10 pr-4 py-2.5 text-sm border border-slate-300 rounded focus:ring-1 focus:ring-[#9B1C1C] focus:border-[#9B1C1C] outline-none font-mono" />
+                    </div>
+                    <button type="submit" id="cancel-lookup-btn" class="bg-[#9B1C1C] hover:bg-[#7f1818] text-white font-bold px-6 py-2.5 rounded transition text-sm flex items-center justify-center gap-2 whitespace-nowrap">
+                        <i class="fa-solid fa-calculator"></i> Calculate Refund Quote
+                    </button>
+                </form>
+
+                <!-- Quick Selection of User's Recent Bookings -->
+                <div id="cancel-quick-chips-box" class="mt-4 pt-3 border-t border-slate-100 hidden">
+                    <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wide block mb-2">Your Active Bookings:</span>
+                    <div id="cancel-quick-chips" class="flex flex-wrap gap-2"></div>
+                </div>
+            </div>
+
+            <!-- Dynamic Cancellation Quote Display Container -->
+            <div id="cancellation-quote-container" class="space-y-4">
+                <div class="bg-slate-50 border border-dashed border-slate-300 rounded-lg p-8 text-center text-slate-500 text-sm">
+                    <i class="fa-solid fa-ticket-simple text-3xl text-slate-300 mb-2 block"></i>
+                    Enter your Booking ID or PNR above to inspect departure hours, refund eligibility tier, and net refundable amount.
+                </div>
+            </div>
+        </section>
+
+        <!-- CANCELLATION SUCCESS / REFUND RECEIPT MODAL -->
+        <div id="cancel-receipt-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+            <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-200 animate-fadeIn">
+                <div class="bg-emerald-700 text-white p-5 flex items-center justify-between">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center text-lg">
+                            <i class="fa-solid fa-check"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-extrabold text-base leading-tight">Ticket Successfully Cancelled</h3>
+                            <p class="text-[11px] text-emerald-100">MSRTC Official Electronic Refund Advice</p>
+                        </div>
+                    </div>
+                    <button onclick="closeCancelReceiptModal()" class="text-white/80 hover:text-white text-lg">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+
+                <div id="cancel-receipt-modal-content" class="p-6 space-y-4 text-xs">
+                    <!-- Populated by app.js -->
+                </div>
+
+                <div class="bg-slate-50 p-4 border-t border-slate-200 flex justify-end gap-2">
+                    <button onclick="window.print()" class="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold px-4 py-2 rounded text-xs transition">
+                        <i class="fa-solid fa-print mr-1"></i> Print Refund Slip
+                    </button>
+                    <button onclick="closeCancelReceiptModal()" class="bg-[#1e3a5f] hover:bg-[#152a45] text-white font-bold px-5 py-2 rounded text-xs transition">
+                        Done &amp; View Trips
+                    </button>
+                </div>
+            </div>
+        </div>
 
         <!-- PAGE 7: DIGITAL SMART ID PASS -->
         <section id="page-smartid" class="page-view hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

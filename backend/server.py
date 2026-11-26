@@ -385,20 +385,130 @@ def create_booking(data, today, created_at=None):
     return booking
 
 
+def get_cancellation_quote(booking_id):
+    """
+    Computes time-decay refund eligibility and amounts.
+    Rules:
+      - More than 24 hours before departure: 90% refund (10% deduction)
+      - Between 12 and 24 hours before departure: 75% refund (25% deduction)
+      - Between 4 and 12 hours before departure: 50% refund (50% deduction)
+      - Under 4 hours before departure: Strictly NO cancellation / 0% refund
+    """
+    booking_id = booking_id.strip()
+    row = DB.execute("SELECT * FROM bookings WHERE id=?", (booking_id,)).fetchone()
+    if not row:
+        row = DB.execute("SELECT * FROM bookings WHERE payload LIKE ?", (f'%"{booking_id}"%',)).fetchone()
+    if not row:
+        raise ApiError(404, f'Booking or PNR "{booking_id}" not found.')
+
+    if row["status"] == "CANCELLED":
+        raise ApiError(400, "This booking has already been cancelled.")
+
+    payload = json.loads(row["payload"])
+    dep_str = payload.get("route", {}).get("departureTime")
+    if not dep_str:
+        # Fallback if route departureTime not present
+        d_val = row["travel_date"]
+        sched = P.SCHEDULE_BY_ID.get(row["schedule_id"], {})
+        dep_time = sched.get("departure", "08:00")
+        dep_str = f"{d_val}T{dep_time}:00"
+
+    dep = datetime.fromisoformat(dep_str)
+    if dep.tzinfo is None:
+        dep = dep.replace(tzinfo=IST)
+    now = datetime.now(IST)
+
+    diff_seconds = (dep - now).total_seconds()
+    hours_left = diff_seconds / 3600.0
+
+    total_amount = float(payload.get("fare", {}).get("totalAmount") or row["total"] or 0)
+    is_paid = payload.get("fare", {}).get("paymentStatus") == "PAID"
+
+    if hours_left < 0:
+        return {
+            "bookingId": row["id"],
+            "pnr": payload.get("pnr", "N/A"),
+            "eligible": False,
+            "hoursLeft": round(hours_left, 1),
+            "reason": "This bus has already departed. Cancellation is not possible.",
+            "refundPct": 0,
+            "cancellationChargePct": 100,
+            "refundAmount": 0.0,
+            "deductionAmount": total_amount,
+            "totalAmount": total_amount,
+            "tierLabel": "Departed (No Refund)",
+            "booking": payload
+        }
+    elif hours_left < 4.0:
+        return {
+            "bookingId": row["id"],
+            "pnr": payload.get("pnr", "N/A"),
+            "eligible": False,
+            "hoursLeft": round(hours_left, 1),
+            "reason": "Cancellation is allowed ONLY at least 4 hours before departure. Under 4 hours, cancellation is not permitted and 0% refund applies.",
+            "refundPct": 0,
+            "cancellationChargePct": 100,
+            "refundAmount": 0.0,
+            "deductionAmount": total_amount,
+            "totalAmount": total_amount,
+            "tierLabel": "Under 4 Hours Before Departure (Non-Refundable)",
+            "booking": payload
+        }
+    elif hours_left >= 24.0:
+        charge_pct = 10
+        refund_pct = 90
+        tier_label = "More than 24 hours before departure (90% Refund • 10% Deduction)"
+    elif 12.0 <= hours_left < 24.0:
+        charge_pct = 25
+        refund_pct = 75
+        tier_label = "Between 12 and 24 hours before departure (75% Refund • 25% Deduction)"
+    else:  # 4.0 <= hours_left < 12.0
+        charge_pct = 50
+        refund_pct = 50
+        tier_label = "Between 4 and 12 hours before departure (50% Refund • 50% Deduction)"
+
+    deduction = round(total_amount * (charge_pct / 100.0), 2)
+    refund = round(max(0.0, total_amount - deduction), 2)
+
+    return {
+        "bookingId": row["id"],
+        "pnr": payload.get("pnr", "N/A"),
+        "eligible": True,
+        "hoursLeft": round(hours_left, 1),
+        "tierLabel": tier_label,
+        "refundPct": refund_pct,
+        "cancellationChargePct": charge_pct,
+        "refundAmount": refund,
+        "deductionAmount": deduction,
+        "totalAmount": total_amount,
+        "isPaid": is_paid,
+        "booking": payload
+    }
+
+
 def cancel_booking(booking_id):
+    quote = get_cancellation_quote(booking_id)
+    if not quote["eligible"]:
+        raise ApiError(400, quote["reason"])
+
+    bid = quote["bookingId"]
     with LOCK:
-        row = DB.execute("SELECT * FROM bookings WHERE id=?", (booking_id,)).fetchone()
-        if not row:
-            raise ApiError(404, "Booking not found.")
-        if row["status"] == "CANCELLED":
-            raise ApiError(400, "This booking is already cancelled.")
-        dep = datetime.fromisoformat(json.loads(row["payload"])["route"]["departureTime"])
-        if dep <= datetime.now(IST):
-            raise ApiError(400, "This trip has already departed.")
-        paid = json.loads(row["payload"])["fare"]["paymentStatus"] == "PAID"
-        DB.execute("UPDATE bookings SET status='CANCELLED' WHERE id=?", (booking_id,))
-        DB.execute("DELETE FROM seat_taken WHERE booking_id=?", (booking_id,))
-    return {"bookingId": booking_id, "paymentStatus": "REFUND_INITIATED" if paid else "CANCELLED"}
+        DB.execute("UPDATE bookings SET status='CANCELLED' WHERE id=?", (bid,))
+        DB.execute("DELETE FROM seat_taken WHERE booking_id=?", (bid,))
+
+    refund_ref = f"RFND-{uuid.uuid4().hex[:8].upper()}"
+    return {
+        "bookingId": bid,
+        "pnr": quote.get("pnr"),
+        "status": "CANCELLED",
+        "paymentStatus": "REFUND_INITIATED" if quote["isPaid"] else "CANCELLED_AT_COUNTER",
+        "refundAmount": quote["refundAmount"],
+        "deductionAmount": quote["deductionAmount"],
+        "refundPct": quote["refundPct"],
+        "cancellationChargePct": quote["cancellationChargePct"],
+        "tierLabel": quote["tierLabel"],
+        "refundReference": refund_ref
+    }
 
 
 def get_unified_revenue():
@@ -726,6 +836,11 @@ class Handler(BaseHTTPRequestHandler):
                 self.send_json(200, CARGO_SERVICE.list_all_cargo())
             elif path == "/api/safety/women-dashboard":
                 self.send_json(200, SAFETY_SERVICE.get_women_safety_dashboard())
+            elif path == "/api/cancel/quote":
+                bid = (qs.get("bookingId") or qs.get("id") or [""])[0].strip()
+                if not bid:
+                    raise ApiError(400, "bookingId or PNR is required.")
+                self.send_json(200, get_cancellation_quote(bid))
             elif path == "/api/auth/verify":
                 token = (qs.get("token") or [""])[0]
                 user = AUTH_SERVICE.verify(token)

@@ -110,6 +110,7 @@ const TRANSLATIONS = {
     nav_history: "My Trips",
     nav_smartid: "Smart ID",
     nav_safety: "Women Safety",
+    nav_cancellation: "Cancel Ticket",
     hero_title: "Book Bus Tickets Online",
     btn_all_features: "All Services & Features",
     btn_rev_dash: "Revenue & ML Dashboard",
@@ -124,6 +125,8 @@ const TRANSLATIONS = {
     qs_book_sub: "Live Schedules & Fares",
     qs_pnr: "PNR / My Trips",
     qs_pnr_sub: "Booking & Ticket Status",
+    qs_cancel: "Cancel & Refund",
+    qs_cancel_sub: "Before 4h Only",
     qs_cargo: "Courier & Luggage",
     qs_cargo_sub: "Parcel & Waybill Booking",
     qs_safety: "Women Safety (1091)",
@@ -161,6 +164,7 @@ const TRANSLATIONS = {
     tag_analytics: "ML + QR",
     tag_ml: "ML Engine",
     tag_account: "Account",
+    tag_cancellation: "Before 4h Only",
     f_book_title: "Bus Ticket Booking & Dynamic Fares",
     f_book_desc: "Search Shivneri, Shivshahi, Asiad & Ordinary buses. Off-peak discounts on low-occupancy buses and regular fare on high-demand buses.",
     f_safety_title: "Women Safety, Night Safe Drop & SOS",
@@ -169,6 +173,8 @@ const TRANSLATIONS = {
     f_cargo_desc: "Send parcels and extra passenger luggage via MSRTC bus cargo compartments with instant digital waybill and tracking.",
     f_history_title: "My Trips & PNR Ticket Status",
     f_history_desc: "View confirmed reservations, download Electronic Reservation Slips (ERS), check PNR status, or cancel bookings.",
+    f_cancel_title: "Ticket Cancellation & Refund",
+    f_cancel_desc: "Cancel confirmed tickets before 4 hours of departure. Tiered refund: ≥24h (90%), 12–24h (75%), 4–12h (50%), <4h (Non-refundable / Blocked).",
     f_smartid_title: "Digital Smart Transit ID",
     f_smartid_desc: "QR-verified passenger pass for Senior Citizens, Mahila Samman, Students, and Divyangjan state travel concessions.",
     f_group_title: "Group & Multi-Day Bulk Calculator",
@@ -198,6 +204,7 @@ const TRANSLATIONS = {
     nav_history: "माझा प्रवास",
     nav_smartid: "स्मार्ट आयडी",
     nav_safety: "महिला सुरक्षा",
+    nav_cancellation: "तिकीट रद्द करा",
     hero_title: "बस तिकिटे ऑनलाइन बुक करा",
     btn_all_features: "सर्व सेवा आणि सुविधा",
     btn_rev_dash: "महसूल व एमएल डॅशबोर्ड",
@@ -212,6 +219,8 @@ const TRANSLATIONS = {
     qs_book_sub: "वेळापत्रक आणि भाडे दर",
     qs_pnr: "PNR / माझा प्रवास",
     qs_pnr_sub: "तिकीट स्थिती तपासा",
+    qs_cancel: "तिकीट रद्द व परतावा",
+    qs_cancel_sub: "फक्त ४ तास अगोदर",
     qs_cargo: "पार्सल व सामान",
     qs_cargo_sub: "वे-बिल बुकिंग सेवा",
     qs_safety: "महिला सुरक्षा (१०९१)",
@@ -249,6 +258,7 @@ const TRANSLATIONS = {
     tag_analytics: "एमएल + QR",
     tag_ml: "एमएल प्रणाली",
     tag_account: "खाते",
+    tag_cancellation: "फक्त ४ तास अगोदर",
     f_book_title: "बस तिकीट बुकिंग व डायनॅमिक दर",
     f_book_desc: "शिवनेरी, शिवशाही, निम-आराम आणि साध्या बस शोधा. कमी गर्दीच्या बसवर ऑफ-पीक सवलत व जास्त गर्दीवर नियमित भाडे.",
     f_safety_title: "महिला सुरक्षा, रात्रीचा सुरक्षित थांबा व SOS",
@@ -257,6 +267,8 @@ const TRANSLATIONS = {
     f_cargo_desc: "एस.टी. बसच्या मालवाहू डब्यातून पार्सल आणि जादा सामान पाठवण्यासाठी डिजिटल वे-बिल व ट्रॅकिंग सेवा.",
     f_history_title: "माझा प्रवास आणि PNR तिकीट स्थिती",
     f_history_desc: "बुक केलेली तिकिटे पहा, इलेक्ट्रॉनिक आरक्षण स्लिप (ERS) डाउनलोड करा, PNR तपासा किंवा तिकीट रद्द करा.",
+    f_cancel_title: "तिकीट रद्द व परतावा",
+    f_cancel_desc: "प्रवासाच्या ४ तास अगोदर तिकीट रद्द करा. वेळेनुसार परतावा: २४+ तास (९०%), १२-२४ तास (७५%), ४-१२ तास (५०%), ४ तासांखाली (रद्द करणे बंद).",
     f_smartid_title: "डिजिटल स्मार्ट ट्रान्झिट आयडी",
     f_smartid_desc: "ज्येष्ठ नागरिक, महिला सन्मान, विद्यार्थी आणि दिव्यांग प्रवाशांसाठी QR-सत्यापित सवलत ओळखपत्र.",
     f_group_title: "ग्रुप आणि बहु-दिवसीय बुकिंग कॅल्क्युलेटर",
@@ -374,6 +386,8 @@ function navigateTo(pageId) {
     calculateLiveCargoTariff();
   } else if (pageId === 'women-safety') {
     loadWomenSafetyPage();
+  } else if (pageId === 'cancellation') {
+    loadCancellationPage();
   } else if (pageId === 'book') {
     setDefaultBookingDate();
   }
@@ -1205,12 +1219,21 @@ function openTicketModal(b) {
       </div>
     </div>
 
-    <!-- Safety SOS Button in Ticket -->
-    <div class="mt-4 pt-3 border-t border-slate-200 flex items-center justify-between">
+    <!-- Actions in Ticket: SOS and Cancellation -->
+    <div class="mt-4 pt-3 border-t border-slate-200 flex flex-wrap items-center justify-between gap-2">
       <span class="text-[10px] text-slate-400 font-mono">Scan QR for validation</span>
-      <button onclick="triggerSOS('${esc(b.bookingId)}', '${esc(b.busDetails?.busNumber)}')" class="bg-rose-50 text-rose-700 border border-rose-300 hover:bg-rose-100 px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5">
-        <i class="fa-solid fa-triangle-exclamation"></i> Emergency SOS
-      </button>
+      <div class="flex items-center gap-2">
+        ${b.tripStatus !== 'CANCELLED' ? `
+          <button onclick="closeTicketModal(); openCancellationForBooking('${esc(b.bookingId || b.id || b.pnr)}')" class="bg-red-50 text-[#9B1C1C] border border-red-200 hover:bg-red-100 px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5">
+            <i class="fa-solid fa-ban"></i> Cancel Ticket
+          </button>
+        ` : `
+          <span class="text-xs font-bold text-rose-700 bg-rose-50 border border-rose-200 px-2.5 py-1 rounded-lg">CANCELLED</span>
+        `}
+        <button onclick="triggerSOS('${esc(b.bookingId)}', '${esc(b.busDetails?.busNumber)}')" class="bg-rose-50 text-rose-700 border border-rose-300 hover:bg-rose-100 px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5">
+          <i class="fa-solid fa-triangle-exclamation"></i> Emergency SOS
+        </button>
+      </div>
     </div>
   `;
 
@@ -1875,6 +1898,13 @@ function renderBookingsList() {
         <button onclick='openTicketModal(${JSON.stringify(b).replace(/'/g, "&#39;")})' class="bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold px-3 py-2 rounded-xl transition">
           View ERS Slip
         </button>
+        ${b.tripStatus !== 'CANCELLED' ? `
+          <button onclick="openCancellationForBooking('${esc(b.bookingId || b.id || b.pnr)}')" class="bg-red-50 hover:bg-red-100 text-[#9B1C1C] border border-red-200 text-xs font-bold px-3 py-2 rounded-xl transition flex items-center gap-1">
+            <i class="fa-solid fa-ban text-[10px]"></i> Cancel
+          </button>
+        ` : `
+          <span class="text-[11px] font-bold text-rose-700 bg-rose-50 border border-rose-200 px-2 py-1 rounded-lg">CANCELLED</span>
+        `}
       </div>
     </div>
   `).join('');
@@ -2814,4 +2844,359 @@ async function triggerWomenEmergencySOS() {
   } catch (err) {
     alert(`🚨 Emergency Call: Dial 1091 (Women Safety) or 112 (Highway Police) immediately.`);
   }
+}
+
+// =========================================================
+// 17. TICKET CANCELLATION & TIME-DECAY REFUND (STRICT <4H RULE)
+// =========================================================
+
+function loadCancellationPage() {
+  const container = document.getElementById('cancel-quick-chips');
+  const box = document.getElementById('cancel-quick-chips-box');
+  if (!container || !box) return;
+
+  const bookings = getStoredBookings().filter(b => b.tripStatus !== 'CANCELLED');
+  if (!bookings.length) {
+    box.classList.add('hidden');
+    return;
+  }
+
+  box.classList.remove('hidden');
+  container.innerHTML = bookings.map(b => {
+    const bid = b.bookingId || b.id || b.pnr;
+    const pnr = b.pnr || bid;
+    const from = (b.route?.from || '').split(' (')[0];
+    const to = (b.route?.to || '').split(' (')[0];
+    return `
+      <button type="button" onclick="openCancellationForBooking('${esc(bid)}')" class="px-2.5 py-1.5 rounded-lg border border-slate-300 bg-slate-50 hover:bg-red-50 hover:border-red-300 text-slate-800 text-xs font-semibold flex items-center gap-1.5 transition">
+        <i class="fa-solid fa-ticket text-[#9B1C1C]"></i>
+        <span>${esc(pnr)} (${esc(from)} → ${esc(to)})</span>
+      </button>
+    `;
+  }).join('');
+}
+
+function openCancellationForBooking(bookingId) {
+  navigateTo('cancellation');
+  const input = document.getElementById('cancel-lookup-input');
+  if (input) input.value = bookingId;
+  lookupCancellationQuote(bookingId);
+}
+
+function handleCancellationLookupSubmit(e) {
+  e.preventDefault();
+  const input = document.getElementById('cancel-lookup-input');
+  const bid = input?.value.trim();
+  if (bid) {
+    lookupCancellationQuote(bid);
+  }
+}
+
+async function lookupCancellationQuote(bookingId) {
+  const container = document.getElementById('cancellation-quote-container');
+  const btn = document.getElementById('cancel-lookup-btn');
+  if (!container) return;
+
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i> Calculating...`;
+  }
+
+  container.innerHTML = `
+    <div class="bg-white p-8 rounded-lg border border-slate-200 text-center text-slate-500 text-sm">
+      <i class="fa-solid fa-spinner fa-spin text-2xl text-[#9B1C1C] mb-2"></i>
+      <p>Verifying departure time and calculating time-decay refund tier...</p>
+    </div>
+  `;
+
+  try {
+    const quote = await MSRTCApi.getCancellationQuote(bookingId);
+    renderCancellationQuote(quote);
+  } catch (err) {
+    container.innerHTML = `
+      <div class="bg-rose-50 border border-rose-200 text-rose-800 p-5 rounded-lg text-xs space-y-2">
+        <div class="flex items-center gap-2 font-bold text-sm text-rose-900">
+          <i class="fa-solid fa-circle-exclamation text-rose-600 text-base"></i>
+          <span>Lookup Failed</span>
+        </div>
+        <p>${esc(err.message || 'Unable to locate booking or compute cancellation quote.')}</p>
+        <p class="text-[11px] text-rose-600">Please double check your Booking ID (e.g. MSRTC-2026-...) or PNR number, or ensure this ticket was not already cancelled.</p>
+      </div>
+    `;
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = `<i class="fa-solid fa-calculator"></i> Calculate Refund Quote`;
+    }
+  }
+}
+
+function renderCancellationQuote(q) {
+  const container = document.getElementById('cancellation-quote-container');
+  if (!container) return;
+
+  const b = q.booking || {};
+  const route = b.route || {};
+  const bus = b.busDetails || {};
+  const isEligible = Boolean(q.eligible);
+  const hoursLeft = q.hoursLeft !== undefined ? q.hoursLeft : 0;
+
+  // Format hours left string
+  let countdownText = '';
+  if (hoursLeft < 0) {
+    countdownText = `Departed ${Math.abs(hoursLeft).toFixed(1)} hrs ago`;
+  } else if (hoursLeft < 1) {
+    countdownText = `${Math.round(hoursLeft * 60)} minutes until departure`;
+  } else {
+    countdownText = `${hoursLeft.toFixed(1)} hours until departure`;
+  }
+
+  container.innerHTML = `
+    <div class="bg-white rounded-lg border ${isEligible ? 'border-emerald-300' : 'border-red-300'} shadow-sm overflow-hidden animate-fadeIn">
+      <!-- Status Header -->
+      <div class="${isEligible ? 'bg-emerald-700' : 'bg-[#9B1C1C]'} text-white p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <span class="text-[10px] font-bold uppercase tracking-wider ${isEligible ? 'bg-emerald-900/60 text-emerald-200' : 'bg-red-950/60 text-red-200'} px-2.5 py-0.5 rounded border ${isEligible ? 'border-emerald-500/30' : 'border-red-500/30'}">
+            ${isEligible ? '✓ ELIGIBLE FOR CANCELLATION' : '⛔ CANCELLATION STRICTLY BLOCKED'}
+          </span>
+          <h3 class="text-lg font-bold text-white mt-1">
+            ${isEligible ? `${q.refundPct}% Refund Applicable` : 'Non-Refundable (Under 4 Hours)'}
+          </h3>
+          <p class="text-xs ${isEligible ? 'text-emerald-100' : 'text-red-100'} mt-0.5">
+            ${esc(q.tierLabel || '')}
+          </p>
+        </div>
+        <div class="text-right">
+          <span class="text-[10px] font-mono block opacity-80 uppercase font-bold">Departure Clock</span>
+          <span class="text-sm font-extrabold ${isEligible ? 'bg-emerald-800 text-white' : 'bg-red-900 text-white'} px-3 py-1 rounded inline-flex items-center gap-1.5 border border-white/20">
+            <i class="fa-solid fa-clock"></i> ${esc(countdownText)}
+          </span>
+        </div>
+      </div>
+
+      <!-- Main Body -->
+      <div class="p-5 sm:p-6 space-y-5 text-xs">
+        <!-- Under 4h Strict Rule Warning if Ineligible -->
+        ${!isEligible ? `
+          <div class="bg-red-50 border-l-4 border-[#9B1C1C] p-4 rounded-r-lg text-red-950 space-y-1">
+            <h4 class="font-extrabold text-sm text-[#9B1C1C] flex items-center gap-1.5">
+              <i class="fa-solid fa-triangle-exclamation"></i>
+              Strict 4-Hour Cancellation Policy Enforced
+            </h4>
+            <p class="leading-relaxed">
+              ${esc(q.reason || 'Under official MSRTC rules, cancellations are accepted ONLY up to 4 hours prior to scheduled departure. Bookings within 4 hours of departure are strictly non-cancellable with 0% refund.')}
+            </p>
+          </div>
+        ` : `
+          <div class="bg-emerald-50 border-l-4 border-emerald-600 p-3.5 rounded-r-lg text-emerald-950 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <i class="fa-solid fa-circle-check text-emerald-600 text-base"></i>
+              <div>
+                <span class="font-bold block">Cancellation Request Permitted</span>
+                <span class="text-[11px] text-emerald-800">You are cancelling with ${hoursLeft.toFixed(1)} hours remaining. Tier applies: ${q.refundPct}% refund.</span>
+              </div>
+            </div>
+            <span class="text-xs font-mono font-bold text-emerald-700 bg-white px-2 py-1 rounded border border-emerald-200">
+              ${q.refundPct}% Refund
+            </span>
+          </div>
+        `}
+
+        <!-- Journey & Ticket Details -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-50 p-4 rounded-lg border border-slate-200">
+          <div>
+            <span class="text-[10px] text-slate-400 block uppercase font-bold">Booking ID / PNR</span>
+            <span class="font-mono font-extrabold text-slate-900">${esc(q.bookingId)}</span>
+            <span class="block text-[10px] font-mono text-slate-500">${esc(q.pnr || '')}</span>
+          </div>
+          <div>
+            <span class="text-[10px] text-slate-400 block uppercase font-bold">Corridor Route</span>
+            <span class="font-bold text-slate-800">${esc(route.from || 'Kolhapur CBS')}</span>
+            <span class="block text-[11px] text-slate-500">→ ${esc(route.to || 'Pune Swargate')}</span>
+          </div>
+          <div>
+            <span class="text-[10px] text-slate-400 block uppercase font-bold">Scheduled Departure</span>
+            <span class="font-extrabold text-slate-900">${esc(route.departureTime || b.travel_date || 'Today')}</span>
+            <span class="block text-[10px] text-slate-500">${esc(bus.busType || 'MSRTC Express')}</span>
+          </div>
+          <div>
+            <span class="text-[10px] text-slate-400 block uppercase font-bold">Reserved Seats</span>
+            <span class="font-mono font-black text-base text-[#9B1C1C]">${esc((b.seats || []).join(', ') || 'N/A')}</span>
+          </div>
+        </div>
+
+        <!-- Financial Breakdown Table -->
+        <div class="border border-slate-200 rounded-lg overflow-hidden">
+          <div class="bg-slate-100 px-4 py-2 font-bold text-slate-700 uppercase tracking-wide text-[11px] flex justify-between">
+            <span>Refund &amp; Deduction Statement</span>
+            <span class="font-mono">INR (₹)</span>
+          </div>
+          <div class="p-4 space-y-2 bg-white">
+            <div class="flex justify-between items-center text-slate-600">
+              <span>Gross Ticket Fare Paid:</span>
+              <span class="font-semibold text-slate-900 font-mono">₹${Number(q.totalAmount || 0).toFixed(2)}</span>
+            </div>
+            <div class="flex justify-between items-center text-rose-700">
+              <span class="flex items-center gap-1">
+                <span>MSRTC Cancellation Charge (${q.cancellationChargePct}%):</span>
+                <i class="fa-solid fa-circle-info text-[10px] text-slate-400" title="State Transit Cancellation Surcharge"></i>
+              </span>
+              <span class="font-bold font-mono">-₹${Number(q.deductionAmount || 0).toFixed(2)}</span>
+            </div>
+            <div class="pt-2 border-t-2 border-slate-200 flex justify-between items-center text-sm font-extrabold">
+              <span class="text-slate-900">Net Refund Payable:</span>
+              <span class="text-lg font-black font-mono ${isEligible ? 'text-emerald-700' : 'text-slate-400'}">
+                ₹${Number(q.refundAmount || 0).toFixed(2)}
+              </span>
+            </div>
+            <p class="text-[10px] text-slate-400 italic pt-1">
+              * Refund will be processed immediately to original payment source (UPI/Card/NetBanking) or verified at depot counter.
+            </p>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="pt-2 flex flex-col sm:flex-row justify-between items-center gap-3">
+          <button type="button" onclick="navigateTo('history')" class="w-full sm:w-auto bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-4 py-2.5 rounded transition text-xs flex items-center justify-center gap-1.5">
+            <i class="fa-solid fa-arrow-left"></i> Back to Trips Vault
+          </button>
+
+          ${isEligible ? `
+            <button type="button" id="confirm-cancel-btn" onclick="confirmTicketCancellation('${esc(q.bookingId)}')" class="w-full sm:w-auto bg-[#9B1C1C] hover:bg-[#7f1818] text-white font-extrabold px-6 py-2.5 rounded transition text-xs flex items-center justify-center gap-2 shadow-md">
+              <i class="fa-solid fa-ban"></i> Confirm Cancellation &amp; Claim ₹${Number(q.refundAmount || 0).toFixed(2)}
+            </button>
+          ` : `
+            <button type="button" disabled class="w-full sm:w-auto bg-slate-200 text-slate-400 font-bold px-6 py-2.5 rounded text-xs cursor-not-allowed flex items-center justify-center gap-2">
+              <i class="fa-solid fa-lock"></i> Cancellation Blocked (Under 4 Hours)
+            </button>
+          `}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+async function confirmTicketCancellation(bookingId) {
+  const ok = confirm(`Are you sure you want to cancel booking "${bookingId}"?\n\nThis action will release your reserved seats back into the available pool and initiate your refund as per MSRTC policy.`);
+  if (!ok) return;
+
+  const btn = document.getElementById('confirm-cancel-btn');
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i> Processing Cancellation...`;
+  }
+
+  try {
+    const res = await MSRTCApi.cancelTicket(bookingId);
+
+    // Update stored local bookings
+    const bookings = getStoredBookings();
+    const updated = bookings.map(b => {
+      const bid = b.bookingId || b.id || b.pnr;
+      if (bid === bookingId || b.pnr === res.pnr) {
+        return {
+          ...b,
+          tripStatus: 'CANCELLED',
+          cancellation: res
+        };
+      }
+      return b;
+    });
+    saveStoredBookings(updated);
+
+    // Show refund receipt modal
+    openCancelReceiptModal(res);
+
+    // Re-render quote card with cancelled acknowledgement
+    const container = document.getElementById('cancellation-quote-container');
+    if (container) {
+      container.innerHTML = `
+        <div class="bg-emerald-50 border-2 border-emerald-400 p-6 rounded-lg text-emerald-950 text-center space-y-3">
+          <div class="w-12 h-12 rounded-full bg-emerald-600 text-white flex items-center justify-center mx-auto text-xl">
+            <i class="fa-solid fa-check"></i>
+          </div>
+          <h3 class="text-lg font-black text-emerald-950">Ticket ${esc(res.bookingId)} Has Been Cancelled</h3>
+          <p class="text-xs text-emerald-800">
+            Refund Reference: <strong class="font-mono">${esc(res.refundReference)}</strong> • Amount: <strong>₹${res.refundAmount}</strong> (${res.refundPct}%)
+          </p>
+          <div class="pt-2 flex justify-center gap-2">
+            <button onclick="navigateTo('history')" class="bg-emerald-700 hover:bg-emerald-800 text-white font-bold px-4 py-2 rounded text-xs">
+              View Bookings Vault
+            </button>
+            <button onclick="loadCancellationPage()" class="bg-white hover:bg-slate-100 text-slate-800 font-bold px-4 py-2 rounded text-xs border border-slate-300">
+              Cancel Another Ticket
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    // Refresh quick chips
+    loadCancellationPage();
+
+  } catch (err) {
+    alert(`Cancellation Failed: ${err.message || 'Please contact MSRTC helpline 1800-22-1234.'}`);
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = `<i class="fa-solid fa-ban"></i> Confirm Cancellation`;
+    }
+  }
+}
+
+function openCancelReceiptModal(res) {
+  const content = document.getElementById('cancel-receipt-modal-content');
+  if (!content) return;
+
+  content.innerHTML = `
+    <div class="border-b border-slate-200 pb-3 flex justify-between items-start">
+      <div>
+        <span class="text-[10px] uppercase font-bold text-slate-400 block">Refund Advice Reference</span>
+        <span class="font-mono font-black text-sm text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+          ${esc(res.refundReference || 'RFND-SUCCESS')}
+        </span>
+      </div>
+      <div class="text-right">
+        <span class="text-[10px] uppercase font-bold text-slate-400 block">Status</span>
+        <span class="text-[11px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded">
+          ${esc(res.paymentStatus || 'REFUND_INITIATED')}
+        </span>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-3 bg-slate-50 p-3.5 rounded-lg border border-slate-200 text-xs">
+      <div>
+        <span class="text-[10px] text-slate-400 uppercase font-bold">Booking ID</span>
+        <p class="font-mono font-extrabold text-slate-900">${esc(res.bookingId)}</p>
+      </div>
+      <div>
+        <span class="text-[10px] text-slate-400 uppercase font-bold">PNR Number</span>
+        <p class="font-mono font-extrabold text-slate-900">${esc(res.pnr || 'N/A')}</p>
+      </div>
+      <div>
+        <span class="text-[10px] text-slate-400 uppercase font-bold">Cancellation Surcharge</span>
+        <p class="font-semibold text-rose-700 font-mono">₹${Number(res.deductionAmount || 0).toFixed(2)} (${res.cancellationChargePct}%)</p>
+      </div>
+      <div>
+        <span class="text-[10px] text-slate-400 uppercase font-bold">Net Refund Credited</span>
+        <p class="font-mono font-black text-emerald-700 text-sm">₹${Number(res.refundAmount || 0).toFixed(2)} (${res.refundPct}%)</p>
+      </div>
+    </div>
+
+    <div class="bg-slate-100 p-3 rounded-lg text-[11px] text-slate-700 space-y-1">
+      <div class="flex items-center gap-1.5 font-bold text-slate-900">
+        <i class="fa-solid fa-circle-check text-emerald-600"></i>
+        <span>Seats Restored to State Inventory</span>
+      </div>
+      <p class="text-[10px] text-slate-500">
+        The reserved seats associated with this booking have been released back into the live MSRTC seat reservation pool.
+      </p>
+    </div>
+  `;
+
+  document.getElementById('cancel-receipt-modal')?.classList.remove('hidden');
+}
+
+function closeCancelReceiptModal() {
+  document.getElementById('cancel-receipt-modal')?.classList.add('hidden');
+  navigateTo('history');
 }
