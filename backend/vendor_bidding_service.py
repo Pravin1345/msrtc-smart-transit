@@ -189,17 +189,18 @@ class VendorBiddingService:
         comm = float(data.get("commissionPct", 12.0))
         email = data.get("email", "")
         now_str = datetime.now(IST).strftime("%Y-%m-%d %H:%M:%S")
+        user_id = (data.get("userId") or "usr_guest").strip() or "usr_guest"
 
         with self.get_connection() as conn:
             conn.execute("""
             INSERT INTO vendor_registrations (
                 id, restaurant_name, owner_name, phone, email, fssai_license, corridor,
                 location_stand, cuisine_type, seating_capacity, has_restrooms, has_ev_charging,
-                commission_pct, status, registered_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'VERIFIED', ?)
+                commission_pct, status, registered_at, user_id
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'VERIFIED', ?, ?)
             """, (
                 vid, r_name, o_name, phone, email, fssai, corridor,
-                stand, cuisine, cap, restroom, ev, comm, now_str
+                stand, cuisine, cap, restroom, ev, comm, now_str, user_id
             ))
 
         return {
@@ -232,7 +233,7 @@ class VendorBiddingService:
                 result.append(item)
             return result
 
-    def place_bid(self, stall_id, vendor_name, vendor_phone, bid_amount):
+    def place_bid(self, stall_id, vendor_name, vendor_phone, bid_amount, user_id="usr_guest"):
         """Submit a competitive tender bid for a rest-stop stall."""
         if not vendor_name or not vendor_phone:
             raise ValueError("Vendor Name and Contact Phone are required to place a bid.")
@@ -269,10 +270,11 @@ class VendorBiddingService:
             """, (bid_amount, vendor_name, vendor_phone, stall_id))
 
             # Record history
+            uid = (user_id or "usr_guest").strip() or "usr_guest"
             conn.execute("""
-            INSERT INTO stall_bids_history (stall_id, vendor_name, vendor_phone, bid_amount, bid_timestamp)
-            VALUES (?, ?, ?, ?, ?)
-            """, (stall_id, vendor_name, vendor_phone, bid_amount, now_str))
+            INSERT INTO stall_bids_history (stall_id, vendor_name, vendor_phone, bid_amount, bid_timestamp, user_id)
+            VALUES (?, ?, ?, ?, ?, ?)
+            """, (stall_id, vendor_name, vendor_phone, bid_amount, now_str, uid))
 
             updated_stall = conn.execute("SELECT * FROM rest_stop_stalls WHERE id=?", (stall_id,)).fetchone()
 

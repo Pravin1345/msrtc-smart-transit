@@ -85,7 +85,7 @@ const MSRTCApi = {
   getDatasetsSummary: () => apiGet('/api/datasets/summary'),
   viewDataset: (file, limit = 25, search = '') => apiGet('/api/datasets/view', { file, limit, search }),
   getBiddingStalls: () => apiGet('/api/vendors/bids'),
-  placeStallBid: (stallId, vendorName, vendorPhone, bidAmount) => apiPost('/api/vendors/bid', { stallId, vendorName, vendorPhone, bidAmount }),
+  placeStallBid: (stallId, vendorName, vendorPhone, bidAmount, token = '', userId = 'usr_guest') => apiPost('/api/vendors/bid', { stallId, vendorName, vendorPhone, bidAmount, token, userId }),
   registerVendor: data => apiPost('/api/vendors/register', data),
   getRegisteredVendors: () => apiGet('/api/vendors/registered'),
   getCargoQuote: data => apiPost('/api/cargo/quote', data),

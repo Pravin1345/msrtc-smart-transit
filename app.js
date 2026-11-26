@@ -1935,6 +1935,8 @@ async function renderAllFeatureHistory() {
     const cargo = data.cargoBookings || [];
     const ads = data.adBookings || [];
     const groups = data.groupBookings || [];
+    const bids = data.restaurantBids || [];
+    const vendorRegs = data.vendorRegistrations || [];
 
     container.innerHTML = `
       <!-- Courier, Cargo & Excess Luggage -->
@@ -2007,6 +2009,40 @@ async function renderAllFeatureHistory() {
             `).join('')}
           </div>
         ` : `<p class="text-xs text-slate-400">No group reservations saved under your account yet.</p>`}
+      </div>
+
+      <!-- Restaurant Tender Bids & Registrations -->
+      <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-sm font-extrabold text-slate-900 flex items-center gap-2">
+            <i class="fa-solid fa-gavel text-amber-600"></i> My Restaurant Bidding &amp; Partner Registrations (${bids.length + vendorRegs.length})
+          </h3>
+          <button onclick="navigateTo('bidding')" class="text-xs font-bold text-[#9B1C1C] hover:underline">+ Open Bidding Portal</button>
+        </div>
+        ${(bids.length || vendorRegs.length) ? `
+          <div class="space-y-2">
+            ${bids.map(b => `
+              <div class="p-3 rounded-xl bg-amber-50/50 border border-amber-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+                <div>
+                  <span class="font-mono font-bold text-amber-900">${esc(b.stall_id)}</span>
+                  <span class="ml-2 font-bold text-slate-800">${esc(b.stall_number || 'Stall Bid')} • ${esc(b.vendor_name)}</span>
+                  <p class="text-[11px] text-slate-500 mt-0.5">${esc(b.rest_stop_name || 'Highway Rest-Stop')} • Bid Placed: ${esc(b.bid_timestamp)}</p>
+                </div>
+                <span class="font-black text-slate-900">₹${Number(b.bid_amount || 0).toLocaleString('en-IN')}/mo</span>
+              </div>
+            `).join('')}
+            ${vendorRegs.map(v => `
+              <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+                <div>
+                  <span class="font-mono font-bold text-[#1e3a5f]">${esc(v.id)}</span>
+                  <span class="ml-2 font-bold text-slate-800">${esc(v.restaurant_name)} (Partner Registration)</span>
+                  <p class="text-[11px] text-slate-500 mt-0.5">${esc(v.location_stand)} • FSSAI: ${esc(v.fssai_license)} • ${esc(v.status)}</p>
+                </div>
+                <span class="text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded">${esc(v.status)}</span>
+              </div>
+            `).join('')}
+          </div>
+        ` : `<p class="text-xs text-slate-400">No restaurant tender bids or partner registrations under your account yet.</p>`}
       </div>
     `;
   } catch (e) {
@@ -2491,7 +2527,10 @@ async function handlePlaceBid(stallId) {
   }
 
   try {
-    const res = await MSRTCApi.placeStallBid(stallId, name, phone, parseInt(amt));
+    const res = await MSRTCApi.placeStallBid(
+      stallId, name, phone, parseInt(amt),
+      authToken || '', currentUser?.userId || 'usr_guest'
+    );
     alert(res.message);
     loadBiddingStalls();
   } catch (err) {
@@ -2517,7 +2556,9 @@ async function handleVendorRegistrationSubmit(e) {
     seatingCapacity: parseInt(document.getElementById('reg-capacity').value || 75),
     hasRestrooms: document.getElementById('reg-restrooms').checked,
     hasEvCharging: document.getElementById('reg-ev').checked,
-    commissionPct: 12.0
+    commissionPct: 12.0,
+    token: authToken || '',
+    userId: currentUser?.userId || 'usr_guest'
   };
 
   try {
@@ -2630,6 +2671,8 @@ async function renderAllFeatureHistory() {
     const cargo = data.cargoBookings || [];
     const ads = data.adBookings || [];
     const groups = data.groupBookings || [];
+    const bids = data.restaurantBids || [];
+    const vendorRegs = data.vendorRegistrations || [];
 
     container.innerHTML = `
       <!-- Courier, Cargo & Excess Luggage -->
@@ -2702,6 +2745,40 @@ async function renderAllFeatureHistory() {
             `).join('')}
           </div>
         ` : `<p class="text-xs text-slate-400">No group reservations saved under your account yet.</p>`}
+      </div>
+
+      <!-- Restaurant Tender Bids & Registrations -->
+      <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-sm font-extrabold text-slate-900 flex items-center gap-2">
+            <i class="fa-solid fa-gavel text-amber-600"></i> My Restaurant Bidding &amp; Partner Registrations (${bids.length + vendorRegs.length})
+          </h3>
+          <button onclick="navigateTo('bidding')" class="text-xs font-bold text-[#9B1C1C] hover:underline">+ Open Bidding Portal</button>
+        </div>
+        ${(bids.length || vendorRegs.length) ? `
+          <div class="space-y-2">
+            ${bids.map(b => `
+              <div class="p-3 rounded-xl bg-amber-50/50 border border-amber-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+                <div>
+                  <span class="font-mono font-bold text-amber-900">${esc(b.stall_id)}</span>
+                  <span class="ml-2 font-bold text-slate-800">${esc(b.stall_number || 'Stall Bid')} • ${esc(b.vendor_name)}</span>
+                  <p class="text-[11px] text-slate-500 mt-0.5">${esc(b.rest_stop_name || 'Highway Rest-Stop')} • Bid Placed: ${esc(b.bid_timestamp)}</p>
+                </div>
+                <span class="font-black text-slate-900">₹${Number(b.bid_amount || 0).toLocaleString('en-IN')}/mo</span>
+              </div>
+            `).join('')}
+            ${vendorRegs.map(v => `
+              <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+                <div>
+                  <span class="font-mono font-bold text-[#1e3a5f]">${esc(v.id)}</span>
+                  <span class="ml-2 font-bold text-slate-800">${esc(v.restaurant_name)} (Partner Registration)</span>
+                  <p class="text-[11px] text-slate-500 mt-0.5">${esc(v.location_stand)} • FSSAI: ${esc(v.fssai_license)} • ${esc(v.status)}</p>
+                </div>
+                <span class="text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded">${esc(v.status)}</span>
+              </div>
+            `).join('')}
+          </div>
+        ` : `<p class="text-xs text-slate-400">No restaurant tender bids or partner registrations under your account yet.</p>`}
       </div>
     `;
   } catch (e) {

@@ -500,7 +500,10 @@ def _sync_postgres_sequences(pg_wrapper):
 
 def _ensure_user_id_columns(conn, is_postgres=True):
     """Ensure every feature booking table has a user_id column for strict per-user isolation."""
-    tables = ("ad_bookings", "cargo_bookings", "vendor_orders", "sos_alerts", "excess_luggage_records")
+    tables = (
+        "ad_bookings", "cargo_bookings", "vendor_orders", "sos_alerts",
+        "excess_luggage_records", "stall_bids_history", "vendor_registrations"
+    )
     for t in tables:
         try:
             if is_postgres:

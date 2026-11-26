@@ -417,10 +417,17 @@ def get_user_bookings(token="", user_id=""):
 
 
 def get_all_user_feature_history(token="", user_id=""):
-    """Return ALL feature bookings (Bus, Cargo/Luggage, Ads, Group) strictly for this user."""
+    """Return ALL feature bookings (Bus, Cargo/Luggage, Ads, Group, Restaurant Bidding) strictly for this user."""
     resolved_uid = _resolve_request_user_id(token, user_id)
     if not resolved_uid:
-        return {"busBookings": [], "cargoBookings": [], "adBookings": [], "groupBookings": []}
+        return {
+            "busBookings": [],
+            "cargoBookings": [],
+            "adBookings": [],
+            "groupBookings": [],
+            "restaurantBids": [],
+            "vendorRegistrations": []
+        }
 
     bus_bookings = get_user_bookings(token=token, user_id=resolved_uid)
     cargo_bookings = CARGO_SERVICE.list_all_cargo(user_id=resolved_uid, limit=50)
@@ -432,12 +439,28 @@ def get_all_user_feature_history(token="", user_id=""):
         "SELECT * FROM group_bookings_live WHERE user_id = ? ORDER BY created_at DESC",
         (resolved_uid,)
     ).fetchall()
+    bid_rows = DB.execute(
+        """
+        SELECT h.*, s.stall_number, s.rest_stop_name
+        FROM stall_bids_history h
+        LEFT JOIN rest_stop_stalls s ON h.stall_id = s.id
+        WHERE h.user_id = ?
+        ORDER BY h.bid_timestamp DESC
+        """,
+        (resolved_uid,)
+    ).fetchall()
+    reg_rows = DB.execute(
+        "SELECT * FROM vendor_registrations WHERE user_id = ? ORDER BY registered_at DESC",
+        (resolved_uid,)
+    ).fetchall()
 
     return {
         "busBookings": bus_bookings,
         "cargoBookings": cargo_bookings,
         "adBookings": [dict(r) for r in ad_rows],
         "groupBookings": [dict(r) for r in group_rows],
+        "restaurantBids": [dict(r) for r in bid_rows],
+        "vendorRegistrations": [dict(r) for r in reg_rows],
     }
 
 
@@ -1100,8 +1123,11 @@ class Handler(BaseHTTPRequestHandler):
                 v_name = body.get("vendorName")
                 v_phone = body.get("vendorPhone")
                 amt = body.get("bidAmount")
-                self.send_json(200, VENDOR_BIDDING_SERVICE.place_bid(stall_id, v_name, v_phone, amt))
+                bid_uid = _resolve_request_user_id(body.get("token", ""), body.get("userId", "")) or "usr_guest"
+                self.send_json(200, VENDOR_BIDDING_SERVICE.place_bid(stall_id, v_name, v_phone, amt, user_id=bid_uid))
             elif path == "/api/vendors/register":
+                reg_uid = _resolve_request_user_id(body.get("token", ""), body.get("userId", "")) or "usr_guest"
+                body["userId"] = reg_uid
                 self.send_json(201, VENDOR_BIDDING_SERVICE.register_vendor(body))
             elif path == "/api/cargo/quote":
                 f_std = body.get("fromStand", "Kolhapur CBS (Central Bus Stand)")
