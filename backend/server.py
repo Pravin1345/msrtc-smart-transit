@@ -470,7 +470,7 @@ def book_group_reservation(body):
             (
                 gid, uid, group_name, contact_name, contact_phone,
                 from_stand, to_stand, travel_date, pax, days,
-                fare, q["total_discount_pct"], q["net_total"], q["tier_name"], "CONFIRMED", created_at
+                fare, q["total_discount_pct"], q["final_total"], q["tier_name"], "CONFIRMED", created_at
             )
         )
     return {
@@ -483,7 +483,7 @@ def book_group_reservation(body):
         "passengers": pax,
         "days": days,
         "discount_pct": q["total_discount_pct"],
-        "total_amount": q["net_total"],
+        "total_amount": q["final_total"],
         "tier_name": q["tier_name"],
         "status": "CONFIRMED",
         "created_at": created_at,
