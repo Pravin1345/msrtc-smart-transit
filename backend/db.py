@@ -467,6 +467,17 @@ def _migrate_sqlite_to_postgres(pg_wrapper):
         print(f"[DB Migration] Notice during data migration: {e}")
 
 
+def _sync_postgres_sequences(pg_wrapper):
+    """Ensure PostgreSQL SERIAL sequences match MAX(id) after migrations or manual inserts."""
+    for t in ("cargo_milestones", "stall_bids_history", "excess_luggage_records"):
+        try:
+            pg_wrapper.execute(
+                f"SELECT setval(pg_get_serial_sequence('public.{t}', 'id'), COALESCE((SELECT MAX(id) FROM public.{t}), 1), true)"
+            )
+        except Exception:
+            pass
+
+
 def init_db():
     global _GLOBAL_DB
     with _LOCK:
@@ -476,6 +487,7 @@ def init_db():
             schemas = _get_table_schemas(is_postgres=True)
             pg_conn.executescript(schemas)
             _migrate_sqlite_to_postgres(pg_conn)
+            _sync_postgres_sequences(pg_conn)
             _GLOBAL_DB = pg_conn
             return _GLOBAL_DB
 
