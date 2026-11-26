@@ -2218,6 +2218,12 @@ async function handleLogout() {
   currentUser = DEFAULT_USER;
   localStorage.removeItem('msrtc_auth_token');
   localStorage.removeItem('msrtc_active_user');
+  document.getElementById('login-form')?.reset();
+  document.getElementById('register-form')?.reset();
+  const loginBtn = document.getElementById('login-submit-btn');
+  if (loginBtn) loginBtn.disabled = false;
+  const regBtn = document.getElementById('register-submit-btn');
+  if (regBtn) regBtn.disabled = false;
   renderAuthCorner();
   loadProfileForm();
   renderSmartIDPass();

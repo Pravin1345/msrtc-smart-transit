@@ -219,13 +219,13 @@ def login_user(data):
     with _get_conn() as conn:
         row = conn.execute("""
         SELECT * FROM users 
-        WHERE email = ? 
-           OR email = ? 
-           OR smart_id = ? 
+        WHERE LOWER(email) = ? 
+           OR LOWER(email) = ? 
+           OR UPPER(smart_id) = ? 
            OR phone = ? 
            OR REPLACE(REPLACE(phone, ' ', ''), '+91', '') = ?
-           OR full_name = ? COLLATE NOCASE
-        """, (email, f"{email}@msrtc.in", raw_ident.upper(), raw_ident, phone_10, raw_ident)).fetchone()
+           OR LOWER(full_name) = ?
+        """, (email, f"{email}@msrtc.in", raw_ident.upper(), raw_ident, phone_10, email)).fetchone()
 
         if not row:
             raise ValueError("No account found with this email, username, or Smart ID. Please register first.")
